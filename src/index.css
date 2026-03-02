@@ -103,11 +103,19 @@
   }
 
   .rdp-caption_dropdowns select {
-    @apply bg-background border border-border rounded-md px-1 py-0.5 text-xs font-sans font-bold text-foreground focus:ring-1 focus:ring-primary outline-none cursor-pointer hover:bg-secondary transition-colors;
-    scrollbar-width: none;
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+    font-weight: bold !important;
+    appearance: auto !important;
   }
 
   .rdp-caption_dropdowns select::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Fix for cell background clash - remove the brown block when selected */
+  .rdp-cell:has([aria-selected]) {
+    background-color: transparent !important;
   }
 }

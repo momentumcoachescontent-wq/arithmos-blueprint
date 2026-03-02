@@ -21,13 +21,23 @@ const MOCK_SYNC_LOGS = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
-  const { profile } = useProfile();
+  const { profile, fetchProfile } = useProfile();
 
   useEffect(() => {
-    if (!isAuthenticated || !profile) {
+    if (!isAuthenticated) {
       navigate("/onboarding");
+      return;
     }
-  }, [isAuthenticated, profile, navigate]);
+
+    // Si tenemos usuario pero el perfil local está incompleto o falta, re-sincronizamos desde Supabase
+    if (user?.id && (!profile || profile.expressionNumber === undefined)) {
+      fetchProfile(user.id).then(fetched => {
+        if (!fetched && !profile) {
+          navigate("/onboarding");
+        }
+      });
+    }
+  }, [isAuthenticated, user?.id, profile, fetchProfile, navigate]);
 
   if (!profile || !user) return null;
 
