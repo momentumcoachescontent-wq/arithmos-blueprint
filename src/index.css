@@ -97,25 +97,35 @@
     box-shadow: 0 0 40px -10px hsl(30 30% 50% / 0.3);
   }
 
-  /* Calendar Dropdowns */
-  .rdp-vhidden {
-    @apply hidden;
-  }
+}
 
-  .rdp-caption_dropdowns select {
-    background-color: #000 !important;
-    color: #fff !important;
-    border: 1px solid #444 !important;
-    font-weight: bold !important;
-    appearance: auto !important;
-  }
+/* Arithmos Calendar Contrast Fix - Outside layers */
+.rdp-dropdown {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: 1px solid #444 !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  font-size: 13px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  padding-right: 24px !important;
+}
 
-  .rdp-caption_dropdowns select::-webkit-scrollbar {
-    display: none;
-  }
+.rdp-caption_dropdowns {
+  display: flex !important;
+  gap: 8px !important;
+}
 
-  /* Fix for cell background clash - remove the brown block when selected */
-  .rdp-cell:has([aria-selected]) {
-    background-color: transparent !important;
-  }
+.rdp-cell:has([aria-selected]) {
+  background-color: transparent !important;
+}
+
+.rdp-vhidden {
+  display: none !important;
 }
