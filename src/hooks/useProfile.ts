@@ -80,7 +80,12 @@ export function useProfile() {
         body: JSON.stringify({ full_name: name, birth_date: birthDate })
       });
 
-      const data = await response.json();
+      let data = await response.json();
+
+      // n8n suele devolver un array [ { "success": true, ... } ]
+      if (Array.isArray(data)) {
+        data = data[0];
+      }
 
       let lifePathNumber = calculateLifePath(birthDate);
       let expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber;

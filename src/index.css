@@ -63,7 +63,9 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     @apply font-serif;
   }
 }
@@ -78,11 +80,11 @@
   }
 
   .text-gradient-silver {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(0,0%,60%)] via-[hsl(0,0%,90%)] to-[hsl(0,0%,60%)];
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(0, 0%, 60%)] via-[hsl(0, 0%, 90%)] to-[hsl(0, 0%, 60%)];
   }
 
   .text-gradient-bronze {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(30,30%,40%)] via-[hsl(30,40%,60%)] to-[hsl(30,30%,40%)];
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(30, 30%, 40%)] via-[hsl(30, 40%, 60%)] to-[hsl(30, 30%, 40%)];
   }
 
   .glow-indigo {
@@ -97,9 +99,9 @@
   .rdp-vhidden {
     @apply hidden;
   }
-  
+
   .rdp-caption_dropdowns select {
-    @apply bg-background border border-border rounded-md px-1 py-0.5 text-xs font-sans focus:ring-1 focus:ring-primary outline-none cursor-pointer hover:bg-secondary transition-colors;
+    @apply bg-background border border-border rounded-md px-1 py-0.5 text-xs font-sans font-bold text-foreground focus:ring-1 focus:ring-primary outline-none cursor-pointer hover:bg-secondary transition-colors;
     scrollbar-width: none;
   }
 

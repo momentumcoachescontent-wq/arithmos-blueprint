@@ -99,6 +99,7 @@ const Onboarding = () => {
                   mode="single"
                   selected={date}
                   onSelect={setDate}
+                  locale={es}
                   disabled={(d) => d > new Date() || d < new Date("1920-01-01")}
                   initialFocus
                   className="p-3 pointer-events-auto"
