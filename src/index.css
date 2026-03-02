@@ -80,11 +80,13 @@
   }
 
   .text-gradient-silver {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(0, 0%, 60%)] via-[hsl(0, 0%, 90%)] to-[hsl(0, 0%, 60%)];
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, hsl(0, 0%, 60%), hsl(0, 0%, 90%), hsl(0, 0%, 60%));
   }
 
   .text-gradient-bronze {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(30, 30%, 40%)] via-[hsl(30, 40%, 60%)] to-[hsl(30, 30%, 40%)];
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, hsl(30, 30%, 40%), hsl(30, 40%, 60%), hsl(30, 30%, 40%));
   }
 
   .glow-indigo {
