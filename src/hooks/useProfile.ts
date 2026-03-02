@@ -74,7 +74,7 @@ export function useProfile() {
   const createProfile = useCallback(async (name: string, birthDate: string, userId?: string) => {
     let newProfile: Profile;
     try {
-      const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook-test/arithmos-calculate", {
+      const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook/arithmos-calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ full_name: name, birth_date: birthDate })
