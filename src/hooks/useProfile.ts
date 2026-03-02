@@ -35,7 +35,7 @@ function calculateLifePath(dateStr: string): number {
   while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
     sum = sum.toString().split("").map(Number).reduce((a, b) => a + b, 0);
   }
-  return sum > 9 ? sum % 9 || 9 : sum;
+  return sum;
 }
 
 export function useProfile() {

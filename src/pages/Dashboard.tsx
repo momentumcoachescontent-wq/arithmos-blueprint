@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogOut, MessageCircle, History, Sparkles, ExternalLink } from "lucide-react";
@@ -21,7 +21,8 @@ const MOCK_SYNC_LOGS = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
-  const { profile, fetchProfile } = useProfile();
+  const { profile, fetchProfile, createProfile } = useProfile();
+  const isSyncing = useRef(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -29,15 +30,33 @@ const Dashboard = () => {
       return;
     }
 
-    // Si tenemos usuario pero el perfil local está incompleto o falta, re-sincronizamos desde Supabase
-    if (user?.id && (!profile || profile.expressionNumber === undefined)) {
-      fetchProfile(user.id).then(fetched => {
-        if (!fetched && !profile) {
-          navigate("/onboarding");
+    const syncData = async () => {
+      if (isSyncing.current || !user?.id) return;
+
+      // Si el perfil falta o está incompleto localmente
+      if (!profile || profile.expressionNumber === undefined) {
+        isSyncing.current = true;
+        try {
+          console.log("Sincronizando perfil...");
+          const fetched = await fetchProfile(user.id);
+
+          // Si tras fetch sigue incompleto en DB, forzamos recalculo con n8n
+          if (fetched && fetched.expressionNumber === undefined && fetched.name && fetched.birthDate) {
+            console.log("Perfil incompleto detectado en DB. Reparando con n8n...");
+            await createProfile(fetched.name, fetched.birthDate, user.id);
+          } else if (!fetched && !profile) {
+            navigate("/onboarding");
+          }
+        } catch (err) {
+          console.error("Error en sincronización:", err);
+        } finally {
+          isSyncing.current = false;
         }
-      });
-    }
-  }, [isAuthenticated, user?.id, profile, fetchProfile, navigate]);
+      }
+    };
+
+    syncData();
+  }, [isAuthenticated, user?.id, profile?.expressionNumber, fetchProfile, createProfile, navigate]);
 
   if (!profile || !user) return null;
 
