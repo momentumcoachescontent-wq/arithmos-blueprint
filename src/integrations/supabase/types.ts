@@ -14,7 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          archetype: string
+          archetype_description: string | null
+          birth_date: string
+          created_at: string
+          id: string
+          life_path_number: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archetype: string
+          archetype_description?: string | null
+          birth_date: string
+          created_at?: string
+          id?: string
+          life_path_number: number
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archetype?: string
+          archetype_description?: string | null
+          birth_date?: string
+          created_at?: string
+          id?: string
+          life_path_number?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      readings: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sync_logs: {
+        Row: {
+          created_at: string
+          description: string | null
+          event: string
+          id: string
+          occurred_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event: string
+          id?: string
+          occurred_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event?: string
+          id?: string
+          occurred_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
