@@ -1,9 +1,14 @@
 import { useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Profile {
   name: string;
   birthDate: string;
   lifePathNumber: number;
+  expressionNumber?: number;
+  soulUrgeNumber?: number;
+  personalityNumber?: number;
+  maturityNumber?: number;
   archetype: string;
   description: string;
   createdAt: string;
@@ -19,6 +24,9 @@ const ARCHETYPES: Record<number, { name: string; description: string }> = {
   7: { name: "El Analista Profundo", description: "Pensador penetrante que opera en un nivel de percepción que otros no pueden alcanzar. Tu introspección es tu superpoder." },
   8: { name: "El Ejecutor de Poder", description: "Manifestador de abundancia y autoridad. Entiendes las leyes del poder material y las usas con precisión quirúrgica." },
   9: { name: "El Visionario Global", description: "Conciencia expandida que ve el panorama completo. Tu misión trasciende lo personal y toca lo colectivo." },
+  11: { name: "El Iluminador Maestro", description: "Potencial magnético con una visión altamente intuitiva." },
+  22: { name: "El Constructor Maestro", description: "Capacidad pragmática suprema para convertir visiones en imperios." },
+  33: { name: "El Maestro Sanador", description: "Vibración compasiva extrema. Influencia transformadora pura." },
 };
 
 function calculateLifePath(dateStr: string): number {
@@ -36,21 +44,115 @@ export function useProfile() {
     return stored ? JSON.parse(stored) : null;
   });
 
-  const createProfile = useCallback((name: string, birthDate: string) => {
-    const lifePathNumber = calculateLifePath(birthDate);
-    const arch = ARCHETYPES[lifePathNumber] || ARCHETYPES[1];
-    const newProfile: Profile = {
-      name,
-      birthDate,
-      lifePathNumber,
-      archetype: arch.name,
-      description: arch.description,
-      createdAt: new Date().toISOString(),
-    };
+  const fetchProfile = useCallback(async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (data && !error) {
+      const fetchedProfile: Profile = {
+        name: data.name,
+        birthDate: data.birth_date,
+        lifePathNumber: data.life_path_number,
+        expressionNumber: data.expression_number || undefined,
+        soulUrgeNumber: data.soul_urge_number || undefined,
+        personalityNumber: data.personality_number || undefined,
+        maturityNumber: data.maturity_number || undefined,
+        archetype: data.archetype,
+        description: data.archetype_description || "",
+        createdAt: data.created_at
+      };
+      setProfile(fetchedProfile);
+      localStorage.setItem("arithmos_profile", JSON.stringify(fetchedProfile));
+      return fetchedProfile;
+    }
+    return null;
+  }, []);
+
+  const createProfile = useCallback(async (name: string, birthDate: string, userId?: string) => {
+    let newProfile: Profile;
+    try {
+      const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook-test/arithmos-calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ full_name: name, birth_date: birthDate })
+      });
+
+      const data = await response.json();
+
+      let lifePathNumber = calculateLifePath(birthDate);
+      let expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber;
+
+      if (data && data.success && data.blueprint) {
+        lifePathNumber = data.blueprint.life_path_number;
+        expressionNumber = data.blueprint.expression_number;
+        soulUrgeNumber = data.blueprint.soul_urge_number;
+        personalityNumber = data.blueprint.personality_number;
+        maturityNumber = data.blueprint.maturity_number;
+      }
+
+      const arch = ARCHETYPES[lifePathNumber] || ARCHETYPES[1];
+      newProfile = {
+        name,
+        birthDate,
+        lifePathNumber,
+        expressionNumber,
+        soulUrgeNumber,
+        personalityNumber,
+        maturityNumber,
+        archetype: arch.name,
+        description: arch.description,
+        createdAt: new Date().toISOString(),
+      };
+
+      if (userId) {
+        // Guardar/Actualizar Perfil
+        await supabase
+          .from('profiles')
+          .upsert({
+            user_id: userId,
+            name: name,
+            birth_date: birthDate,
+            life_path_number: lifePathNumber,
+            expression_number: expressionNumber,
+            soul_urge_number: soulUrgeNumber,
+            personality_number: personalityNumber,
+            maturity_number: maturityNumber,
+            archetype: arch.name,
+            archetype_description: arch.description
+          });
+
+        // Guardar Lectura Inicial
+        await supabase
+          .from('readings')
+          .insert({
+            user_id: userId,
+            title: `Blueprint de ${name}`,
+            type: 'mini_blueprint',
+            metadata: data.blueprint || { life_path_number: lifePathNumber }
+          });
+      }
+
+    } catch (error) {
+      console.error("Error conectando al motor n8n:", error);
+      const lifePathNumber = calculateLifePath(birthDate);
+      const arch = ARCHETYPES[lifePathNumber] || ARCHETYPES[1];
+      newProfile = {
+        name,
+        birthDate,
+        lifePathNumber,
+        archetype: arch.name,
+        description: arch.description,
+        createdAt: new Date().toISOString(),
+      };
+    }
+
     localStorage.setItem("arithmos_profile", JSON.stringify(newProfile));
     setProfile(newProfile);
     return newProfile;
   }, []);
 
-  return { profile, createProfile };
+  return { profile, createProfile, fetchProfile };
 }

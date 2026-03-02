@@ -80,6 +80,26 @@ const Dashboard = () => {
               </div>
             </motion.div>
 
+            {/* Extended Blueprint */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            >
+              {[
+                { label: "Expresión", value: profile.expressionNumber },
+                { label: "Deseo del Alma", value: profile.soulUrgeNumber },
+                { label: "Personalidad", value: profile.personalityNumber },
+                { label: "Madurez", value: profile.maturityNumber }
+              ].map((item, idx) => (
+                <div key={idx} className="glass rounded-xl p-4 flex flex-col items-center justify-center text-center">
+                  <span className="text-xs uppercase tracking-widest text-muted-foreground mb-2 font-sans">{item.label}</span>
+                  <span className="text-2xl font-serif font-bold text-foreground">{item.value || "-"}</span>
+                </div>
+              ))}
+            </motion.div>
+
             {/* Reading History */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}

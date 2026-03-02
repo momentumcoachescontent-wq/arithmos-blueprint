@@ -22,16 +22,20 @@ const Onboarding = () => {
 
   const canSubmit = name.trim().length > 1 && date;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canSubmit || !date) return;
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
       const dateStr = format(date, "yyyy-MM-dd");
-      login({ id: crypto.randomUUID(), name: name.trim() });
-      createProfile(name.trim(), dateStr);
+      // El login ahora es asíncrono y asegura un ID de Supabase (vía Auth Anónimo si es necesario)
+      const loggedInUser = await login({ id: crypto.randomUUID(), name: name.trim() });
+      await createProfile(name.trim(), dateStr, loggedInUser.id);
       navigate("/dashboard");
-    }, 800);
+    } catch (error) {
+      console.error(error);
+      setIsSubmitting(false);
+    }
   };
 
   return (
