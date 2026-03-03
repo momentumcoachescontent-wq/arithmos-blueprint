@@ -11,6 +11,10 @@ export interface Profile {
   maturityNumber?: number;
   archetype: string;
   description: string;
+  // Fase 2: Narrativa IA
+  narrative?: string;
+  powerStrategy?: string;
+  shadowWork?: string;
   createdAt: string;
 }
 
@@ -24,9 +28,9 @@ const ARCHETYPES: Record<number, { name: string; description: string }> = {
   7: { name: "El Analista Profundo", description: "Pensador penetrante que opera en un nivel de percepción que otros no pueden alcanzar. Tu introspección es tu superpoder." },
   8: { name: "El Ejecutor de Poder", description: "Manifestador de abundancia y autoridad. Entiendes las leyes del poder material y las usas con precisión quirúrgica." },
   9: { name: "El Visionario Global", description: "Conciencia expandida que ve el panorama completo. Tu misión trasciende lo personal y toca lo colectivo." },
-  11: { name: "El Iluminador Maestro", description: "Potencial magnético con una visión altamente intuitiva." },
-  22: { name: "El Constructor Maestro", description: "Capacidad pragmática suprema para convertir visiones en imperios." },
-  33: { name: "El Maestro Sanador", description: "Vibración compasiva extrema. Influencia transformadora pura." },
+  11: { name: "El Iluminador Maestro", description: "Potencial magnético con una visión altamente intuitiva. Eres un puente entre lo visible y lo invisible." },
+  22: { name: "El Constructor Maestro", description: "Capacidad pragmática suprema para convertir visiones en imperios. Tu legado es tangible y transformador." },
+  33: { name: "El Maestro Sanador", description: "Vibración compasiva extrema. Influencia transformadora pura. Naces para elevar la conciencia de otros." },
 };
 
 function calculateLifePath(dateStr: string): number {
@@ -62,6 +66,9 @@ export function useProfile() {
         maturityNumber: data.maturity_number || undefined,
         archetype: data.archetype,
         description: data.archetype_description || "",
+        narrative: data.narrative || undefined,
+        powerStrategy: data.power_strategy || undefined,
+        shadowWork: data.shadow_work || undefined,
         createdAt: data.created_at
       };
       setProfile(fetchedProfile);
@@ -82,13 +89,12 @@ export function useProfile() {
 
       let data = await response.json();
 
-      // n8n suele devolver un array [ { "success": true, ... } ]
-      if (Array.isArray(data)) {
-        data = data[0];
-      }
+      // n8n can return array
+      if (Array.isArray(data)) data = data[0];
 
       let lifePathNumber = calculateLifePath(birthDate);
       let expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber;
+      let narrative, powerStrategy, shadowWork;
 
       if (data && data.success && data.blueprint) {
         lifePathNumber = data.blueprint.life_path_number;
@@ -96,6 +102,13 @@ export function useProfile() {
         soulUrgeNumber = data.blueprint.soul_urge_number;
         personalityNumber = data.blueprint.personality_number;
         maturityNumber = data.blueprint.maturity_number;
+
+        // Fase 2: Extraer la interpretación narrativa
+        if (data.interpretation) {
+          narrative = data.interpretation.narrative;
+          powerStrategy = data.interpretation.power_strategy;
+          shadowWork = data.interpretation.shadow_work;
+        }
       }
 
       const arch = ARCHETYPES[lifePathNumber] || ARCHETYPES[1];
@@ -109,6 +122,9 @@ export function useProfile() {
         maturityNumber,
         archetype: arch.name,
         description: arch.description,
+        narrative,
+        powerStrategy,
+        shadowWork,
         createdAt: new Date().toISOString(),
       };
 
@@ -126,7 +142,10 @@ export function useProfile() {
             personality_number: personalityNumber,
             maturity_number: maturityNumber,
             archetype: arch.name,
-            archetype_description: arch.description
+            archetype_description: arch.description,
+            narrative: narrative || null,
+            power_strategy: powerStrategy || null,
+            shadow_work: shadowWork || null,
           });
 
         // Guardar Lectura Inicial

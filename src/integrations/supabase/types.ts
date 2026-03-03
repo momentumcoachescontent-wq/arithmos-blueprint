@@ -27,6 +27,9 @@ export type Database = {
           personality_number: number | null
           maturity_number: number | null
           name: string
+          narrative: string | null
+          power_strategy: string | null
+          shadow_work: string | null
           updated_at: string
           user_id: string
         }
@@ -42,6 +45,9 @@ export type Database = {
           personality_number?: number | null
           maturity_number?: number | null
           name: string
+          narrative?: string | null
+          power_strategy?: string | null
+          shadow_work?: string | null
           updated_at?: string
           user_id: string
         }
@@ -57,6 +63,9 @@ export type Database = {
           personality_number?: number | null
           maturity_number?: number | null
           name?: string
+          narrative?: string | null
+          power_strategy?: string | null
+          shadow_work?: string | null
           updated_at?: string
           user_id?: string
         }

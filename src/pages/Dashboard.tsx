@@ -1,10 +1,13 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, History, Sparkles, ExternalLink } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { NarrativeSection } from "@/components/NarrativeSection";
+import { CycleChart } from "@/components/CycleChart";
+import { DailyPulseCard } from "@/components/DailyPulseCard";
 
 const MOCK_READINGS = [
   { date: "2026-03-01", type: "Daily Pulse", summary: "Día de número 7: Ideal para análisis profundo y planificación estratégica silenciosa." },
@@ -86,7 +89,10 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Daily Pulse en vivo */}
+            <DailyPulseCard birthDate={profile.birthDate} />
+
             {/* Life Path Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -129,28 +135,16 @@ const Dashboard = () => {
               ))}
             </motion.div>
 
-            {/* Reading History */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <History className="h-4 w-4 text-bronze" />
-                <h2 className="text-lg font-serif text-foreground">Historial de Lecturas</h2>
-              </div>
-              <div className="space-y-3">
-                {MOCK_READINGS.map((r, i) => (
-                  <div key={i} className="glass rounded-lg p-5 glass-hover">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-xs text-muted-foreground font-sans">{r.date}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-sans">{r.type}</span>
-                    </div>
-                    <p className="text-sm text-secondary-foreground font-sans">{r.summary}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            {/* Narrativa IA (Fase 2) */}
+            <NarrativeSection
+              narrative={profile.narrative}
+              powerStrategy={profile.powerStrategy}
+              shadowWork={profile.shadowWork}
+              archetypeName={profile.archetype}
+            />
+
+            {/* Ciclos Personales (Fase 2) */}
+            <CycleChart birthDate={profile.birthDate} />
           </div>
 
           {/* Sidebar */}
