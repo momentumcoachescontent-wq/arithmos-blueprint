@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface SynchronicityResult {
     analysis: string;
     significance: number; // 0-100
+    influence: number;    // 0-100
     actionStep: string;
 }
 
@@ -65,6 +66,7 @@ export function useSynchronicity(userId?: string) {
             const newResult: SynchronicityResult = {
                 analysis: data.analysis || "El universo susurra a través de este evento, sugiriendo un alineamiento con tu propósito actual.",
                 significance: data.significance || 75,
+                influence: data.influence || 60,
                 actionStep: data.action_step || "Observa la siguiente repetición de este patrón en las próximas 48 horas."
             };
 
@@ -80,6 +82,7 @@ export function useSynchronicity(userId?: string) {
                         description,
                         analysis: newResult.analysis,
                         significance: newResult.significance,
+                        influence: newResult.influence,
                         action_step: newResult.actionStep
                     }
                 });
@@ -96,5 +99,9 @@ export function useSynchronicity(userId?: string) {
         }
     }, [userId, checkLimit]);
 
-    return { analyzeEvent, isAnalyzing, result, limitReached, checkLimit };
+    const reset = useCallback(() => {
+        setResult(null);
+    }, []);
+
+    return { analyzeEvent, isAnalyzing, result, limitReached, checkLimit, reset };
 }
