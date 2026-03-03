@@ -35,13 +35,52 @@ const ARCHETYPES: Record<number, { name: string; description: string }> = {
   33: { name: "El Maestro Sanador", description: "Vibración compasiva extrema. Influencia transformadora pura. Naces para elevar la conciencia de otros." },
 };
 
-function calculateLifePath(dateStr: string): number {
-  const digits = dateStr.replace(/-/g, "").split("").map(Number);
-  let sum = digits.reduce((a, b) => a + b, 0);
-  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
-    sum = sum.toString().split("").map(Number).reduce((a, b) => a + b, 0);
+const PYTHAGOREAN_TABLE: Record<string, number> = {
+  a: 1, j: 1, s: 1,
+  b: 2, k: 2, t: 2,
+  c: 3, l: 3, u: 3,
+  d: 4, m: 4, v: 4,
+  e: 5, n: 5, w: 5,
+  f: 6, o: 6, x: 6,
+  g: 7, p: 7, y: 7,
+  h: 8, q: 8, z: 8,
+  i: 9, r: 9
+};
+
+const VOWELS = ['a', 'e', 'i', 'o', 'u'];
+
+function sumDigits(num: number): number {
+  return num.toString().split('').reduce((acc, curr) => acc + parseInt(curr), 0);
+}
+
+function reduceToSingleDigitOrMaster(num: number): number {
+  const masters = [11, 22, 33];
+  let current = num;
+  while (current > 9 && !masters.includes(current)) {
+    current = sumDigits(current);
+  }
+  return current;
+}
+
+function calculateNameValue(nameStr: string, type: 'all' | 'vowels' | 'consonants' = 'all'): number {
+  let sum = 0;
+  const chars = nameStr.toLowerCase().replace(/[^a-z]/g, '').split('');
+  for (const char of chars) {
+    const isVowel = VOWELS.includes(char);
+    if (type === 'all' || (type === 'vowels' && isVowel) || (type === 'consonants' && !isVowel)) {
+      sum += PYTHAGOREAN_TABLE[char] || 0;
+    }
   }
   return sum;
+}
+
+function calculateLifePath(dateStr: string): number {
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return 0;
+  const yearReduced = reduceToSingleDigitOrMaster(parseInt(parts[0]));
+  const monthReduced = reduceToSingleDigitOrMaster(parseInt(parts[1]));
+  const dayReduced = reduceToSingleDigitOrMaster(parseInt(parts[2]));
+  return reduceToSingleDigitOrMaster(yearReduced + monthReduced + dayReduced);
 }
 
 export function useProfile() {
@@ -83,116 +122,95 @@ export function useProfile() {
   }, []);
 
   const createProfile = useCallback(async (name: string, birthDate: string, userId?: string) => {
-    let newProfile: Profile;
+    // 1. Cálculos Deterministas Locales (Respaldo Inmediato)
+    const lifePathNumber = calculateLifePath(birthDate);
+    const expressionNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'all'));
+    const soulUrgeNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'vowels'));
+    const personalityNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'consonants'));
+    const maturityNumber = reduceToSingleDigitOrMaster(lifePathNumber + expressionNumber);
+
+    const arch = ARCHETYPES[lifePathNumber] || ARCHETYPES[1];
+
+    let newProfile: Profile = {
+      name,
+      birthDate,
+      lifePathNumber,
+      expressionNumber,
+      soulUrgeNumber,
+      personalityNumber,
+      maturityNumber,
+      archetype: arch.name,
+      description: arch.description,
+      createdAt: new Date().toISOString(),
+    };
+
     try {
+      // 2. Intentar obtener interpretación IA de n8n
       const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook/arithmos-calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ full_name: name, birth_date: birthDate })
       });
 
-      let data = await response.json();
+      if (response.ok) {
+        let data = await response.json();
+        if (Array.isArray(data)) data = data[0];
 
-      // n8n can return array
-      if (Array.isArray(data)) data = data[0];
-
-      let lifePathNumber = calculateLifePath(birthDate);
-      let expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber;
-      let narrative, powerStrategy, shadowWork, audioUrl;
-
-      if (data && data.success && data.blueprint) {
-        lifePathNumber = data.blueprint.life_path_number;
-        expressionNumber = data.blueprint.expression_number;
-        soulUrgeNumber = data.blueprint.soul_urge_number;
-        personalityNumber = data.blueprint.personality_number;
-        maturityNumber = data.blueprint.maturity_number;
-
-        // Fase 2: Extraer la interpretación narrativa
-        if (data.interpretation) {
-          narrative = data.interpretation.narrative;
-          powerStrategy = data.interpretation.power_strategy;
-          shadowWork = data.interpretation.shadow_work;
-          audioUrl = data.interpretation.audio_url;
+        if (data && data.success && data.interpretation) {
+          newProfile.narrative = data.interpretation.narrative;
+          newProfile.powerStrategy = data.interpretation.power_strategy;
+          newProfile.shadowWork = data.interpretation.shadow_work;
+          newProfile.audioUrl = data.interpretation.audio_url;
         }
       }
-
-      const arch = ARCHETYPES[lifePathNumber] || ARCHETYPES[1];
-      newProfile = {
-        name,
-        birthDate,
-        lifePathNumber,
-        expressionNumber,
-        soulUrgeNumber,
-        personalityNumber,
-        maturityNumber,
-        archetype: arch.name,
-        description: arch.description,
-        narrative,
-        powerStrategy,
-        shadowWork,
-        createdAt: new Date().toISOString(),
-      };
-
-      if (userId) {
-        // Verificar que haya sesión activa antes de escribir en Supabase
-        const { data: { session } } = await supabase.auth.getSession();
-
-        if (session) {
-          // Guardar/Actualizar Perfil en Supabase
-          const { error: upsertError } = await supabase
-            .from('profiles')
-            .upsert({
-              user_id: userId,
-              name: name,
-              birth_date: birthDate,
-              life_path_number: lifePathNumber,
-              expression_number: expressionNumber,
-              soul_urge_number: soulUrgeNumber,
-              personality_number: personalityNumber,
-              maturity_number: maturityNumber,
-              archetype: arch.name,
-              archetype_description: arch.description,
-              narrative: narrative || null,
-              power_strategy: powerStrategy || null,
-              shadow_work: shadowWork || null,
-              audio_url: audioUrl || null,
-            });
-
-          if (!upsertError) {
-            // Guardar Lectura Inicial solo si el perfil se guardó correctamente
-            await supabase
-              .from('readings')
-              .insert({
-                user_id: userId,
-                title: `Blueprint de ${name}`,
-                type: 'mini_blueprint',
-                metadata: data.blueprint || { life_path_number: lifePathNumber }
-              });
-          } else {
-            console.warn("No se pudo guardar en Supabase, continúando con datos locales:", upsertError.message);
-          }
-        } else {
-          // Sin sesión activa → solo localStorage (Anonymous Auth no disponible o desactivado)
-          console.info("Sin sesión Supabase activa. Perfil guardado solo localmente.");
-        }
-      }
-
     } catch (error) {
-      console.error("Error conectando al motor n8n:", error);
-      const lifePathNumber = calculateLifePath(birthDate);
-      const arch = ARCHETYPES[lifePathNumber] || ARCHETYPES[1];
-      newProfile = {
-        name,
-        birthDate,
-        lifePathNumber,
-        archetype: arch.name,
-        description: arch.description,
-        createdAt: new Date().toISOString(),
-      };
+      console.warn("Fallo en motor IA (n8n), se usarán solo datos matemáticos locales:", error);
     }
 
+    // 3. Persistencia en LocalStorage y Supabase
     localStorage.setItem("arithmos_profile", JSON.stringify(newProfile));
     setProfile(newProfile);
+
+    if (userId) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { error: upsertError } = await supabase
+          .from('profiles')
+          .upsert({
+            user_id: userId,
+            name: name,
+            birth_date: birthDate,
+            life_path_number: lifePathNumber,
+            expression_number: expressionNumber,
+            soul_urge_number: soulUrgeNumber,
+            personality_number: personalityNumber,
+            maturity_number: maturityNumber,
+            archetype: arch.name,
+            archetype_description: arch.description,
+            narrative: newProfile.narrative || null,
+            power_strategy: newProfile.powerStrategy || null,
+            shadow_work: newProfile.shadowWork || null,
+            audio_url: newProfile.audioUrl || null,
+          });
+
+        if (!upsertError) {
+          await supabase
+            .from('readings')
+            .upsert({
+              user_id: userId,
+              title: `Blueprint de ${name}`,
+              type: 'mini_blueprint',
+              metadata: {
+                life_path_number: lifePathNumber,
+                expression_number: expressionNumber,
+                soul_urge_number: soulUrgeNumber,
+                personality_number: personalityNumber,
+                maturity_number: maturityNumber
+              }
+            }, { onConflict: 'user_id,type' });
+        }
+      }
+    }
     return newProfile;
   }, []);
 

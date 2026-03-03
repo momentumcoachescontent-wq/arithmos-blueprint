@@ -14,7 +14,7 @@ export function NarrativeSection({
     shadowWork,
     archetypeName,
 }: NarrativeSectionProps) {
-    if (!narrative && !powerStrategy && !shadowWork) return null;
+    const hasData = narrative || powerStrategy || shadowWork;
 
     return (
         <motion.div
@@ -26,6 +26,16 @@ export function NarrativeSection({
             <h3 className="text-xs font-sans tracking-widest text-muted-foreground uppercase">
                 Interpretación Maestra · {archetypeName}
             </h3>
+
+            {!hasData && (
+                <div className="bg-card/30 border border-dashed border-border rounded-xl p-8 text-center">
+                    <Sparkles className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                    <p className="text-sm font-sans text-muted-foreground italic">
+                        Tu análisis narrativo profundo está siendo procesado por el Coach Arithmos.
+                        Presiona "Recalcular" o vuelve en unos instantes para sintonizar tu frecuencia.
+                    </p>
+                </div>
+            )}
 
             {/* Narrativa Principal */}
             {narrative && (

@@ -124,6 +124,13 @@ const Dashboard = () => {
               </div>
             </motion.div>
 
+            <NarrativeSection
+              narrative={profile.narrative}
+              powerStrategy={profile.powerStrategy}
+              shadowWork={profile.shadowWork}
+              archetypeName={profile.archetype}
+            />
+
             {/* Extended Blueprint */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -143,13 +150,6 @@ const Dashboard = () => {
                 </div>
               ))}
             </motion.div>
-
-            <NarrativeSection
-              narrative={profile.narrative}
-              powerStrategy={profile.powerStrategy}
-              shadowWork={profile.shadowWork}
-              archetypeName={profile.archetype}
-            />
 
             <div className="grid md:grid-cols-2 gap-6">
               <CycleChart birthDate={profile.birthDate} />
