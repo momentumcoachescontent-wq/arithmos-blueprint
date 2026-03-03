@@ -97,10 +97,14 @@ export function useProfile() {
       .single();
 
     if (data && !error) {
+      const name = (data as any).name || (data as any).full_name || "Buscador";
+      const birthDate = data.birth_date;
+      const lifePathNumber = data.life_path_number;
+
       const fetchedProfile: Profile = {
-        name: (data as any).name || (data as any).full_name || "Buscador",
-        birthDate: data.birth_date,
-        lifePathNumber: data.life_path_number,
+        name,
+        birthDate,
+        lifePathNumber,
         expressionNumber: data.expression_number || undefined,
         soulUrgeNumber: data.soul_urge_number || undefined,
         personalityNumber: data.personality_number || undefined,
@@ -114,9 +118,28 @@ export function useProfile() {
         role: (data.role as "freemium" | "premium" | "admin") || "freemium",
         createdAt: data.created_at
       };
-      setProfile(fetchedProfile);
+
+      // --- SMART REPAIR ---
+      // Si faltan números pero tenemos nombre/fecha, repararlos localmente y en DB
+      if (!fetchedProfile.expressionNumber || !fetchedProfile.soulUrgeNumber || !fetchedProfile.personalityNumber || !fetchedProfile.maturityNumber) {
+        fetchedProfile.expressionNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'all'));
+        fetchedProfile.soulUrgeNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'vowels'));
+        fetchedProfile.personalityNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'consonants'));
+        fetchedProfile.maturityNumber = reduceToSingleDigitOrMaster(lifePathNumber + (fetchedProfile.expressionNumber || 0));
+
+        // Background update to fix DB record
+        supabase.from('profiles').update({
+          expression_number: fetchedProfile.expressionNumber,
+          soul_urge_number: fetchedProfile.soulUrgeNumber,
+          personality_number: fetchedProfile.personalityNumber,
+          maturity_number: fetchedProfile.maturityNumber
+        }).eq('user_id', userId).then(({ error }) => {
+          if (error) console.warn("Auto-reparación falló en DB:", error.message);
+        });
+      }
+
+      setProfile({ ...fetchedProfile });
       localStorage.setItem("arithmos_profile", JSON.stringify(fetchedProfile));
-      // Forzar actualización inmediata devolviendo el objeto
       return fetchedProfile;
     }
     return null;
