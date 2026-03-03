@@ -18,7 +18,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { profile, fetchProfile } = useProfile();
-  const { stats, fetchStats } = useStats();
+  const { stats, fetchStats } = useStats(user?.id);
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -33,14 +33,14 @@ const Dashboard = () => {
         if (!p) {
           navigate("/onboarding");
         }
-        await fetchStats();
+        await fetchStats(user.id);
       };
       syncData();
       initialized.current = true;
     }
   }, [user, navigate, fetchProfile, fetchStats]);
 
-  if (!user || !profile) {
+  if (!user || !profile || !stats) {
     return <div className="min-h-screen bg-background flex items-center justify-center font-serif text-2xl animate-pulse">Sintonizando tu frecuencia...</div>;
   }
 

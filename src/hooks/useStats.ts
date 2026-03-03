@@ -20,19 +20,20 @@ function xpForNextLevel(level: number): number {
 export function useStats(userId?: string) {
     const [stats, setStats] = useState<UserStats | null>(null);
 
-    const fetchStats = useCallback(async () => {
-        if (!userId) return null;
+    const fetchStats = useCallback(async (providedUserId?: string) => {
+        const idToUse = providedUserId || userId;
+        if (!idToUse) return null;
 
         // Asegurar que exista el registro
         await supabase.from('user_stats').upsert(
-            { user_id: userId, xp: 0, level: 1 },
+            { user_id: idToUse, xp: 0, level: 1 },
             { onConflict: 'user_id', ignoreDuplicates: true }
         );
 
         const { data, error } = await supabase
             .from('user_stats')
             .select('*')
-            .eq('user_id', userId)
+            .eq('user_id', idToUse)
             .single();
 
         if (!data || error) return null;
