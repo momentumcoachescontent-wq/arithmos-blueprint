@@ -31,6 +31,7 @@ export type Database = {
           power_strategy: string | null
           shadow_work: string | null
           audio_url: string | null
+          role: string
           updated_at: string
           user_id: string
         }
@@ -50,6 +51,7 @@ export type Database = {
           power_strategy?: string | null
           shadow_work?: string | null
           audio_url?: string | null
+          role?: string
           updated_at?: string
           user_id: string
         }
@@ -69,6 +71,7 @@ export type Database = {
           power_strategy?: string | null
           shadow_work?: string | null
           audio_url?: string | null
+          role?: string
           updated_at?: string
           user_id?: string
         }

@@ -16,6 +16,7 @@ export interface Profile {
   powerStrategy?: string;
   shadowWork?: string;
   audioUrl?: string;
+  role?: "freemium" | "premium" | "admin";
   createdAt: string;
 }
 
@@ -71,6 +72,7 @@ export function useProfile() {
         powerStrategy: data.power_strategy || undefined,
         shadowWork: data.shadow_work || undefined,
         audioUrl: data.audio_url || undefined,
+        role: (data.role as "freemium" | "premium" | "admin") || "freemium",
         createdAt: data.created_at
       };
       setProfile(fetchedProfile);
