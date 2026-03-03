@@ -43,14 +43,13 @@ export function useMissions(userId?: string, birthDate?: string) {
             .or(`personal_number.is.null,personal_number.eq.${personalNumber}`)
             .limit(4);
 
-        // Obtener completadas hoy
+        // Obtener completadas hoy usando la columna completed_date
         const today = new Date().toISOString().split("T")[0];
         const { data: completedData } = await supabase
             .from('user_missions')
             .select('mission_id')
             .eq('user_id', userId)
-            .gte('completed_at', `${today}T00:00:00`)
-            .lte('completed_at', `${today}T23:59:59`);
+            .eq('completed_date', today);
 
         const completedIds = (completedData || []).map(c => c.mission_id);
         setCompletedToday(completedIds);
@@ -78,6 +77,7 @@ export function useMissions(userId?: string, birthDate?: string) {
         const { error } = await supabase.from('user_missions').insert({
             user_id: userId,
             mission_id: missionId,
+            completed_date: new Date().toISOString().split("T")[0],
             personal_number_at_completion: personalNumber,
         });
 

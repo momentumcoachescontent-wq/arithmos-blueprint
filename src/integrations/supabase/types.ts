@@ -188,6 +188,7 @@ export type Database = {
           user_id: string
           mission_id: string
           completed_at: string
+          completed_date: string
           personal_number_at_completion: number | null
         }
         Insert: {
@@ -195,6 +196,7 @@ export type Database = {
           user_id: string
           mission_id: string
           completed_at?: string
+          completed_date?: string
           personal_number_at_completion?: number | null
         }
         Update: {
@@ -202,6 +204,7 @@ export type Database = {
           user_id?: string
           mission_id?: string
           completed_at?: string
+          completed_date?: string
           personal_number_at_completion?: number | null
         }
         Relationships: []
