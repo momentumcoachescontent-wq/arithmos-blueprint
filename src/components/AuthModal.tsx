@@ -50,29 +50,56 @@ export function AuthModal({ isOpen, onClose, defaultTab = "register", selectedPl
 
         setLoading(true);
         try {
-            const newUser = await registerWithEmail(email, password, fullName.trim());
-            if (newUser) {
-                // Solo actualizamos el rol — useProfile.createProfile se encargará del resto en /onboarding
-                const role = roleFromPlan(selectedPlan);
-                await supabase.from("profiles")
-                    .update({ role })
-                    .eq("user_id", newUser.id);
+            const { data, error: signUpError } = await supabase.auth.signUp({
+                email,
+                password,
+                options: { data: { full_name: fullName.trim() } },
+            });
+
+            if (signUpError) {
+                // "User already registered" (error 422)
+                if (signUpError.message?.includes("already registered") || signUpError.status === 422) {
+                    setError("Este email ya tiene una cuenta. Usa la pestaña Iniciar Sesión.");
+                } else {
+                    setError(signUpError.message || "Error al crear la cuenta.");
+                }
+                return;
+            }
+
+            const newUser = data?.user;
+
+            // Caso: email confirmation requerida (identities = [], user existe pero sin confirmar)
+            const needsConfirmation = newUser && (!data.session || newUser.identities?.length === 0);
+
+            if (needsConfirmation) {
+                setSuccess("✅ ¡Revisa tu email! Te enviamos un enlace de confirmación. Tras confirmar, inicia sesión.");
+                return;
+            }
+
+            if (newUser && data.session) {
+                // Guardamos el usuario en auth local
+                localStorage.setItem("arithmos_user", JSON.stringify({
+                    id: newUser.id,
+                    name: fullName.trim(),
+                    email: email,
+                    isAnonymous: false,
+                }));
                 setSuccess("¡Cuenta creada! Redirigiendo para completar tu perfil...");
                 setTimeout(() => {
                     onClose();
                     navigate("/onboarding");
                 }, 1800);
+            } else {
+                setError("No se pudo crear la cuenta. Verifica que el email sea válido.");
             }
         } catch (err: any) {
-            if (err.message?.includes("already registered")) {
-                setError("Este email ya tiene una cuenta. Usa la pestaña Iniciar Sesión.");
-            } else {
-                setError(err.message || "Error al crear la cuenta.");
-            }
+            console.error("Register error:", err);
+            setError(err.message || "Error inesperado al crear la cuenta.");
         } finally {
             setLoading(false);
         }
     };
+
 
     const handleLogin = async () => {
         setError(null);
