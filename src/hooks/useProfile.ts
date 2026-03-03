@@ -129,34 +129,46 @@ export function useProfile() {
       };
 
       if (userId) {
-        // Guardar/Actualizar Perfil
-        await supabase
-          .from('profiles')
-          .upsert({
-            user_id: userId,
-            name: name,
-            birth_date: birthDate,
-            life_path_number: lifePathNumber,
-            expression_number: expressionNumber,
-            soul_urge_number: soulUrgeNumber,
-            personality_number: personalityNumber,
-            maturity_number: maturityNumber,
-            archetype: arch.name,
-            archetype_description: arch.description,
-            narrative: narrative || null,
-            power_strategy: powerStrategy || null,
-            shadow_work: shadowWork || null,
-          });
+        // Verificar que haya sesión activa antes de escribir en Supabase
+        const { data: { session } } = await supabase.auth.getSession();
 
-        // Guardar Lectura Inicial
-        await supabase
-          .from('readings')
-          .insert({
-            user_id: userId,
-            title: `Blueprint de ${name}`,
-            type: 'mini_blueprint',
-            metadata: data.blueprint || { life_path_number: lifePathNumber }
-          });
+        if (session) {
+          // Guardar/Actualizar Perfil en Supabase
+          const { error: upsertError } = await supabase
+            .from('profiles')
+            .upsert({
+              user_id: userId,
+              name: name,
+              birth_date: birthDate,
+              life_path_number: lifePathNumber,
+              expression_number: expressionNumber,
+              soul_urge_number: soulUrgeNumber,
+              personality_number: personalityNumber,
+              maturity_number: maturityNumber,
+              archetype: arch.name,
+              archetype_description: arch.description,
+              narrative: narrative || null,
+              power_strategy: powerStrategy || null,
+              shadow_work: shadowWork || null,
+            });
+
+          if (!upsertError) {
+            // Guardar Lectura Inicial solo si el perfil se guardó correctamente
+            await supabase
+              .from('readings')
+              .insert({
+                user_id: userId,
+                title: `Blueprint de ${name}`,
+                type: 'mini_blueprint',
+                metadata: data.blueprint || { life_path_number: lifePathNumber }
+              });
+          } else {
+            console.warn("No se pudo guardar en Supabase, continúando con datos locales:", upsertError.message);
+          }
+        } else {
+          // Sin sesión activa → solo localStorage (Anonymous Auth no disponible o desactivado)
+          console.info("Sin sesión Supabase activa. Perfil guardado solo localmente.");
+        }
       }
 
     } catch (error) {
@@ -180,3 +192,4 @@ export function useProfile() {
 
   return { profile, createProfile, fetchProfile };
 }
+
