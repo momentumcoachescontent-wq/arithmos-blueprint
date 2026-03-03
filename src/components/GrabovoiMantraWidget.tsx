@@ -55,9 +55,14 @@ export function GrabovoiMantraWidget({ birthDate }: GrabovoiMantraWidgetProps) {
                 <h3 className="text-lg font-serif font-bold text-foreground mb-1">
                     Frecuencia de Enfoque <span className="text-primary italic">Grabovoi</span>
                 </h3>
-                <p className="text-xs text-muted-foreground font-sans">
+                <p className="text-xs text-muted-foreground font-sans mb-3">
                     Selecciona tu intención para sintonizar tu código de manifestación personal de hoy.
                 </p>
+                <div className="p-3 bg-primary/5 border border-primary/10 rounded-lg">
+                    <p className="text-[10px] text-muted-foreground italic leading-relaxed">
+                        Para usar correctamente los códigos de Grabovoi debemos tener una mente abierta. Ningún método de manifestación sirve si no creemos que se puede lograr. Una vez que hayamos determinado los dígitos, debemos concentrarnos y visualizarlos, repitiéndolos en voz baja, dígito por dígito.
+                    </p>
+                </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">

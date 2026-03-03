@@ -53,10 +53,18 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground tracking-tight">
-              Tu <span className="text-primary italic">Blueprint</span> Estratégico
-            </h1>
-            {profile && <DailyProtectionShield birthDate={profile.birthDate} />}
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
+              <span className="text-xl font-serif font-bold text-primary">{profile.name[0]}</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-xs text-muted-foreground font-sans lowercase">hola, {profile.name.split(' ')[0]}</p>
+                {profile && <DailyProtectionShield birthDate={profile.birthDate} />}
+              </div>
+              <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground tracking-tight">
+                Tu <span className="text-primary italic">Blueprint</span> Estratégico
+              </h1>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <XPBar xp={stats.xp} level={stats.level} nextLevelXp={stats.nextLevelXp} progressPercent={stats.progressPercent} />
