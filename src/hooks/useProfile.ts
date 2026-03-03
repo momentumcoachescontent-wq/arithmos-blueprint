@@ -59,7 +59,7 @@ export function useProfile() {
 
     if (data && !error) {
       const fetchedProfile: Profile = {
-        name: data.name,
+        name: (data as any).name || (data as any).full_name || "Buscador",
         birthDate: data.birth_date,
         lifePathNumber: data.life_path_number,
         expressionNumber: data.expression_number || undefined,
