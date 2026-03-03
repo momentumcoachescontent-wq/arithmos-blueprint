@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Missions from "./pages/Missions";
 import Journal from "./pages/Journal";
 import Ranking from "./pages/Ranking";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/missions" element={<Missions />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/ranking" element={<Ranking />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

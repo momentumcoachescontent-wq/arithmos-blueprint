@@ -30,6 +30,7 @@ export type Database = {
           narrative: string | null
           power_strategy: string | null
           shadow_work: string | null
+          audio_url: string | null
           updated_at: string
           user_id: string
         }
@@ -48,6 +49,7 @@ export type Database = {
           narrative?: string | null
           power_strategy?: string | null
           shadow_work?: string | null
+          audio_url?: string | null
           updated_at?: string
           user_id: string
         }
@@ -66,6 +68,7 @@ export type Database = {
           narrative?: string | null
           power_strategy?: string | null
           shadow_work?: string | null
+          audio_url?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -80,6 +83,7 @@ export type Database = {
           title: string
           type: string
           user_id: string
+          audio_url: string | null
         }
         Insert: {
           content?: string | null
@@ -89,6 +93,7 @@ export type Database = {
           title: string
           type?: string
           user_id: string
+          audio_url?: string | null
         }
         Update: {
           content?: string | null
@@ -98,6 +103,7 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+          audio_url?: string | null
         }
         Relationships: []
       }

@@ -9,6 +9,7 @@ import { useMissions } from "@/hooks/useMissions";
 import { useStats } from "@/hooks/useStats";
 import { MissionCard, MissionLocked } from "@/components/MissionCard";
 import { XPBar } from "@/components/XPBar";
+import { useDiscord } from "@/hooks/useDiscord";
 
 const Missions = () => {
     const navigate = useNavigate();
@@ -16,8 +17,11 @@ const Missions = () => {
     const { profile } = useProfile();
     const { missions, fetchMissions, completeMission } = useMissions(user?.id, profile?.birthDate);
     const { stats, fetchStats, awardXp } = useStats(user?.id);
+    const { shareMissionVictory } = useDiscord();
     const [completing, setCompleting] = useState<string | null>(null);
     const [xpGained, setXpGained] = useState<{ amount: number; id: string } | null>(null);
+    const shareToDiscord = localStorage.getItem("arithmos_discord_share") === "true";
+    const discordWebhookUrl = localStorage.getItem("arithmos_discord_webhook") || "";
 
     useEffect(() => {
         if (!isAuthenticated) { navigate("/onboarding"); return; }
@@ -28,10 +32,19 @@ const Missions = () => {
     const handleComplete = async (missionId: string) => {
         if (!profile) return;
         setCompleting(missionId);
-        const personalNumber = missions.find(m => m.id === missionId)?.personalNumber ?? 1;
+        const mission = missions.find(m => m.id === missionId);
+        const personalNumber = mission?.personalNumber ?? 1;
+
         await completeMission(missionId, personalNumber, async (xp) => {
+            const oldLevel = stats?.level || 1;
             await awardXp(xp);
             setXpGained({ amount: xp, id: missionId });
+
+            // Compartir en Discord si está activo
+            if (shareToDiscord && discordWebhookUrl && mission) {
+                await shareMissionVictory(discordWebhookUrl, profile.name, mission.title, xp);
+            }
+
             setTimeout(() => setXpGained(null), 2500);
         });
         setCompleting(null);
@@ -99,6 +112,18 @@ const Missions = () => {
                     ))}
                     {missions.length < 3 && <MissionLocked />}
                 </div>
+
+                {shareToDiscord && discordWebhookUrl && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex items-center gap-2 py-3 px-4 rounded-xl bg-primary/5 border border-primary/15 text-xs font-sans text-muted-foreground mt-6"
+                    >
+                        <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+                        <span>Discord conectado. Tus victorias se compartirán automáticamente.</span>
+                        <button onClick={() => navigate("/settings")} className="ml-auto text-primary hover:underline whitespace-nowrap">Gestionar →</button>
+                    </motion.div>
+                )}
 
                 <div className="mt-8 text-center">
                     <Button variant="ghost" className="text-muted-foreground text-sm font-sans" onClick={() => navigate("/journal")}>

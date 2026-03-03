@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -10,6 +10,7 @@ import { NarrativeSection } from "@/components/NarrativeSection";
 import { CycleChart } from "@/components/CycleChart";
 import { DailyPulseCard } from "@/components/DailyPulseCard";
 import { XPBar } from "@/components/XPBar";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -69,9 +70,18 @@ const Dashboard = () => {
             <Sparkles className="h-5 w-5 text-primary" />
             <span className="font-serif text-lg text-foreground">Arithmos</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {stats && <XPBar {...stats} compact />}
             <span className="text-sm text-muted-foreground font-sans hidden sm:block">{user.name}</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/settings")}
+              className="text-muted-foreground hover:text-foreground"
+              title="Configuración"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
               <LogOut className="h-4 w-4" />
             </Button>
@@ -135,6 +145,11 @@ const Dashboard = () => {
               shadowWork={profile.shadowWork}
               archetypeName={profile.archetype}
             />
+
+            {/* Audio IA (Fase 4) */}
+            {profile.audioUrl && (
+              <AudioPlayer url={profile.audioUrl} title={`Meditación: ${profile.archetype}`} />
+            )}
 
             {/* Ciclos Personales (Fase 2) */}
             <CycleChart birthDate={profile.birthDate} />
@@ -202,23 +217,28 @@ const Dashboard = () => {
               </span>
             </motion.button>
 
-            {/* Discord CTA */}
+            {/* Discord Community */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="glass rounded-xl p-5 border-primary/20"
+              className="glass rounded-xl p-5 border-primary/20 bg-primary/5"
             >
               <div className="flex items-center gap-2 mb-2">
                 <MessageCircle className="h-4 w-4 text-primary" />
-                <h3 className="font-serif text-foreground text-sm">Conecta Discord</h3>
+                <h3 className="font-serif text-foreground text-sm font-semibold">Comunidad Discord</h3>
               </div>
-              <p className="text-xs text-muted-foreground mb-4 font-sans">
-                Recibe el Daily Pulse directo en tu servidor.
+              <p className="text-xs text-muted-foreground mb-4 font-sans leading-relaxed">
+                Comparte tus misiones y celebra niveles en la comunidad oficial de Arithmos.
               </p>
-              <Button className="w-full glow-indigo group" size="sm">
-                Activar
-                <ExternalLink className="ml-2 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              <Button
+                variant="outline"
+                className="w-full text-xs font-sans group border-primary/20 hover:bg-primary/10"
+                size="sm"
+                onClick={() => navigate("/missions")}
+              >
+                Configurar Webhook
+                <ExternalLink className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </motion.div>
           </div>

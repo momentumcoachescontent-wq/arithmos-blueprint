@@ -15,6 +15,7 @@ export interface Profile {
   narrative?: string;
   powerStrategy?: string;
   shadowWork?: string;
+  audioUrl?: string;
   createdAt: string;
 }
 
@@ -69,6 +70,7 @@ export function useProfile() {
         narrative: data.narrative || undefined,
         powerStrategy: data.power_strategy || undefined,
         shadowWork: data.shadow_work || undefined,
+        audioUrl: data.audio_url || undefined,
         createdAt: data.created_at
       };
       setProfile(fetchedProfile);
@@ -94,7 +96,7 @@ export function useProfile() {
 
       let lifePathNumber = calculateLifePath(birthDate);
       let expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber;
-      let narrative, powerStrategy, shadowWork;
+      let narrative, powerStrategy, shadowWork, audioUrl;
 
       if (data && data.success && data.blueprint) {
         lifePathNumber = data.blueprint.life_path_number;
@@ -108,6 +110,7 @@ export function useProfile() {
           narrative = data.interpretation.narrative;
           powerStrategy = data.interpretation.power_strategy;
           shadowWork = data.interpretation.shadow_work;
+          audioUrl = data.interpretation.audio_url;
         }
       }
 
@@ -150,6 +153,7 @@ export function useProfile() {
               narrative: narrative || null,
               power_strategy: powerStrategy || null,
               shadow_work: shadowWork || null,
+              audio_url: audioUrl || null,
             });
 
           if (!upsertError) {
