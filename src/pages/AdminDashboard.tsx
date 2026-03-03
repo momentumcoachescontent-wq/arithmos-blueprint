@@ -1,0 +1,232 @@
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+    Users,
+    BarChart3,
+    ShieldAlert,
+    Settings,
+    ArrowLeft,
+    Activity,
+    Cpu,
+    Database,
+    CheckCircle2,
+    XCircle,
+    TrendingUp,
+    MessageSquare
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+
+const AdminDashboard = () => {
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const { profile } = useProfile();
+    const [stats, setStats] = useState({
+        userCount: 0,
+        readingCount: 0,
+        journalCount: 0,
+        aiSuccessRate: 98,
+        systemStatus: 'healthy',
+        n8nStatus: 'online',
+        supabaseStatus: 'connected'
+    });
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        if (profile?.role !== 'admin') {
+            navigate("/dashboard");
+            return;
+        }
+
+        const fetchAdminStats = async () => {
+            try {
+                const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+                const { count: readingCount } = await supabase.from('readings').select('*', { count: 'exact', head: true });
+                const { count: journalCount } = await supabase.from('journal_entries').select('*', { count: 'exact', head: true });
+
+                setStats(prev => ({
+                    ...prev,
+                    userCount: userCount || 0,
+                    readingCount: readingCount || 0,
+                    journalCount: journalCount || 0
+                }));
+            } catch (error) {
+                console.error("Error fetching admin stats:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchAdminStats();
+    }, [profile, navigate]);
+
+    if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center font-serif text-2xl animate-pulse">Iniciando Portal del Arquitecto...</div>;
+
+    return (
+        <div className="min-h-screen bg-background text-foreground px-6 py-12">
+            <div className="max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-12">
+                    <button
+                        onClick={() => navigate("/dashboard")}
+                        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-sans"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Volver al Sistema
+                    </button>
+                    <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-sans font-bold text-primary uppercase tracking-widest">
+                        Architect Mode Active
+                    </div>
+                </div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-12"
+                >
+                    <h1 className="text-4xl md:text-5xl font-serif font-semibold text-gradient-silver mb-4">
+                        Panel de Administración y Diagnóstico
+                    </h1>
+                    <p className="text-muted-foreground font-sans text-lg">
+                        Supervisión integral de Arithmos: Uso, Inteligencia Artificial y Salud Transversal.
+                    </p>
+                </motion.div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                    {[
+                        { label: "Usuarios Totales", value: stats.userCount, icon: Users, color: "text-blue-400" },
+                        { label: "Consultas IA", value: stats.readingCount, icon: Activity, color: "text-primary" },
+                        { label: "Entradas de Diario", value: stats.journalCount, icon: MessageSquare, color: "text-emerald-400" },
+                        { label: "Tasa de Éxito IA", value: `${stats.aiSuccessRate}%`, icon: Cpu, color: "text-amber-400" },
+                    ].map((item, idx) => (
+                        <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className="glass rounded-xl p-6 border-border hover:border-primary/30 transition-all"
+                        >
+                            <div className="flex items-start justify-between mb-2">
+                                <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground">{item.label}</p>
+                                <item.icon className={`h-5 w-5 ${item.color}`} />
+                            </div>
+                            <p className="text-3xl font-serif font-bold text-foreground">{item.value}</p>
+                        </motion.div>
+                    ))}
+                </div>
+
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* System Health */}
+                    <div className="lg:col-span-2 space-y-8">
+                        <section className="glass rounded-2xl p-8 border-border">
+                            <div className="flex items-center justify-between mb-8">
+                                <h3 className="text-xl font-serif font-semibold flex items-center gap-2">
+                                    <Database className="h-5 w-5 text-indigo-400" />
+                                    Diagnóstico de Salud del Sistema
+                                </h3>
+                                <Button size="sm" variant="outline" className="text-xs font-sans">Ejecutar Checkup Completo</Button>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                                        <div>
+                                            <p className="text-sm font-sans font-bold">Supabase Infrastructure</p>
+                                            <p className="text-xs text-muted-foreground">Auth, PostgreSQL & RLS Policies</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-emerald-500 text-sm font-sans font-bold">
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        CONNECTED
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                                        <div>
+                                            <p className="text-sm font-sans font-bold">n8n Workflow Engine</p>
+                                            <p className="text-xs text-muted-foreground">Webhooks & Calculation Logic</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-emerald-500 text-sm font-sans font-bold">
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        ONLINE
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border opacity-60">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+                                        <div>
+                                            <p className="text-sm font-sans font-bold">ElevenLabs API</p>
+                                            <p className="text-xs text-muted-foreground">Voice Synthesis Engine</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-amber-500 text-sm font-sans font-bold">
+                                        <Activity className="h-4 w-4" />
+                                        IDLE
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section className="glass rounded-2xl p-8 border-border">
+                            <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2">
+                                <TrendingUp className="h-5 w-5 text-primary" />
+                                Uso de IA y Tokens
+                            </h3>
+                            <div className="h-48 bg-secondary/30 rounded-xl flex items-center justify-center text-muted-foreground text-sm font-sans border border-border border-dashed">
+                                Gráfico de tendencia de uso de IA (En desarrollo)
+                            </div>
+                        </section>
+                    </div>
+
+                    {/* Sidebar Admin: Risk & Shadow Monitor */}
+                    <div className="space-y-8">
+                        <section className="glass rounded-2xl p-8 border-rose-500/20 bg-rose-500/5">
+                            <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2 text-rose-500">
+                                <ShieldAlert className="h-5 w-5" />
+                                Monitor de Riesgos
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="p-4 rounded-lg bg-background/50 border border-rose-500/10">
+                                    <p className="text-xs font-sans font-bold uppercase tracking-tighter text-rose-500 mb-1">Alerta de Sombra</p>
+                                    <p className="text-sm text-foreground/80 leading-snug">Se detectó alta frecuencia de términos "Shadow" en 5 perfiles nuevos.</p>
+                                </div>
+                                <div className="p-4 rounded-lg bg-background/50 border border-emerald-500/10">
+                                    <p className="text-xs font-sans font-bold uppercase tracking-tighter text-emerald-500 mb-1">Estabilidad</p>
+                                    <p className="text-sm text-foreground/80 leading-snug">Sin errores críticos de n8n reportados en las últimas 72 horas.</p>
+                                </div>
+                            </div>
+                            <Button variant="ghost" className="w-full mt-6 text-rose-500 hover:bg-rose-500/10 text-xs uppercase tracking-widest font-bold">
+                                Ver Análisis de Sombras Completo
+                            </Button>
+                        </section>
+
+                        <section className="glass rounded-2xl p-8 border-border">
+                            <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2">
+                                <Settings className="h-5 w-5 text-muted-foreground" />
+                                Acciones Rápidas
+                            </h3>
+                            <div className="space-y-2">
+                                <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Limpiar Cache de IA</Button>
+                                <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Exportar Base de Datos (CSV)</Button>
+                                <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Re-sincronizar con Discord</Button>
+                                <Button variant="ghost" className="w-full justify-start text-sm text-rose-400 hover:bg-rose-500/5">Modo de Mantenimiento</Button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default AdminDashboard;

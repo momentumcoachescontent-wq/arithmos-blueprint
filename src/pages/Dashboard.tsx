@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -9,92 +9,79 @@ import { useStats } from "@/hooks/useStats";
 import { NarrativeSection } from "@/components/NarrativeSection";
 import { CycleChart } from "@/components/CycleChart";
 import { DailyPulseCard } from "@/components/DailyPulseCard";
+import { TacticalRecommendations } from "@/components/TacticalRecommendations";
+import { HistorySection } from "@/components/HistorySection";
 import { XPBar } from "@/components/XPBar";
 import { AudioPlayer } from "@/components/AudioPlayer";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
-  const { profile, fetchProfile, createProfile } = useProfile();
-  const { stats, fetchStats } = useStats(user?.id);
-  const isSyncing = useRef(false);
+  const { user, logout } = useAuth();
+  const { profile, fetchProfile } = useProfile();
+  const { stats, fetchStats } = useStats();
+  const initialized = useRef(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/onboarding");
+    if (!user) {
+      navigate("/");
       return;
     }
 
-    const syncData = async () => {
-      if (isSyncing.current || !user?.id) return;
+    if (!initialized.current) {
+      fetchProfile(user.id);
+      fetchStats(user.id);
+      initialized.current = true;
+    }
+  }, [user, navigate, fetchProfile, fetchStats]);
 
-      // Si el perfil falta o está incompleto localmente
-      if (!profile || profile.expressionNumber === undefined) {
-        isSyncing.current = true;
-        try {
-          console.log("Sincronizando perfil...");
-          const fetched = await fetchProfile(user.id);
-
-          // Si tras fetch sigue incompleto en DB, forzamos recalculo con n8n
-          if (fetched && fetched.expressionNumber === undefined && fetched.name && fetched.birthDate) {
-            console.log("Perfil incompleto detectado en DB. Reparando con n8n...");
-            await createProfile(fetched.name, fetched.birthDate, user.id);
-          } else if (!fetched && !profile) {
-            navigate("/onboarding");
-          }
-        } catch (err) {
-          console.error("Error en sincronización:", err);
-        } finally {
-          isSyncing.current = false;
-        }
-      }
-    };
-
-    syncData();
-    fetchStats();
-  }, [isAuthenticated, user?.id, profile?.expressionNumber, fetchProfile, createProfile, navigate, fetchStats]);
-
-  if (!profile || !user) return null;
-
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
+  if (!user || !profile) {
+    return <div className="min-h-screen bg-background flex items-center justify-center font-serif text-2xl animate-pulse">Sintonizando tu frecuencia...</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <span className="font-serif text-lg text-foreground">Arithmos</span>
+    <div className="min-h-screen bg-background px-6 py-12">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+              <span className="text-xl font-serif font-bold text-primary">{profile.name[0]}</span>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground font-sans lowercase">bienvenido, {profile.name}</p>
+              <h2 className="text-2xl font-serif font-semibold text-gradient-silver">Tu Blueprint Energético</h2>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            {stats && <XPBar {...stats} compact />}
-            <span className="text-sm text-muted-foreground font-sans hidden sm:block">{user.name}</span>
+            <XPBar xp={stats.xp} level={stats.level} nextLevelXp={stats.nextLevelXp} />
+            <div className="h-10 w-[1px] bg-border mx-2 hidden md:block" />
             <Button
               variant="ghost"
               size="icon"
               onClick={() => navigate("/settings")}
-              className="text-muted-foreground hover:text-foreground"
-              title="Configuración"
+              className="rounded-full hover:bg-secondary"
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-5 w-5 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
-              <LogOut className="h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => logout()}
+              className="rounded-full hover:bg-rose-500/10 text-rose-500"
+            >
+              <LogOut className="h-5 w-5" />
             </Button>
           </div>
         </div>
-      </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Daily Pulse en vivo */}
-            <DailyPulseCard birthDate={profile.birthDate} />
+            {/* Daily Pulse y Recomendaciones */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <DailyPulseCard birthDate={profile.birthDate} />
+              <TacticalRecommendations birthDate={profile.birthDate} lifePathNumber={profile.lifePathNumber} />
+            </div>
 
             {/* Life Path Card */}
             <motion.div
@@ -107,10 +94,23 @@ const Dashboard = () => {
                 <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <span className="text-4xl font-serif font-bold text-primary">{profile.lifePathNumber}</span>
                 </div>
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-serif font-semibold text-foreground mb-2">
-                    {profile.archetype}
-                  </h1>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h1 className="text-2xl md:text-3xl font-serif font-semibold text-gradient-silver">
+                      {profile.archetype}
+                    </h1>
+                    {profile.role === 'admin' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate("/onboarding")}
+                        className="text-muted-foreground hover:text-primary h-8 gap-2 font-sans text-xs"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Recalcular
+                      </Button>
+                    )}
+                  </div>
                   <p className="text-muted-foreground font-sans text-sm leading-relaxed">
                     {profile.description}
                   </p>
@@ -126,75 +126,68 @@ const Dashboard = () => {
               className="grid grid-cols-2 md:grid-cols-4 gap-4"
             >
               {[
-                { label: "Expresión", value: profile.expressionNumber },
-                { label: "Deseo del Alma", value: profile.soulUrgeNumber },
-                { label: "Personalidad", value: profile.personalityNumber },
-                { label: "Madurez", value: profile.maturityNumber }
+                { label: "Expresión", value: profile.expressionNumber, icon: Target },
+                { label: "Deseo Alma", value: profile.soulUrgeNumber, icon: Sparkles },
+                { label: "Personalidad", value: profile.personalityNumber, icon: BookOpen },
+                { label: "Madurez", value: profile.maturityNumber, icon: Activity },
               ].map((item, idx) => (
-                <div key={idx} className="glass rounded-xl p-4 flex flex-col items-center justify-center text-center">
-                  <span className="text-xs uppercase tracking-widest text-muted-foreground mb-2 font-sans">{item.label}</span>
-                  <span className="text-2xl font-serif font-bold text-foreground">{item.value || "-"}</span>
+                <div key={idx} className="glass rounded-xl p-4 text-center border-border hover:border-primary/30 transition-colors">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-sans">{item.label}</p>
+                  <p className="text-2xl font-serif font-bold text-foreground">{item.value || "?"}</p>
                 </div>
               ))}
             </motion.div>
 
-            {/* Narrativa IA (Fase 2) */}
             <NarrativeSection
               narrative={profile.narrative}
               powerStrategy={profile.powerStrategy}
               shadowWork={profile.shadowWork}
-              archetypeName={profile.archetype}
             />
 
-            {/* Audio IA (Fase 4) */}
-            {profile.audioUrl && (
-              <AudioPlayer url={profile.audioUrl} title={`Meditación: ${profile.archetype}`} />
-            )}
-
-            {/* Ciclos Personales (Fase 2) */}
-            <CycleChart birthDate={profile.birthDate} />
+            <div className="grid md:grid-cols-2 gap-6">
+              <CycleChart birthDate={profile.birthDate} />
+              <AudioPlayer audioUrl={profile.audioUrl} />
+            </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-4">
-            {/* Misiones del Día */}
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              onClick={() => navigate("/missions")}
-              className="w-full glass rounded-xl p-5 border-border text-left group hover:border-primary/30 transition-all"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Target className="h-5 w-5 text-primary" />
-                <h3 className="font-serif text-foreground">Misiones del Día</h3>
-              </div>
-              <p className="text-sm text-muted-foreground font-sans">
-                Desafíos calibrados a tu número personal de hoy. Completa misiones y acumula XP.
-              </p>
-              <span className="text-xs text-primary font-sans mt-3 block group-hover:underline">
-                Ir a Misiones →
-              </span>
-            </motion.button>
+            {/* Historial Evolutivo */}
+            <HistorySection userId={user.id} />
 
-            {/* Diario de Sombras */}
+            {/* Acceso a Sincronicidad */}
             <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              onClick={() => navigate("/journal")}
-              className="w-full glass rounded-xl p-5 border-border text-left group hover:border-amber-500/30 transition-all"
+              onClick={() => navigate("/synchronicity")}
+              className="w-full glass rounded-xl p-6 border-border bg-primary/5 text-left group hover:border-primary/40 transition-all shadow-lg shadow-primary/5"
             >
               <div className="flex items-center gap-3 mb-2">
-                <BookOpen className="h-5 w-5 text-amber-400" />
-                <h3 className="font-serif text-foreground">Diario de Sombras</h3>
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h3 className="font-serif text-foreground font-semibold">Consultar Sincronicidad</h3>
               </div>
-              <p className="text-sm text-muted-foreground font-sans">
-                El espacio privado donde la oscuridad se convierte en claridad estratégica.
+              <p className="text-xs text-muted-foreground font-sans leading-relaxed">
+                ¿Has visto un número repetido o una coincidencia hoy? Descifra el mensaje del universo.
               </p>
-              <span className="text-xs text-amber-400 font-sans mt-3 block group-hover:underline">
-                Ir al Diario →
+              <span className="text-[10px] text-primary font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">
+                Iniciar Consulta →
               </span>
+            </motion.button>
+
+            {/* Misiones del Día */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              onClick={() => navigate("/missions")}
+              className="w-full glass rounded-xl p-5 border-border bg-secondary/50 text-left group hover:border-primary/30 transition-all"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Target className="h-5 w-5 text-primary" />
+                <h3 className="font-serif text-foreground font-semibold">Misiones Diarias</h3>
+              </div>
+              <p className="text-xs text-muted-foreground font-sans leading-relaxed">Completa tareas para ganar XP y elevar tu frecuencia personal.</p>
             </motion.button>
 
             {/* Tribunal de Poder */}
@@ -202,45 +195,41 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              onClick={() => navigate("/ranking")}
-              className="w-full glass rounded-xl p-5 border-border text-left group hover:border-amber-400/30 transition-all"
+              className="w-full glass rounded-xl p-5 border-border bg-amber-500/5 text-left group hover:border-amber-500/40 transition-all opacity-60 cursor-not-allowed"
             >
               <div className="flex items-center gap-3 mb-2">
-                <Trophy className="h-5 w-5 text-amber-400" />
-                <h3 className="font-serif text-foreground">Tribunal de Poder</h3>
+                <Trophy className="h-5 w-5 text-amber-500" />
+                <h3 className="font-serif text-foreground font-semibold">Tribunal de Poder</h3>
               </div>
-              <p className="text-sm text-muted-foreground font-sans">
-                Los estrategas con mayor reconocimiento por su transformación y práctica.
-              </p>
-              <span className="text-xs text-amber-400 font-sans mt-3 block group-hover:underline">
-                Ver Ranking →
-              </span>
+              <p className="text-xs text-muted-foreground font-sans leading-relaxed">Próximamente: Comparte tu Blueprint y compite en el ranking global.</p>
             </motion.button>
 
-            {/* Discord Community */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="glass rounded-xl p-5 border-primary/20 bg-primary/5"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <MessageCircle className="h-4 w-4 text-primary" />
-                <h3 className="font-serif text-foreground text-sm font-semibold">Comunidad Discord</h3>
-              </div>
-              <p className="text-xs text-muted-foreground mb-4 font-sans leading-relaxed">
-                Comparte tus misiones y celebra niveles en la comunidad oficial de Arithmos.
-              </p>
-              <Button
-                variant="outline"
-                className="w-full text-xs font-sans group border-primary/20 hover:bg-primary/10"
-                size="sm"
-                onClick={() => navigate("/missions")}
+            {/* Portal del Arquitecto (Solo Admin) */}
+            {profile.role === 'admin' && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                onClick={() => navigate("/admin")}
+                className="w-full glass rounded-xl p-5 border-primary/30 bg-primary/10 text-left group hover:border-primary/60 transition-all shadow-lg shadow-primary/10 mt-4"
               >
-                Configurar Webhook
-                <ExternalLink className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                <div className="flex items-center gap-3 mb-1">
+                  <Shield className="h-5 w-5 text-primary" />
+                  <h3 className="font-serif text-foreground font-semibold">Portal del Arquitecto</h3>
+                </div>
+                <p className="text-[10px] text-primary font-sans uppercase tracking-[0.2em] font-bold">Diagnóstico y Control Central</p>
+              </motion.button>
+            )}
+
+            <div className="p-6 rounded-xl bg-gradient-to-br from-bronze/10 to-transparent border border-bronze/20 mt-6">
+              <h3 className="text-sm font-serif font-semibold text-bronze mb-2">Comunidad Consciente</h3>
+              <p className="text-xs text-muted-foreground font-sans leading-relaxed mb-4">
+                Únete a nuestro Discord para compartir hallazgos con otros buscadores.
+              </p>
+              <Button size="sm" variant="outline" className="w-full text-xs font-sans gap-2 h-8">
+                <MessageCircle className="h-3 w-3" />
+                Unirse a Discord
               </Button>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
@@ -249,4 +238,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

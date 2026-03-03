@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { CalendarIcon, ArrowLeft } from "lucide-react";
+import { CalendarIcon, ArrowLeft, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +14,33 @@ import { useProfile } from "@/hooks/useProfile";
 
 const Onboarding = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const { createProfile } = useProfile();
+  const { user, login } = useAuth();
+  const { createProfile, fetchProfile } = useProfile();
   const [name, setName] = useState("");
   const [date, setDate] = useState<Date>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUpdateMode, setIsUpdateMode] = useState(false);
+
+  // Pre-cargar datos si existen
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (user?.id) {
+        const existingProfile = await fetchProfile(user.id);
+        if (existingProfile) {
+          setName(existingProfile.name);
+          if (existingProfile.birthDate) {
+            try {
+              setDate(parseISO(existingProfile.birthDate));
+            } catch (e) {
+              console.error("Error parsing date:", e);
+            }
+          }
+          setIsUpdateMode(true);
+        }
+      }
+    };
+    loadProfile();
+  }, [user, fetchProfile]);
 
   const canSubmit = name.trim().length > 1 && date;
 
@@ -28,8 +50,8 @@ const Onboarding = () => {
 
     try {
       const dateStr = format(date, "yyyy-MM-dd");
-      // El login ahora es asíncrono y asegura un ID de Supabase (vía Auth Anónimo si es necesario)
-      const loggedInUser = await login({ id: crypto.randomUUID(), name: name.trim() });
+      // El login asegura un ID de Supabase (vía Auth Anónimo si es necesario)
+      const loggedInUser = await login({ id: user?.id || crypto.randomUUID(), name: name.trim() });
       await createProfile(name.trim(), dateStr, loggedInUser.id);
       navigate("/dashboard");
     } catch (error) {
@@ -47,21 +69,23 @@ const Onboarding = () => {
         className="w-full max-w-md"
       >
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate(user ? "/dashboard" : "/")}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-12 text-sm font-sans"
         >
           <ArrowLeft className="h-4 w-4" />
-          Volver
+          {user ? "Volver al Dashboard" : "Volver"}
         </button>
 
         <p className="text-sm uppercase tracking-[0.3em] text-bronze mb-4 font-sans">
           Tu Blueprint Personal
         </p>
         <h1 className="text-3xl md:text-4xl font-serif font-semibold text-gradient-silver mb-3">
-          Revela tu arquetipo
+          {isUpdateMode ? "Actualiza tu Blueprint" : "Revela tu arquetipo"}
         </h1>
         <p className="text-muted-foreground mb-12 font-sans text-sm">
-          Solo necesitamos dos datos para calcular tu Camino de Vida con precisión determinista.
+          {isUpdateMode
+            ? "Ajusta tus parámetros para recalcular tu frecuencia estratégica con precisión."
+            : "Solo necesitamos dos datos para calcular tu Camino de Vida con precisión determinista."}
         </p>
 
         <div className="space-y-6">
@@ -118,10 +142,13 @@ const Onboarding = () => {
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
               >
-                Calculando...
+                Recalculando...
               </motion.span>
             ) : (
-              "Revelar mi Arquetipo"
+              <span className="flex items-center gap-2">
+                {isUpdateMode && <RotateCcw className="h-4 w-4" />}
+                {isUpdateMode ? "Actualizar mi Blueprint" : "Revelar mi Arquetipo"}
+              </span>
             )}
           </Button>
         </div>

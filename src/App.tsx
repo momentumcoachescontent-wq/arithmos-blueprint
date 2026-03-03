@@ -10,6 +10,8 @@ import Missions from "./pages/Missions";
 import Journal from "./pages/Journal";
 import Ranking from "./pages/Ranking";
 import Settings from "./pages/Settings";
+import Synchronicity from "./pages/Synchronicity";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
           <Route path="/journal" element={<Journal />} />
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/synchronicity" element={<Synchronicity />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
