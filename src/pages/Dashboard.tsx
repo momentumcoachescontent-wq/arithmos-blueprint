@@ -14,6 +14,8 @@ import { HistorySection } from "@/components/HistorySection";
 import { XPBar } from "@/components/XPBar";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { BlueprintIndicator } from "@/components/BlueprintIndicator";
+import { DailyProtectionShield } from "@/components/DailyProtectionShield";
+import { GrabovoiMantraWidget } from "@/components/GrabovoiMantraWidget";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -49,15 +51,12 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background px-6 py-12">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-              <span className="text-xl font-serif font-bold text-primary">{profile.name[0]}</span>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground font-sans lowercase">bienvenido, {profile.name}</p>
-              <h2 className="text-2xl font-serif font-semibold text-gradient-silver">Tu Blueprint Energético</h2>
-            </div>
+            <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground tracking-tight">
+              Tu <span className="text-primary italic">Blueprint</span> Estratégico
+            </h1>
+            {profile && <DailyProtectionShield birthDate={profile.birthDate} />}
           </div>
           <div className="flex items-center gap-3">
             <XPBar xp={stats.xp} level={stats.level} nextLevelXp={stats.nextLevelXp} progressPercent={stats.progressPercent} />
@@ -157,8 +156,13 @@ const Dashboard = () => {
 
             <div className="grid md:grid-cols-2 gap-6">
               <CycleChart birthDate={profile.birthDate} />
+              <GrabovoiMantraWidget birthDate={profile.birthDate} />
+            </div>
+            {/*
+            <div className="mt-8">
               <AudioPlayer url={profile.audioUrl || ""} />
             </div>
+            */}
           </div>
 
           {/* Sidebar */}
