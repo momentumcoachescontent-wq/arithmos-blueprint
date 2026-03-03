@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -28,8 +28,14 @@ const Dashboard = () => {
     }
 
     if (!initialized.current) {
-      fetchProfile(user.id);
-      fetchStats(user.id);
+      const syncData = async () => {
+        const p = await fetchProfile(user.id);
+        if (!p) {
+          navigate("/onboarding");
+        }
+        await fetchStats();
+      };
+      syncData();
       initialized.current = true;
     }
   }, [user, navigate, fetchProfile, fetchStats]);
@@ -53,7 +59,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <XPBar xp={stats.xp} level={stats.level} nextLevelXp={stats.nextLevelXp} />
+            <XPBar xp={stats.xp} level={stats.level} nextLevelXp={stats.nextLevelXp} progressPercent={stats.progressPercent} />
             <div className="h-10 w-[1px] bg-border mx-2 hidden md:block" />
             <Button
               variant="ghost"
@@ -142,11 +148,12 @@ const Dashboard = () => {
               narrative={profile.narrative}
               powerStrategy={profile.powerStrategy}
               shadowWork={profile.shadowWork}
+              archetypeName={profile.archetype}
             />
 
             <div className="grid md:grid-cols-2 gap-6">
               <CycleChart birthDate={profile.birthDate} />
-              <AudioPlayer audioUrl={profile.audioUrl} />
+              <AudioPlayer url={profile.audioUrl || ""} />
             </div>
           </div>
 
