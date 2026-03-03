@@ -1,30 +1,21 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, ExternalLink } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useStats } from "@/hooks/useStats";
 import { NarrativeSection } from "@/components/NarrativeSection";
 import { CycleChart } from "@/components/CycleChart";
 import { DailyPulseCard } from "@/components/DailyPulseCard";
-
-const MOCK_READINGS = [
-  { date: "2026-03-01", type: "Daily Pulse", summary: "Día de número 7: Ideal para análisis profundo y planificación estratégica silenciosa." },
-  { date: "2026-02-28", type: "Ciclo Personal", summary: "Entrando en mes personal 3: Momento de comunicar tu visión y expandir tu red." },
-  { date: "2026-02-25", type: "Alerta de Sincronicidad", summary: "Patrón 11:11 detectado en tus métricas. Ventana de manifestación activa." },
-];
-
-const MOCK_SYNC_LOGS = [
-  { timestamp: "2026-03-01 09:14", event: "Número maestro 22 en tu tránsito diario" },
-  { timestamp: "2026-02-27 15:30", event: "Alineación triple entre día personal, mes y año" },
-  { timestamp: "2026-02-24 11:11", event: "Sincronicidad numérica: patrón 1-1-1 activo" },
-];
+import { XPBar } from "@/components/XPBar";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
   const { profile, fetchProfile, createProfile } = useProfile();
+  const { stats, fetchStats } = useStats(user?.id);
   const isSyncing = useRef(false);
 
   useEffect(() => {
@@ -59,7 +50,8 @@ const Dashboard = () => {
     };
 
     syncData();
-  }, [isAuthenticated, user?.id, profile?.expressionNumber, fetchProfile, createProfile, navigate]);
+    fetchStats();
+  }, [isAuthenticated, user?.id, profile?.expressionNumber, fetchProfile, createProfile, navigate, fetchStats]);
 
   if (!profile || !user) return null;
 
@@ -78,7 +70,8 @@ const Dashboard = () => {
             <span className="font-serif text-lg text-foreground">Arithmos</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground font-sans">{user.name}</span>
+            {stats && <XPBar {...stats} compact />}
+            <span className="text-sm text-muted-foreground font-sans hidden sm:block">{user.name}</span>
             <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
               <LogOut className="h-4 w-4" />
             </Button>
@@ -148,45 +141,85 @@ const Dashboard = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-8">
+          <div className="space-y-4">
+            {/* Misiones del Día */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              onClick={() => navigate("/missions")}
+              className="w-full glass rounded-xl p-5 border-border text-left group hover:border-primary/30 transition-all"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Target className="h-5 w-5 text-primary" />
+                <h3 className="font-serif text-foreground">Misiones del Día</h3>
+              </div>
+              <p className="text-sm text-muted-foreground font-sans">
+                Desafíos calibrados a tu número personal de hoy. Completa misiones y acumula XP.
+              </p>
+              <span className="text-xs text-primary font-sans mt-3 block group-hover:underline">
+                Ir a Misiones →
+              </span>
+            </motion.button>
+
+            {/* Diario de Sombras */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              onClick={() => navigate("/journal")}
+              className="w-full glass rounded-xl p-5 border-border text-left group hover:border-amber-500/30 transition-all"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <BookOpen className="h-5 w-5 text-amber-400" />
+                <h3 className="font-serif text-foreground">Diario de Sombras</h3>
+              </div>
+              <p className="text-sm text-muted-foreground font-sans">
+                El espacio privado donde la oscuridad se convierte en claridad estratégica.
+              </p>
+              <span className="text-xs text-amber-400 font-sans mt-3 block group-hover:underline">
+                Ir al Diario →
+              </span>
+            </motion.button>
+
+            {/* Tribunal de Poder */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              onClick={() => navigate("/ranking")}
+              className="w-full glass rounded-xl p-5 border-border text-left group hover:border-amber-400/30 transition-all"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Trophy className="h-5 w-5 text-amber-400" />
+                <h3 className="font-serif text-foreground">Tribunal de Poder</h3>
+              </div>
+              <p className="text-sm text-muted-foreground font-sans">
+                Los estrategas con mayor reconocimiento por su transformación y práctica.
+              </p>
+              <span className="text-xs text-amber-400 font-sans mt-3 block group-hover:underline">
+                Ver Ranking →
+              </span>
+            </motion.button>
+
             {/* Discord CTA */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="glass rounded-xl p-6 border-primary/20"
+              transition={{ delay: 0.4 }}
+              className="glass rounded-xl p-5 border-primary/20"
             >
-              <div className="flex items-center gap-2 mb-3">
-                <MessageCircle className="h-5 w-5 text-primary" />
-                <h3 className="font-serif text-foreground">Conecta Discord</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <MessageCircle className="h-4 w-4 text-primary" />
+                <h3 className="font-serif text-foreground text-sm">Conecta Discord</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-5 font-sans">
-                Activa tu conexión para recibir el Daily Pulse y soporte estratégico on-demand directamente en tu servidor.
+              <p className="text-xs text-muted-foreground mb-4 font-sans">
+                Recibe el Daily Pulse directo en tu servidor.
               </p>
               <Button className="w-full glow-indigo group" size="sm">
-                Activar conexión
+                Activar
                 <ExternalLink className="ml-2 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Button>
-            </motion.div>
-
-            {/* Sync Logs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="h-4 w-4 text-bronze" />
-                <h3 className="font-serif text-foreground">Logs de Sincronicidad</h3>
-              </div>
-              <div className="space-y-3">
-                {MOCK_SYNC_LOGS.map((log, i) => (
-                  <div key={i} className="glass rounded-lg p-4">
-                    <p className="text-xs text-muted-foreground mb-1 font-sans">{log.timestamp}</p>
-                    <p className="text-sm text-secondary-foreground font-sans">{log.event}</p>
-                  </div>
-                ))}
-              </div>
             </motion.div>
           </div>
         </div>
@@ -196,3 +229,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

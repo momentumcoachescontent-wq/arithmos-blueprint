@@ -128,12 +128,132 @@ export type Database = {
         }
         Relationships: []
       }
+      user_stats: {
+        Row: {
+          user_id: string
+          xp: number
+          level: number
+          show_in_ranking: boolean
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          xp?: number
+          level?: number
+          show_in_ranking?: boolean
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          xp?: number
+          level?: number
+          show_in_ranking?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      missions: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          type: string
+          xp_reward: number
+          personal_number: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          type?: string
+          xp_reward?: number
+          personal_number?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          type?: string
+          xp_reward?: number
+          personal_number?: number | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      user_missions: {
+        Row: {
+          id: string
+          user_id: string
+          mission_id: string
+          completed_at: string
+          personal_number_at_completion: number | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          mission_id: string
+          completed_at?: string
+          personal_number_at_completion?: number | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          mission_id?: string
+          completed_at?: string
+          personal_number_at_completion?: number | null
+        }
+        Relationships: []
+      }
+      journal_entries: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          content: string
+          ai_reflection: string | null
+          shadow_pattern: string | null
+          personal_number_at_entry: number | null
+          type: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          content: string
+          ai_reflection?: string | null
+          shadow_pattern?: string | null
+          personal_number_at_entry?: number | null
+          type?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          content?: string
+          ai_reflection?: string | null
+          shadow_pattern?: string | null
+          personal_number_at_entry?: number | null
+          type?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      award_xp: {
+        Args: { p_user_id: string; p_xp: number }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
