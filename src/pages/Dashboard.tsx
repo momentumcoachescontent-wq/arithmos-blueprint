@@ -13,6 +13,7 @@ import { TacticalRecommendations } from "@/components/TacticalRecommendations";
 import { HistorySection } from "@/components/HistorySection";
 import { XPBar } from "@/components/XPBar";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import { BlueprintIndicator } from "@/components/BlueprintIndicator";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -145,10 +146,12 @@ const Dashboard = () => {
                 { label: "Personalidad", value: profile.personalityNumber, icon: BookOpen },
                 { label: "Madurez", value: profile.maturityNumber, icon: Activity },
               ].map((item, idx) => (
-                <div key={idx} className="glass rounded-xl p-4 text-center border-border hover:border-primary/30 transition-colors">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 font-sans">{item.label}</p>
-                  <p className="text-2xl font-serif font-bold text-foreground">{item.value || "?"}</p>
-                </div>
+                <BlueprintIndicator
+                  key={idx}
+                  label={item.label}
+                  value={item.value}
+                  icon={item.icon}
+                />
               ))}
             </motion.div>
 
