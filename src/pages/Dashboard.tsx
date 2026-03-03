@@ -105,7 +105,7 @@ const Dashboard = () => {
                     <h1 className="text-2xl md:text-3xl font-serif font-semibold text-gradient-silver">
                       {profile.archetype}
                     </h1>
-                    {profile.role === 'admin' && (
+                    <div className="flex items-center gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -115,7 +115,7 @@ const Dashboard = () => {
                         <RotateCcw className="h-3 w-3" />
                         Recalcular
                       </Button>
-                    )}
+                    </div>
                   </div>
                   <p className="text-muted-foreground font-sans text-sm leading-relaxed">
                     {profile.description}

@@ -116,6 +116,7 @@ export function useProfile() {
       };
       setProfile(fetchedProfile);
       localStorage.setItem("arithmos_profile", JSON.stringify(fetchedProfile));
+      // Forzar actualización inmediata devolviendo el objeto
       return fetchedProfile;
     }
     return null;
@@ -167,9 +168,9 @@ export function useProfile() {
       console.warn("Fallo en motor IA (n8n), se usarán solo datos matemáticos locales:", error);
     }
 
-    // 3. Persistencia en LocalStorage y Supabase
+    // 3. Persistencia en LocalStorage y actualización de ESTADO reactivo
     localStorage.setItem("arithmos_profile", JSON.stringify(newProfile));
-    setProfile(newProfile);
+    setProfile({ ...newProfile }); // Clonar para forzar re-render
 
     if (userId) {
       const { data: { session } } = await supabase.auth.getSession();
