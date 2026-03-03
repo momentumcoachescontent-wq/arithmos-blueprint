@@ -102,14 +102,24 @@ export function useAuth() {
 
   /**
    * Login anónimo (usado para la consulta inicial sin registro)
+   * Siempre verifica si hay sesión activa; si no, crea una anónima.
    */
   const login = useCallback(async (userData: User) => {
+    // Verificar si ya hay una sesión activa en Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+
     let userId = userData.id;
-    if (!userId.includes("-")) {
+
+    if (!session) {
+      // No hay sesión → crear una anónima para que las peticiones lleven JWT
       const { data } = await supabase.auth.signInAnonymously();
       if (data.user) userId = data.user.id;
+    } else {
+      // Ya hay sesión → usar el ID existente
+      userId = session.user.id;
     }
-    const finalUser = { ...userData, id: userId, isAnonymous: true };
+
+    const finalUser = { ...userData, id: userId, isAnonymous: !session?.user?.email };
     localStorage.setItem("arithmos_user", JSON.stringify(finalUser));
     setUser(finalUser);
     return finalUser;
