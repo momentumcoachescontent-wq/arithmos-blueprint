@@ -17,7 +17,7 @@ import { AudioPlayer } from "@/components/AudioPlayer";
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { profile, fetchProfile } = useProfile();
+  const { profile, fetchProfile, syncBlueprintIA } = useProfile();
   const { stats, fetchStats } = useStats(user?.id);
   const initialized = useRef(false);
 
@@ -129,6 +129,7 @@ const Dashboard = () => {
               powerStrategy={profile.powerStrategy}
               shadowWork={profile.shadowWork}
               archetypeName={profile.archetype}
+              onSync={syncBlueprintIA}
             />
 
             {/* Extended Blueprint */}

@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Zap, Eye } from "lucide-react";
+import { Sparkles, Zap, Eye, RotateCcw } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface NarrativeSectionProps {
     narrative?: string;
     powerStrategy?: string;
     shadowWork?: string;
     archetypeName: string;
+    onSync?: () => Promise<any>;
 }
 
 export function NarrativeSection({
@@ -13,8 +16,20 @@ export function NarrativeSection({
     powerStrategy,
     shadowWork,
     archetypeName,
+    onSync,
 }: NarrativeSectionProps) {
     const hasData = narrative || powerStrategy || shadowWork;
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    const handleSync = async () => {
+        if (!onSync) return;
+        setIsSyncing(true);
+        try {
+            await onSync();
+        } finally {
+            setIsSyncing(false);
+        }
+    };
 
     return (
         <motion.div
@@ -29,11 +44,20 @@ export function NarrativeSection({
 
             {!hasData && (
                 <div className="bg-card/30 border border-dashed border-border rounded-xl p-8 text-center">
-                    <Sparkles className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-                    <p className="text-sm font-sans text-muted-foreground italic">
+                    <Sparkles className={`h-8 w-8 mx-auto mb-3 ${isSyncing ? 'text-primary animate-pulse' : 'text-muted-foreground/30'}`} />
+                    <p className="text-sm font-sans text-muted-foreground italic mb-4">
                         Tu análisis narrativo profundo está siendo procesado por el Coach Arithmos.
-                        Presiona "Recalcular" o vuelve en unos instantes para sintonizar tu frecuencia.
                     </p>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleSync}
+                        disabled={isSyncing}
+                        className="font-sans text-xs gap-2"
+                    >
+                        {isSyncing ? 'Sintonizando...' : 'Resintonizar ahora'}
+                        {!isSyncing && <RotateCcw className="h-3 w-3" />}
+                    </Button>
                 </div>
             )}
 

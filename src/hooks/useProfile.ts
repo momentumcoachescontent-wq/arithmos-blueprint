@@ -18,6 +18,7 @@ export interface Profile {
   audioUrl?: string;
   role?: "freemium" | "premium" | "admin";
   createdAt: string;
+  id: string; // ID de Supabase
 }
 
 const ARCHETYPES: Record<number, { name: string; description: string }> = {
@@ -116,7 +117,8 @@ export function useProfile() {
         shadowWork: data.shadow_work || undefined,
         audioUrl: data.audio_url || undefined,
         role: (data.role as "freemium" | "premium" | "admin") || "freemium",
-        createdAt: data.created_at
+        createdAt: data.created_at,
+        id: data.id
       };
 
       // --- SMART REPAIR ---
@@ -166,6 +168,7 @@ export function useProfile() {
       archetype: arch.name,
       description: arch.description,
       createdAt: new Date().toISOString(),
+      id: profile?.id || "",
     };
 
     try {
@@ -215,7 +218,7 @@ export function useProfile() {
             power_strategy: newProfile.powerStrategy || null,
             shadow_work: newProfile.shadowWork || null,
             audio_url: newProfile.audioUrl || null,
-          });
+          }, { onConflict: 'user_id' }); // Usar user_id como target de conflicto si id es desconocido
 
         if (!upsertError) {
           await supabase
@@ -238,6 +241,48 @@ export function useProfile() {
     return newProfile;
   }, []);
 
-  return { profile, createProfile, fetchProfile };
+  const syncBlueprintIA = useCallback(async () => {
+    if (!profile) return;
+
+    try {
+      const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook/arithmos-calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ full_name: profile.name, birth_date: profile.birthDate })
+      });
+
+      if (response.ok) {
+        let data = await response.json();
+        if (Array.isArray(data)) data = data[0];
+
+        if (data && data.success && data.interpretation) {
+          const updatedProfile = {
+            ...profile,
+            narrative: data.interpretation.narrative,
+            powerStrategy: data.interpretation.power_strategy,
+            shadowWork: data.interpretation.shadow_work,
+            audioUrl: data.interpretation.audio_url,
+          };
+
+          setProfile({ ...updatedProfile });
+          localStorage.setItem("arithmos_profile", JSON.stringify(updatedProfile));
+
+          await supabase.from('profiles').update({
+            narrative: updatedProfile.narrative,
+            power_strategy: updatedProfile.powerStrategy,
+            shadow_work: updatedProfile.shadowWork,
+            audio_url: updatedProfile.audioUrl,
+          }).eq('id', profile.id);
+
+          return updatedProfile;
+        }
+      }
+    } catch (error) {
+      console.error("Error sincronizando IA:", error);
+    }
+    return null;
+  }, [profile]);
+
+  return { profile, createProfile, fetchProfile, syncBlueprintIA };
 }
 
