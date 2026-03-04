@@ -89,24 +89,38 @@ export function UpgradeModal({ isOpen, onClose, userId, featureRequested }: Upgr
                             <p className="text-sm text-rose-400 text-center mb-4 font-sans">{error}</p>
                         )}
 
-                        {/* CTA Button */}
-                        <Button
-                            onClick={() => redirectToCheckout()}
-                            disabled={isLoading}
-                            className="w-full h-12 text-base font-sans font-bold gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Preparando tu pago...
-                                </>
-                            ) : (
-                                <>
-                                    <Zap className="h-4 w-4" />
-                                    Activar Premium Ahora
-                                </>
-                            )}
-                        </Button>
+                        {/* CTA Buttons */}
+                        <div className="space-y-3">
+                            <Button
+                                onClick={() => redirectToCheckout()}
+                                disabled={isLoading}
+                                className="w-full h-12 text-base font-sans font-bold gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Preparando pago seguro...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Zap className="h-4 w-4" />
+                                        Pagar con Tarjeta (Stripe)
+                                    </>
+                                )}
+                            </Button>
+
+                            <Button
+                                onClick={() => {
+                                    // Placeholder para integración futura de MercadoPago
+                                    alert("Integración de MercadoPago en proceso.");
+                                }}
+                                disabled={isLoading}
+                                variant="outline"
+                                className="w-full h-12 text-base font-sans font-bold gap-2 bg-[#009ee3]/5 text-[#009ee3] border-[#009ee3]/30 hover:bg-[#009ee3]/10 hover:text-[#009ee3]"
+                            >
+                                Pagar con MercadoPago
+                            </Button>
+                        </div>
 
                         <p className="text-xs text-center text-muted-foreground mt-4 font-sans">
                             Pago seguro via Stripe · Sin contratos · Sin sorpresas

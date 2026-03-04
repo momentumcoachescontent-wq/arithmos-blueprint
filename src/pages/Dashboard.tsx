@@ -1,11 +1,13 @@
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useStats } from "@/hooks/useStats";
+import { ProFeatureGate } from "@/components/ProFeatureGate";
 import { NarrativeSection } from "@/components/NarrativeSection";
 import { CycleChart } from "@/components/CycleChart";
 import { DailyPulseCard } from "@/components/DailyPulseCard";
@@ -19,10 +21,28 @@ import { GrabovoiMantraWidget } from "@/components/GrabovoiMantraWidget";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, logout } = useAuth();
   const { profile, fetchProfile, syncBlueprintIA } = useProfile();
   const { stats, fetchStats } = useStats(user?.id);
   const initialized = useRef(false);
+
+  useEffect(() => {
+    const paymentStatus = searchParams.get("payment");
+    if (paymentStatus === "success") {
+      toast.success("¡Pago exitoso!", {
+        description: "Tu plan Premium se ha activado. ¡Bienvenido a un nuevo nivel!",
+      });
+      searchParams.delete("payment");
+      setSearchParams(searchParams, { replace: true });
+    } else if (paymentStatus === "cancelled") {
+      toast.error("Pago cancelado", {
+        description: "El proceso de pago no fue completado.",
+      });
+      searchParams.delete("payment");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!user) {
@@ -226,6 +246,43 @@ const Dashboard = () => {
               </div>
               <p className="text-xs text-muted-foreground font-sans leading-relaxed">Próximamente: Comparte tu Blueprint y compite en el ranking global.</p>
             </motion.button>
+
+            {/* Teaser Pro Features */}
+            <ProFeatureGate
+              userRole={profile.role}
+              userId={user.id}
+              featureName="Radar de Equipo"
+            >
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full glass rounded-xl p-5 border-border bg-indigo-500/5 text-left transition-all"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Users className="h-5 w-5 text-indigo-400" />
+                  <h3 className="font-serif text-foreground font-semibold">Radar de Equipo</h3>
+                </div>
+                <p className="text-xs text-muted-foreground font-sans leading-relaxed">Analiza la compatibilidad numérica de tu equipo. Identifica fortalezas y tensiones.</p>
+              </motion.button>
+            </ProFeatureGate>
+
+            <ProFeatureGate
+              userRole={profile.role}
+              userId={user.id}
+              featureName="Reporte Deep Dive Anual"
+            >
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full glass rounded-xl p-5 border-border bg-emerald-500/5 text-left transition-all"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <FileText className="h-5 w-5 text-emerald-400" />
+                  <h3 className="font-serif text-foreground font-semibold">Reporte Deep Dive Anual</h3>
+                </div>
+                <p className="text-xs text-muted-foreground font-sans leading-relaxed">Tu hoja de ruta estratégica para los próximos 12 meses, generada por IA en 15+ páginas.</p>
+              </motion.button>
+            </ProFeatureGate>
 
             {/* Portal del Arquitecto (Solo Admin) */}
             {profile.role === 'admin' && (
