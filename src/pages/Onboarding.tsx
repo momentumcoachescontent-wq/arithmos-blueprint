@@ -18,6 +18,7 @@ const Onboarding = () => {
   const { createProfile, fetchProfile } = useProfile();
   const [name, setName] = useState("");
   const [date, setDate] = useState<Date>();
+  const [phone, setPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUpdateMode, setIsUpdateMode] = useState(false);
 
@@ -28,6 +29,7 @@ const Onboarding = () => {
         const existingProfile = await fetchProfile(user.id);
         if (existingProfile) {
           setName(existingProfile.name);
+          setPhone(existingProfile.phone || "");
           if (existingProfile.birthDate) {
             try {
               setDate(parseISO(existingProfile.birthDate));
@@ -52,7 +54,7 @@ const Onboarding = () => {
       const dateStr = format(date, "yyyy-MM-dd");
       // El login asegura un ID de Supabase (vía Auth Anónimo si es necesario)
       const loggedInUser = await login({ id: user?.id || crypto.randomUUID(), name: name.trim() });
-      await createProfile(name.trim(), dateStr, loggedInUser.id);
+      await createProfile(name.trim(), dateStr, loggedInUser.id, phone.trim());
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
@@ -97,6 +99,19 @@ const Onboarding = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nombre completo"
+              className="bg-secondary border-border text-foreground placeholder:text-muted-foreground h-12 font-sans"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2 font-sans">
+              Teléfono (WhatsApp)
+            </label>
+            <Input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+52 1 234..."
               className="bg-secondary border-border text-foreground placeholder:text-muted-foreground h-12 font-sans"
             />
           </div>

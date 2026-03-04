@@ -12,11 +12,15 @@ import {
     AlertCircle,
     Eye,
     EyeOff,
-    ExternalLink,
-    CreditCard,
-    Zap,
+    CalendarIcon,
+    Phone,
     Loader2,
 } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { es } from "date-fns/locale";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,10 +69,28 @@ const Feedback = ({ message, type }: { message: string; type: "ok" | "err" }) =>
 const Settings = () => {
     const navigate = useNavigate();
     const { user, isAuthenticated, logout } = useAuth();
-    const { profile } = useProfile();
+    const { profile, createProfile } = useProfile();
     const { stats, fetchStats, toggleRanking } = useStats(user?.id);
     const { redirectToCheckout, redirectToPortal, isLoading: stripeLoading } = useSubscription(user?.id);
     const isPremium = profile?.role === 'premium' || profile?.role === 'admin';
+
+    // ── Perfil Editable ──
+    const [name, setName] = useState("");
+    const [phone, setPhone] = useState("");
+    const [birthDate, setBirthDate] = useState<Date>();
+    const [profileStatus, setProfileStatus] = useState<{ message: string; type: "ok" | "err" } | null>(null);
+    const [savingProfile, setSavingProfile] = useState(false);
+
+    useEffect(() => {
+        if (profile) {
+            setName(profile.name || "");
+            setPhone(profile.phone || "");
+            if (profile.birthDate) {
+                try { setBirthDate(parseISO(profile.birthDate)); }
+                catch (e) { console.error("Error parsing date:", e); }
+            }
+        }
+    }, [profile]);
 
     // ── Cargar estadísticas al entrar ──
     useEffect(() => {
@@ -114,6 +136,25 @@ const Settings = () => {
             setPushEnabled(Notification.permission === "granted");
         }
     }, []);
+
+    // ─────────── Guardar Perfil ───────────
+    const handleSaveProfile = async () => {
+        setProfileStatus(null);
+        if (!name.trim()) { setProfileStatus({ message: "El nombre es obligatorio.", type: "err" }); return; }
+        if (!birthDate) { setProfileStatus({ message: "La fecha de nacimiento es obligatoria.", type: "err" }); return; }
+
+        setSavingProfile(true);
+        try {
+            const dateStr = format(birthDate, "yyyy-MM-dd");
+            await createProfile(name.trim(), dateStr, user?.id, phone.trim());
+            setProfileStatus({ message: "Perfil actualizado correctamente.", type: "ok" });
+            setTimeout(() => setProfileStatus(null), 3000);
+        } catch (err: any) {
+            setProfileStatus({ message: err.message || "Error al actualizar perfil.", type: "err" });
+        } finally {
+            setSavingProfile(false);
+        }
+    };
 
     // ─────────── Cambiar contraseña ───────────
     const handlePasswordChange = async () => {
@@ -227,25 +268,84 @@ const Settings = () => {
             <div className="max-w-2xl mx-auto px-6 py-10 space-y-6">
                 {/* ─── Cuenta ─── */}
                 <Section title="Mi Cuenta" icon={User}>
-                    <div className="space-y-2">
-                        <Label className="text-xs uppercase tracking-widest text-muted-foreground font-sans">Nombre</Label>
-                        <p className="font-serif text-foreground text-lg">{profile?.name || user.name}</p>
-                    </div>
-                    <div className="space-y-2">
-                        <Label className="text-xs uppercase tracking-widest text-muted-foreground font-sans">Email</Label>
-                        <p className="font-sans text-foreground">
-                            {user.email || (
-                                <span className="text-muted-foreground italic text-sm">
-                                    Sin email — cuenta anónima.{" "}
-                                    <button
-                                        className="text-primary underline-offset-2 hover:underline"
-                                        onClick={() => navigate("/onboarding?register=true")}
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label className="font-sans text-sm text-muted-foreground">Nombre completo</Label>
+                            <Input
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Tu nombre"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="font-sans text-sm text-muted-foreground">Teléfono (WhatsApp)</Label>
+                            <div className="relative">
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    type="tel"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    placeholder="+52 1 234..."
+                                    className="pl-10"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="font-sans text-sm text-muted-foreground">Fecha de Nacimiento</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal bg-secondary/50 border-border h-10",
+                                            !birthDate && "text-muted-foreground"
+                                        )}
                                     >
-                                        Registrarse
-                                    </button>
-                                </span>
-                            )}
-                        </p>
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {birthDate ? format(birthDate, "PPP", { locale: es }) : "Selecciona tu fecha"}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar
+                                        mode="single"
+                                        selected={birthDate}
+                                        onSelect={setBirthDate}
+                                        disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
+                                        initialFocus
+                                        locale={es}
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-xs uppercase tracking-widest text-muted-foreground font-sans">Email</Label>
+                            <p className="font-sans text-foreground">
+                                {user.email || (
+                                    <span className="text-muted-foreground italic text-sm">
+                                        Sin email — cuenta anónima.{" "}
+                                        <button
+                                            className="text-primary underline-offset-2 hover:underline"
+                                            onClick={() => navigate("/onboarding?register=true")}
+                                        >
+                                            Registrarse
+                                        </button>
+                                    </span>
+                                )}
+                            </p>
+                        </div>
+
+                        <Button
+                            onClick={handleSaveProfile}
+                            disabled={savingProfile || !name.trim() || !birthDate}
+                            className="w-full mt-2"
+                        >
+                            {savingProfile ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                            {savingProfile ? "Guardando..." : "Guardar Cambios de Perfil"}
+                        </Button>
+                        {profileStatus && <Feedback {...profileStatus} />}
                     </div>
 
                     {user.isAnonymous && (
