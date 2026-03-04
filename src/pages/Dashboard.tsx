@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -252,6 +252,7 @@ const Dashboard = () => {
               userRole={profile.role}
               userId={user.id}
               featureName="Radar de Equipo"
+              mode="click"
             >
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
@@ -261,7 +262,10 @@ const Dashboard = () => {
               >
                 <div className="flex items-center gap-3 mb-2">
                   <Users className="h-5 w-5 text-indigo-400" />
-                  <h3 className="font-serif text-foreground font-semibold">Radar de Equipo</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-serif text-foreground font-semibold">Radar de Equipo</h3>
+                    {profile.role !== "premium" && profile.role !== "admin" && <Lock className="h-3 w-3 text-indigo-400/50" />}
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground font-sans leading-relaxed">Analiza la compatibilidad numérica de tu equipo. Identifica fortalezas y tensiones.</p>
                 <span className="text-[10px] text-indigo-400 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">Abrir Radar →</span>
@@ -272,6 +276,7 @@ const Dashboard = () => {
               userRole={profile.role}
               userId={user.id}
               featureName="Reporte Deep Dive Anual"
+              mode="click"
             >
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
@@ -281,7 +286,10 @@ const Dashboard = () => {
               >
                 <div className="flex items-center gap-3 mb-2">
                   <FileText className="h-5 w-5 text-emerald-400" />
-                  <h3 className="font-serif text-foreground font-semibold">Reporte Deep Dive Anual</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-serif text-foreground font-semibold">Reporte Deep Dive Anual</h3>
+                    {profile.role !== "premium" && profile.role !== "admin" && <Lock className="h-3 w-3 text-emerald-400/50" />}
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground font-sans leading-relaxed">Tu hoja de ruta estratégica para los próximos 12 meses, generada por IA en 15+ páginas.</p>
                 <span className="text-[10px] text-emerald-400 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">Solicitar Reporte →</span>

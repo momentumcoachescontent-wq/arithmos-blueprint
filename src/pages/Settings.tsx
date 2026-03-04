@@ -300,62 +300,64 @@ const Settings = () => {
                     </Section>
                 )}
 
-                {/* ─── Discord ─── */}
-                <Section title="Integración Discord" icon={MessageSquare}>
-                    <p className="text-sm text-muted-foreground font-sans leading-relaxed">
-                        Conecta un canal de Discord para publicar tus victorias, logros y subidas de nivel en tu comunidad automáticamente.
-                    </p>
+                {/* ─── Discord (Solo Admin) ─── */}
+                {profile?.role === 'admin' && (
+                    <Section title="Integración Discord" icon={MessageSquare}>
+                        <p className="text-sm text-muted-foreground font-sans leading-relaxed">
+                            Conecta un canal de Discord para publicar tus victorias, logros y subidas de nivel en tu comunidad automáticamente.
+                        </p>
 
-                    <div className="space-y-2">
-                        <Label className="font-sans text-sm text-muted-foreground">URL del Webhook</Label>
-                        <Input
-                            placeholder="https://discord.com/api/webhooks/..."
-                            value={discordWebhook}
-                            onChange={(e) => setDiscordWebhook(e.target.value)}
-                            className="font-mono text-xs"
-                        />
-                        <a
-                            href="https://support.discord.com/hc/es/articles/228383668"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-xs text-primary hover:underline font-sans"
-                        >
-                            ¿Cómo crear un Webhook en Discord? <ExternalLink className="h-3 w-3" />
-                        </a>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1">
-                        <div>
-                            <p className="text-sm font-sans text-foreground">Compartir victorias automáticamente</p>
-                            <p className="text-xs text-muted-foreground font-sans">Al completar misiones y subir de nivel</p>
+                        <div className="space-y-2">
+                            <Label className="font-sans text-sm text-muted-foreground">URL del Webhook</Label>
+                            <Input
+                                placeholder="https://discord.com/api/webhooks/..."
+                                value={discordWebhook}
+                                onChange={(e) => setDiscordWebhook(e.target.value)}
+                                className="font-mono text-xs"
+                            />
+                            <a
+                                href="https://support.discord.com/hc/es/articles/228383668"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-xs text-primary hover:underline font-sans"
+                            >
+                                ¿Cómo crear un Webhook en Discord? <ExternalLink className="h-3 w-3" />
+                            </a>
                         </div>
-                        <Switch
-                            checked={shareDiscord}
-                            onCheckedChange={(v) => {
-                                setShareDiscord(v);
-                                localStorage.setItem("arithmos_discord_share", String(v));
-                            }}
-                        />
-                    </div>
 
-                    <div className="flex gap-2 pt-1">
-                        <Button size="sm" variant="outline" onClick={handleSaveDiscord} className="flex-1">
-                            <Save className="h-4 w-4 mr-2" />
-                            Guardar
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={handleTestWebhook}
-                            disabled={testingWebhook || !discordWebhook}
-                            className="flex-1"
-                        >
-                            {testingWebhook ? "Enviando..." : "🧪 Probar Webhook"}
-                        </Button>
-                    </div>
+                        <div className="flex items-center justify-between pt-1">
+                            <div>
+                                <p className="text-sm font-sans text-foreground">Compartir victorias automáticamente</p>
+                                <p className="text-xs text-muted-foreground font-sans">Al completar misiones y subir de nivel</p>
+                            </div>
+                            <Switch
+                                checked={shareDiscord}
+                                onCheckedChange={(v) => {
+                                    setShareDiscord(v);
+                                    localStorage.setItem("arithmos_discord_share", String(v));
+                                }}
+                            />
+                        </div>
 
-                    {discordStatus && <Feedback {...discordStatus} />}
-                </Section>
+                        <div className="flex gap-2 pt-1">
+                            <Button size="sm" variant="outline" onClick={handleSaveDiscord} className="flex-1">
+                                <Save className="h-4 w-4 mr-2" />
+                                Guardar
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={handleTestWebhook}
+                                disabled={testingWebhook || !discordWebhook}
+                                className="flex-1"
+                            >
+                                {testingWebhook ? "Enviando..." : "🧪 Probar Webhook"}
+                            </Button>
+                        </div>
+
+                        {discordStatus && <Feedback {...discordStatus} />}
+                    </Section>
+                )}
 
                 {/* ─── Notificaciones Push ─── */}
                 <Section title="Notificaciones Push" icon={Bell}>

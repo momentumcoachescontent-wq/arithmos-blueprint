@@ -11,6 +11,8 @@ interface ProFeatureGateProps {
     featureName?: string;
     /** ID del usuario para el checkout */
     userId?: string;
+    /** Modo de bloqueo: 'overlay' (predeterminado) o 'click' (discreto) */
+    mode?: "overlay" | "click";
 }
 
 /**
@@ -23,12 +25,29 @@ export function ProFeatureGate({
     userRole,
     featureName = "Esta función",
     userId,
+    mode = "overlay",
 }: ProFeatureGateProps) {
     const [modalOpen, setModalOpen] = useState(false);
     const isPremium = userRole === "premium" || userRole === "admin";
 
     if (isPremium) {
         return <>{children}</>;
+    }
+
+    if (mode === "click") {
+        return (
+            <>
+                <div onClick={() => setModalOpen(true)} className="cursor-pointer">
+                    {children}
+                </div>
+                <UpgradeModal
+                    isOpen={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    userId={userId}
+                    featureRequested={featureName}
+                />
+            </>
+        );
     }
 
     return (
