@@ -14,6 +14,7 @@ import Synchronicity from "./pages/Synchronicity";
 import AdminDashboard from "./pages/AdminDashboard";
 import RadarEquipo from "./pages/RadarEquipo";
 import DeepDive from "./pages/DeepDive";
+import Evolucion from "./pages/Evolucion";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/radar-equipo" element={<RadarEquipo />} />
           <Route path="/deep-dive" element={<DeepDive />} />
+          <Route path="/evolucion" element={<Evolucion />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

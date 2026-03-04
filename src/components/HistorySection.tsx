@@ -53,7 +53,7 @@ export const HistorySection = ({ userId }: HistorySectionProps) => {
                     variant="ghost"
                     size="sm"
                     className="text-xs text-muted-foreground hover:text-foreground h-8"
-                    onClick={() => navigate("/journal")}
+                    onClick={() => navigate("/evolucion")}
                 >
                     Ver todo <ArrowRight className="ml-1 h-3 w-3" />
                 </Button>
