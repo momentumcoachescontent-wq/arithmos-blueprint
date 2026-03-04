@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import RadarEquipo from "./pages/RadarEquipo";
 import DeepDive from "./pages/DeepDive";
 import Evolucion from "./pages/Evolucion";
+import CoachChat from "./pages/CoachChat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/radar-equipo" element={<RadarEquipo />} />
           <Route path="/deep-dive" element={<DeepDive />} />
           <Route path="/evolucion" element={<Evolucion />} />
+          <Route path="/coach" element={<CoachChat />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

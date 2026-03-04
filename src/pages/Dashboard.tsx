@@ -198,6 +198,27 @@ const Dashboard = () => {
             {/* Historial Evolutivo */}
             <HistorySection userId={user.id} />
 
+            {/* Coach AI */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              onClick={() => navigate("/coach")}
+              className="w-full glass rounded-xl p-6 border-primary/20 bg-gradient-to-br from-primary/10 to-transparent text-left group hover:border-primary/50 transition-all shadow-lg shadow-primary/5"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <MessageCircle className="h-5 w-5 text-primary" />
+                <h3 className="font-serif text-foreground font-semibold">Coach de Sombras</h3>
+                <span className="px-2 py-0.5 rounded-full bg-primary/20 text-[10px] text-primary font-bold uppercase ml-auto">IA</span>
+              </div>
+              <p className="text-xs text-muted-foreground font-sans leading-relaxed">
+                Conversaciones honestas para transformar tus patrones de sombra en claridad estratégica.
+              </p>
+              <span className="text-[10px] text-primary font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">
+                Iniciar Sesión →
+              </span>
+            </motion.button>
+
             {/* Acceso a Sincronicidad */}
             <motion.button
               initial={{ opacity: 0, y: 20 }}
