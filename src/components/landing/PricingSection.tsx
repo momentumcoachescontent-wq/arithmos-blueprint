@@ -25,16 +25,6 @@ const plans: { name: string; price: string; period: string; description: string;
     featured: true,
     plan: "premium",
   },
-  {
-    name: "Team Plan B2B",
-    price: "Custom",
-    period: "",
-    description: "Numerología aplicada a la dinámica de equipos y decisiones corporativas.",
-    features: ["Blueprints de equipo", "Análisis de compatibilidad grupal", "Dashboard ejecutivo", "API de integración", "Onboarding dedicado"],
-    cta: "Contactar Ventas",
-    featured: false,
-    plan: "team",
-  },
 ];
 
 export function PricingSection() {
@@ -76,8 +66,8 @@ export function PricingSection() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
                 className={`rounded-xl p-8 flex flex-col ${plan.featured
-                    ? "glass border-primary/30 glow-indigo"
-                    : "glass"
+                  ? "glass border-primary/30 glow-indigo"
+                  : "glass"
                   }`}
               >
                 {plan.featured && (

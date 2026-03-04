@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-export type PlanType = "freemium" | "premium" | "team";
+export type PlanType = "freemium" | "premium";
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -21,7 +21,6 @@ interface AuthModalProps {
 const planLabels: Record<PlanType, string> = {
     freemium: "Freemium",
     premium: "The Empowered Path",
-    team: "Team Plan B2B",
 };
 
 export function AuthModal({ isOpen, onClose, defaultTab = "register", selectedPlan }: AuthModalProps) {
@@ -38,7 +37,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "register", selectedPl
     const [success, setSuccess] = useState<string | null>(null);
 
     const roleFromPlan = (plan?: PlanType): string => {
-        if (plan === "premium" || plan === "team") return "premium";
+        if (plan === "premium") return "premium";
         return "freemium";
     };
 
