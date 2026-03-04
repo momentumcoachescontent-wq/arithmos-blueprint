@@ -12,7 +12,16 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, action, context } = await req.json();
+    const bodyText = await req.text();
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+    } catch (e) {
+      console.error("No se pudo parsear JSON:", bodyText);
+      throw new Error("Invalid JSON body");
+    }
+
+    const { messages = [], action = "chat", context = {} } = body;
 
     // Si la accion es resumir la sesión
     if (action === "summarize") {
@@ -23,7 +32,7 @@ serve(async (req) => {
             role: "system",
             content: `Eres el Coach de Arithmos. Resume la siguiente conversación del usuario en un párrafo conciso enfocado en la "Sombra" o patrón que se trabajó, y el aprendizaje u objetivo final establecido. Sé directo y analítico. No uses saludos.`
           },
-          ...messages
+          ...(Array.isArray(messages) ? messages : [])
         ],
         temperature: 0.7,
         max_tokens: 250,
@@ -57,7 +66,7 @@ Reglas:
 ${profileContext}`
     };
 
-    const chatMessages = [systemMessage, ...messages];
+    const chatMessages = [systemMessage, ...(Array.isArray(messages) ? messages : [])];
 
     // MODO STREAMING
     const response = await openai.chat.completions.create({
