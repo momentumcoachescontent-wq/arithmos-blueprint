@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, SUPABASE_URL } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useProfile } from "./useProfile";
 import { toast } from "sonner";
@@ -128,29 +128,45 @@ export function useCoachSession() {
             const history = messages.map(m => ({ role: m.role, content: m.content }));
             history.push({ role: "user", content }); // añadir el nuevo
 
-            const { data, error } = await supabase.functions.invoke("chat-coach", {
-                body: {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/chat-coach`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session?.access_token}`
+                },
+                body: JSON.stringify({
                     messages: history,
                     action: "chat",
                     context: {
                         name: profile?.name,
                         lifePath: profile?.lifePathNumber
                     }
-                }
+                })
             });
 
-            if (error) throw error;
+            if (!response.ok) {
+                throw new Error(`Error en API: ${response.status}`);
+            }
 
-            // Para el caso en que Deno/Supabase retorne texto normal debido a la función invoke 
-            // supabase.functions.invoke NO soporta streaming de texto plano directamente a un iterador fácilmente en el frontend
-            // sin usar custom fetch. Implementamos un fallback simple si retorna todo junto.
+            const reader = response.body?.getReader();
+            if (!reader) throw new Error("No reader");
 
-            // Fallback (Si no podemos leer el stream propiamente con supabase.functions.invoke):
-            const assistantContent = typeof data === 'string' ? data : data?.content || "No response";
+            let assistantContent = "";
+            const decoder = new TextDecoder();
 
-            setMessages(prev => prev.map(m =>
-                m.id === tempAssistantId ? { ...m, content: assistantContent } : m
-            ));
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                assistantContent += chunk;
+
+                setMessages(prev => prev.map(m =>
+                    m.id === tempAssistantId ? { ...m, content: assistantContent } : m
+                ));
+            }
 
             // Guardar respuesta del asistente en BD
             await supabase.from("coach_messages" as any).insert({
