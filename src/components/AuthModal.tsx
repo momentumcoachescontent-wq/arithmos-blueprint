@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, Eye, EyeOff, User, ArrowRight, Sparkles } from "lucide-react";
+import { X, Mail, Lock, Eye, EyeOff, User, ArrowRight, Sparkles, Phone, CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 
 export type PlanType = "freemium" | "premium";
@@ -26,10 +32,13 @@ const planLabels: Record<PlanType, string> = {
 export function AuthModal({ isOpen, onClose, defaultTab = "register", selectedPlan }: AuthModalProps) {
     const navigate = useNavigate();
     const { loginWithEmail, registerWithEmail } = useAuth();
+    const { createProfile } = useProfile();
 
     const [tab, setTab] = useState<"login" | "register">(defaultTab);
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [birthDate, setBirthDate] = useState<Date>();
     const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -45,6 +54,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "register", selectedPl
         setError(null);
         if (!fullName.trim()) { setError("Ingresa tu nombre completo."); return; }
         if (!email.trim()) { setError("Ingresa tu email."); return; }
+        if (!birthDate) { setError("Selecciona tu fecha de nacimiento."); return; }
         if (password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres."); return; }
 
         setLoading(true);
@@ -83,10 +93,15 @@ export function AuthModal({ isOpen, onClose, defaultTab = "register", selectedPl
                     email: email,
                     isAnonymous: false,
                 }));
-                setSuccess("¡Cuenta creada! Redirigiendo para completar tu perfil...");
+
+                // --- Onboarding 2.0: Create Profile immediately ---
+                const birthDateStr = format(birthDate, "yyyy-MM-dd");
+                await createProfile(fullName.trim(), birthDateStr, newUser.id, phone.trim());
+
+                setSuccess("¡Cuenta creada! Tu blueprint está listo.");
                 setTimeout(() => {
                     onClose();
-                    navigate("/onboarding");
+                    navigate("/dashboard");
                 }, 1800);
             } else {
                 setError("No se pudo crear la cuenta. Verifica que el email sea válido.");
@@ -201,17 +216,61 @@ export function AuthModal({ isOpen, onClose, defaultTab = "register", selectedPl
                             {/* Form */}
                             <div className="space-y-4" onKeyDown={handleKey}>
                                 {tab === "register" && (
-                                    <div className="space-y-2">
-                                        <Label className="text-sm font-sans text-muted-foreground">Nombre completo</Label>
-                                        <div className="relative">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <Input
-                                                value={fullName}
-                                                onChange={(e) => setFullName(e.target.value)}
-                                                placeholder="Tu nombre"
-                                                className="pl-10"
-                                                autoFocus
-                                            />
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-sans text-muted-foreground">Nombre completo</Label>
+                                            <div className="relative">
+                                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                <Input
+                                                    value={fullName}
+                                                    onChange={(e) => setFullName(e.target.value)}
+                                                    placeholder="Tu nombre"
+                                                    className="pl-10"
+                                                    autoFocus
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-sans text-muted-foreground">Teléfono (WhatsApp)</Label>
+                                            <div className="relative">
+                                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                <Input
+                                                    type="tel"
+                                                    value={phone}
+                                                    onChange={(e) => setPhone(e.target.value)}
+                                                    placeholder="+52 1 234..."
+                                                    className="pl-10"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-sans text-muted-foreground">Fecha de Nacimiento</Label>
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        className={cn(
+                                                            "w-full justify-start text-left font-normal bg-secondary/50 border-border h-10",
+                                                            !birthDate && "text-muted-foreground"
+                                                        )}
+                                                    >
+                                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                                        {birthDate ? format(birthDate, "PPP", { locale: es }) : "Selecciona tu fecha"}
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0 z-[60]" align="start">
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={birthDate}
+                                                        onSelect={setBirthDate}
+                                                        disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
+                                                        initialFocus
+                                                        locale={es}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
                                         </div>
                                     </div>
                                 )}
