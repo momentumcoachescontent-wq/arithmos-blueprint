@@ -101,11 +101,11 @@ const RadarEquipo = () => {
     // ── Al cargar: añadir perfil del usuario como primer miembro ──
     useEffect(() => {
         if (!profile) return;
-        const ownerLifePath = profile.birth_date ? getLifePath(profile.birth_date) : null;
+        const ownerLifePath = profile.birthDate ? getLifePath(profile.birthDate) : null;
         const ownerMember: TeamMember = {
             id: "owner",
             name: profile.name,
-            birth_date: profile.birth_date || "",
+            birth_date: profile.birthDate || "",
             life_path: ownerLifePath,
             isOwner: true,
         };
@@ -126,7 +126,7 @@ const RadarEquipo = () => {
                 .eq("owner_id", user.id)
                 .order("created_at", { ascending: false })
                 .limit(10);
-            setSavedTeams((data as SavedTeam[]) || []);
+            setSavedTeams((data as unknown as SavedTeam[]) || []);
         } finally {
             setIsLoadingHistory(false);
         }
