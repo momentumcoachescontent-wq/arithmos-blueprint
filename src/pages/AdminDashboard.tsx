@@ -12,13 +12,17 @@ import {
     CheckCircle2,
     XCircle,
     TrendingUp,
-    MessageSquare
+    MessageSquare,
+    CreditCard,
+    DollarSign
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminFinopsTab } from "@/components/admin/AdminFinopsTab";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -31,7 +35,8 @@ const AdminDashboard = () => {
         aiSuccessRate: 98,
         systemStatus: 'healthy',
         n8nStatus: 'online',
-        supabaseStatus: 'connected'
+        supabaseStatus: 'connected',
+        premiumUsers: 0
     });
     const [isLoading, setIsLoading] = useState(true);
 
@@ -46,12 +51,14 @@ const AdminDashboard = () => {
                 const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
                 const { count: readingCount } = await supabase.from('readings').select('*', { count: 'exact', head: true });
                 const { count: journalCount } = await supabase.from('journal_entries').select('*', { count: 'exact', head: true });
+                const { count: premiumCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'premium');
 
                 setStats(prev => ({
                     ...prev,
                     userCount: userCount || 0,
                     readingCount: readingCount || 0,
-                    journalCount: journalCount || 0
+                    journalCount: journalCount || 0,
+                    premiumUsers: premiumCount || 0
                 }));
             } catch (error) {
                 console.error("Error fetching admin stats:", error);
@@ -99,9 +106,9 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                     {[
                         { label: "Usuarios Totales", value: stats.userCount, icon: Users, color: "text-blue-400" },
+                        { label: "Usuarios Premium", value: stats.premiumUsers, icon: DollarSign, color: "text-amber-500" },
                         { label: "Consultas IA", value: stats.readingCount, icon: Activity, color: "text-primary" },
                         { label: "Entradas de Diario", value: stats.journalCount, icon: MessageSquare, color: "text-emerald-400" },
-                        { label: "Tasa de Éxito IA", value: `${stats.aiSuccessRate}%`, icon: Cpu, color: "text-amber-400" },
                     ].map((item, idx) => (
                         <motion.div
                             key={idx}
@@ -119,111 +126,148 @@ const AdminDashboard = () => {
                     ))}
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* System Health */}
-                    <div className="lg:col-span-2 space-y-8">
-                        <section className="glass rounded-2xl p-8 border-border">
-                            <div className="flex items-center justify-between mb-8">
-                                <h3 className="text-xl font-serif font-semibold flex items-center gap-2">
-                                    <Database className="h-5 w-5 text-indigo-400" />
-                                    Diagnóstico de Salud del Sistema
+                {/* Main Content Area via Tabs */}
+                <Tabs defaultValue="system" className="space-y-8">
+                    <div className="flex justify-center md:justify-start">
+                        <TabsList className="bg-secondary/50 border border-border p-1 w-full md:w-auto h-auto rounded-lg">
+                            <TabsTrigger
+                                value="system"
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-sans text-sm rounded-md py-2 px-6"
+                            >
+                                <Database className="h-4 w-4 mr-2 inline-block" />
+                                Sistema e IA
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="finops"
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-sans text-sm rounded-md py-2 px-6"
+                            >
+                                <CreditCard className="h-4 w-4 mr-2 inline-block" />
+                                FinOps (Pagos)
+                            </TabsTrigger>
+                        </TabsList>
+                    </div>
+
+                    <TabsContent value="system" className="grid grid-cols-1 lg:grid-cols-3 gap-8 m-0 focus-visible:outline-none">
+                        {/* System Health */}
+                        <div className="lg:col-span-2 space-y-8">
+                            <section className="glass rounded-2xl p-8 border-border">
+                                <div className="flex items-center justify-between mb-8">
+                                    <h3 className="text-xl font-serif font-semibold flex items-center gap-2">
+                                        <Database className="h-5 w-5 text-indigo-400" />
+                                        Diagnóstico de Salud del Sistema
+                                    </h3>
+                                    <Button size="sm" variant="outline" className="text-xs font-sans">Ejecutar Checkup Completo</Button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
+                                        <div className="flex items-center gap-4">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                                            <div>
+                                                <p className="text-sm font-sans font-bold">Supabase Infrastructure</p>
+                                                <p className="text-xs text-muted-foreground">Auth, PostgreSQL & RLS Policies</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-emerald-500 text-sm font-sans font-bold">
+                                            <CheckCircle2 className="h-4 w-4" />
+                                            CONNECTED
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
+                                        <div className="flex items-center gap-4">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                                            <div>
+                                                <p className="text-sm font-sans font-bold">n8n Workflow Engine</p>
+                                                <p className="text-xs text-muted-foreground">Webhooks & Calculation Logic</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-emerald-500 text-sm font-sans font-bold">
+                                            <CheckCircle2 className="h-4 w-4" />
+                                            ONLINE
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
+                                        <div className="flex items-center gap-4">
+                                            {import.meta.env.VITE_STRIPE_PUBLIC_KEY ? (
+                                                <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                                            ) : (
+                                                <div className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />
+                                            )}
+                                            <div>
+                                                <p className="text-sm font-sans font-bold">Stripe Payments (FinOps)</p>
+                                                <p className="text-xs text-muted-foreground">Checkout & Webhook Configuration</p>
+                                            </div>
+                                        </div>
+
+                                        {import.meta.env.VITE_STRIPE_PUBLIC_KEY ? (
+                                            <div className="flex items-center gap-2 text-emerald-500 text-sm font-sans font-bold">
+                                                <CheckCircle2 className="h-4 w-4" />
+                                                READY
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2 text-rose-500 text-sm font-sans font-bold">
+                                                <XCircle className="h-4 w-4" />
+                                                MISSING KEYS
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className="glass rounded-2xl p-8 border-border">
+                                <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2">
+                                    <TrendingUp className="h-5 w-5 text-primary" />
+                                    Uso de IA y Tokens
                                 </h3>
-                                <Button size="sm" variant="outline" className="text-xs font-sans">Ejecutar Checkup Completo</Button>
-                            </div>
+                                <div className="h-48 bg-secondary/30 rounded-xl flex items-center justify-center text-muted-foreground text-sm font-sans border border-border border-dashed">
+                                    Gráfico de tendencia de uso de IA (En desarrollo)
+                                </div>
+                            </section>
+                        </div>
 
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                                        <div>
-                                            <p className="text-sm font-sans font-bold">Supabase Infrastructure</p>
-                                            <p className="text-xs text-muted-foreground">Auth, PostgreSQL & RLS Policies</p>
-                                        </div>
+                        {/* Sidebar Admin: Risk & Shadow Monitor */}
+                        <div className="space-y-8">
+                            <section className="glass rounded-2xl p-8 border-rose-500/20 bg-rose-500/5">
+                                <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2 text-rose-500">
+                                    <ShieldAlert className="h-5 w-5" />
+                                    Monitor de Riesgos
+                                </h3>
+                                <div className="space-y-4">
+                                    <div className="p-4 rounded-lg bg-background/50 border border-rose-500/10">
+                                        <p className="text-xs font-sans font-bold uppercase tracking-tighter text-rose-500 mb-1">Alerta de Sombra</p>
+                                        <p className="text-sm text-foreground/80 leading-snug">Se detectó alta frecuencia de términos "Shadow" en 5 perfiles nuevos.</p>
                                     </div>
-                                    <div className="flex items-center gap-2 text-emerald-500 text-sm font-sans font-bold">
-                                        <CheckCircle2 className="h-4 w-4" />
-                                        CONNECTED
+                                    <div className="p-4 rounded-lg bg-background/50 border border-emerald-500/10">
+                                        <p className="text-xs font-sans font-bold uppercase tracking-tighter text-emerald-500 mb-1">Estabilidad</p>
+                                        <p className="text-sm text-foreground/80 leading-snug">Sin errores críticos de n8n reportados en las últimas 72 horas.</p>
                                     </div>
                                 </div>
+                                <Button variant="ghost" className="w-full mt-6 text-rose-500 hover:bg-rose-500/10 text-xs uppercase tracking-widest font-bold">
+                                    Ver Análisis de Sombras Completo
+                                </Button>
+                            </section>
 
-                                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                                        <div>
-                                            <p className="text-sm font-sans font-bold">n8n Workflow Engine</p>
-                                            <p className="text-xs text-muted-foreground">Webhooks & Calculation Logic</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-emerald-500 text-sm font-sans font-bold">
-                                        <CheckCircle2 className="h-4 w-4" />
-                                        ONLINE
-                                    </div>
+                            <section className="glass rounded-2xl p-8 border-border">
+                                <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2">
+                                    <Settings className="h-5 w-5 text-muted-foreground" />
+                                    Acciones Rápidas
+                                </h3>
+                                <div className="space-y-2">
+                                    <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Limpiar Cache de IA</Button>
+                                    <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Exportar Base de Datos (CSV)</Button>
+                                    <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Re-sincronizar con Discord</Button>
+                                    <Button variant="ghost" className="w-full justify-start text-sm text-rose-400 hover:bg-rose-500/5">Modo de Mantenimiento</Button>
                                 </div>
+                            </section>
+                        </div>
+                    </TabsContent>
 
-                                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border opacity-60">
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-                                        <div>
-                                            <p className="text-sm font-sans font-bold">ElevenLabs API</p>
-                                            <p className="text-xs text-muted-foreground">Voice Synthesis Engine</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-amber-500 text-sm font-sans font-bold">
-                                        <Activity className="h-4 w-4" />
-                                        IDLE
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-
-                        <section className="glass rounded-2xl p-8 border-border">
-                            <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2">
-                                <TrendingUp className="h-5 w-5 text-primary" />
-                                Uso de IA y Tokens
-                            </h3>
-                            <div className="h-48 bg-secondary/30 rounded-xl flex items-center justify-center text-muted-foreground text-sm font-sans border border-border border-dashed">
-                                Gráfico de tendencia de uso de IA (En desarrollo)
-                            </div>
-                        </section>
-                    </div>
-
-                    {/* Sidebar Admin: Risk & Shadow Monitor */}
-                    <div className="space-y-8">
-                        <section className="glass rounded-2xl p-8 border-rose-500/20 bg-rose-500/5">
-                            <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2 text-rose-500">
-                                <ShieldAlert className="h-5 w-5" />
-                                Monitor de Riesgos
-                            </h3>
-                            <div className="space-y-4">
-                                <div className="p-4 rounded-lg bg-background/50 border border-rose-500/10">
-                                    <p className="text-xs font-sans font-bold uppercase tracking-tighter text-rose-500 mb-1">Alerta de Sombra</p>
-                                    <p className="text-sm text-foreground/80 leading-snug">Se detectó alta frecuencia de términos "Shadow" en 5 perfiles nuevos.</p>
-                                </div>
-                                <div className="p-4 rounded-lg bg-background/50 border border-emerald-500/10">
-                                    <p className="text-xs font-sans font-bold uppercase tracking-tighter text-emerald-500 mb-1">Estabilidad</p>
-                                    <p className="text-sm text-foreground/80 leading-snug">Sin errores críticos de n8n reportados en las últimas 72 horas.</p>
-                                </div>
-                            </div>
-                            <Button variant="ghost" className="w-full mt-6 text-rose-500 hover:bg-rose-500/10 text-xs uppercase tracking-widest font-bold">
-                                Ver Análisis de Sombras Completo
-                            </Button>
-                        </section>
-
-                        <section className="glass rounded-2xl p-8 border-border">
-                            <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2">
-                                <Settings className="h-5 w-5 text-muted-foreground" />
-                                Acciones Rápidas
-                            </h3>
-                            <div className="space-y-2">
-                                <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Limpiar Cache de IA</Button>
-                                <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Exportar Base de Datos (CSV)</Button>
-                                <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Re-sincronizar con Discord</Button>
-                                <Button variant="ghost" className="w-full justify-start text-sm text-rose-400 hover:bg-rose-500/5">Modo de Mantenimiento</Button>
-                            </div>
-                        </section>
-                    </div>
-                </div>
+                    <TabsContent value="finops" className="m-0 focus-visible:outline-none">
+                        <AdminFinopsTab />
+                    </TabsContent>
+                </Tabs>
             </div>
         </div>
     );

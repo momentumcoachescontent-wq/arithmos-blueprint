@@ -161,6 +161,50 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_intents: {
+        Row: {
+          id: string
+          user_id: string
+          provider: 'stripe' | 'mercadopago'
+          status: 'pending' | 'completed' | 'failed' | 'cancelled'
+          checkout_session_id: string | null
+          amount: number | null
+          currency: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          provider: 'stripe' | 'mercadopago'
+          status: 'pending' | 'completed' | 'failed' | 'cancelled'
+          checkout_session_id?: string | null
+          amount?: number | null
+          currency?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          provider?: 'stripe' | 'mercadopago'
+          status?: 'pending' | 'completed' | 'failed' | 'cancelled'
+          checkout_session_id?: string | null
+          amount?: number | null
+          currency?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_intents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       missions: {
         Row: {
           id: string

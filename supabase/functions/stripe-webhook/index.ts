@@ -31,6 +31,13 @@ Deno.serve(async (req) => {
         case "checkout.session.completed": {
             const session = event.data.object as Stripe.Checkout.Session;
             const userId = session.metadata?.supabase_user_id;
+
+            // Actualizar el intento de pago a "completed"
+            await supabase
+                .from("payment_intents")
+                .update({ status: "completed" })
+                .eq("checkout_session_id", session.id);
+
             if (userId && session.mode === "subscription") {
                 // Activar plan Premium en Supabase
                 await supabase
@@ -81,8 +88,22 @@ Deno.serve(async (req) => {
             break;
         }
 
+        case "checkout.session.expired": {
+            // Un intento se cerró por timeout sin pagar (carrito abandonado pasivo/oficial)
+            const session = event.data.object as Stripe.Checkout.Session;
+            await supabase
+                .from("payment_intents")
+                .update({ status: "cancelled" })
+                .eq("checkout_session_id", session.id);
+            break;
+        }
+
         case "invoice.payment_failed": {
             const invoice = event.data.object as Stripe.Invoice;
+
+            // Si el pago falla (recurrente o inicial), buscamos la suscripción/cliente relacionada
+            // (Para un payment intent simple, Stripe emite checkout.session.async_payment_failed)
+
             // Marcar la suscripción como en riesgo (sin degradar todavía)
             if (invoice.customer) {
                 const { data: profile } = await supabase

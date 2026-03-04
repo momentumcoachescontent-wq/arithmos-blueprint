@@ -69,6 +69,16 @@ Deno.serve(async (req) => {
             },
         });
 
+        // Trackear el intento en la Base de Datos (Módulo FinOps - Carritos Abandonados)
+        await supabase.from("payment_intents").insert({
+            user_id: userId,
+            provider: "stripe",
+            status: "pending",
+            checkout_session_id: session.id,
+            amount: 9.99, // Hardcoded por ahora basado en el roadmap
+            currency: "usd"
+        });
+
         return new Response(JSON.stringify({ sessionId: session.id }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
