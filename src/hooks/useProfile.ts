@@ -17,6 +17,10 @@ export interface Profile {
   shadowWork?: string;
   audioUrl?: string;
   role?: "freemium" | "premium" | "admin";
+  // Monetización Stripe
+  stripe_customer_id?: string;
+  stripe_subscription_id?: string;
+  subscription_status?: "active" | "past_due" | "cancelled" | "inactive";
   createdAt: string;
   id: string; // ID de Supabase
 }

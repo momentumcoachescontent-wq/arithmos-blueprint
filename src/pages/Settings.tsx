@@ -13,7 +13,11 @@ import {
     Eye,
     EyeOff,
     ExternalLink,
+    CreditCard,
+    Zap,
+    Loader2,
 } from "lucide-react";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,6 +67,8 @@ const Settings = () => {
     const { user, isAuthenticated, logout } = useAuth();
     const { profile } = useProfile();
     const { stats, toggleRanking } = useStats(user?.id);
+    const { redirectToCheckout, redirectToPortal, isLoading: stripeLoading } = useSubscription(user?.id);
+    const isPremium = profile?.role === 'premium' || profile?.role === 'admin';
 
     // ── Contraseña ──
     const [currentPwd, setCurrentPwd] = useState("");
@@ -390,6 +396,49 @@ const Settings = () => {
                         />
                     </div>
                 </Section>
+
+                {/* ─── Suscripción ─── */}
+                {!user.isAnonymous && (
+                    <Section title="Mi Suscripción" icon={CreditCard}>
+                        {isPremium ? (
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
+                                    <Zap className="h-5 w-5 text-primary flex-shrink-0" />
+                                    <div>
+                                        <p className="text-sm font-sans font-semibold text-foreground">Plan Premium Activo</p>
+                                        <p className="text-xs text-muted-foreground font-sans">
+                                            {profile?.subscription_status === 'past_due' ? '⚠️ Pago pendiente — actualiza tu método de pago' : 'Acceso completo a todas las funciones Pro'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full font-sans text-sm"
+                                    onClick={() => redirectToPortal()}
+                                    disabled={stripeLoading}
+                                >
+                                    {stripeLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CreditCard className="h-4 w-4 mr-2" />}
+                                    Gestionar Suscripción en Stripe
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <p className="text-sm text-muted-foreground font-sans leading-relaxed">
+                                    Estás en el plan <strong>Freemium</strong>. Actualiza a Premium para desbloquear el Radar de Equipo, reportes PDF y consultas ilimitadas.
+                                </p>
+                                <Button
+                                    className="w-full gap-2 font-bold font-sans"
+                                    onClick={() => redirectToCheckout()}
+                                    disabled={stripeLoading}
+                                >
+                                    {stripeLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                                    Activar Premium — $9.99/mes
+                                </Button>
+                            </div>
+                        )}
+                    </Section>
+                )}
 
                 {/* ─── Cerrar Sesión ─── */}
                 <div className="pt-4">
