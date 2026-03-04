@@ -1,21 +1,32 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = 'arithmos-cache-v1';
+import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 
-self.addEventListener('install', (event) => {
-    console.log('[Service Worker] Instalando...');
-});
+// Este placeholder es reemplazado automáticamente por Workbox durante `npm run build`
+// con el manifest de todos los assets que se pre-cachearán.
+precacheAndRoute(self.__WB_MANIFEST);
 
+// Limpia cachés de versiones de SW anteriores
+cleanupOutdatedCaches();
+
+// Tomar el control de todas las pestañas al activarse
 self.addEventListener('activate', (event) => {
-    console.log('[Service Worker] Activado');
+    console.log('[Arithmos SW] Activado y listo.');
+    event.waitUntil(self.clients.claim());
 });
 
+// ─────────────────────────────────────────────────
+// Push Notifications
+// ─────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
-    const data = event.data ? event.data.json() : { title: 'Arithmos', body: 'Nueva notificación de poder.' };
+    const data = event.data
+        ? event.data.json()
+        : { title: 'Arithmos', body: 'Nueva revelación numerológica.' };
 
     const options = {
         body: data.body,
         icon: '/icon-192x192.png',
-        badge: '/badge-72x72.png',
+        badge: '/icon-192x192.png',
+        vibrate: [200, 100, 200],
         data: {
             url: data.url || '/'
         }
@@ -29,6 +40,6 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     event.waitUntil(
-        clients.openWindow(event.notification.data.url)
+        clients.openWindow(event.notification.data.url || '/')
     );
 });
