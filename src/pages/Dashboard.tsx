@@ -256,13 +256,15 @@ const Dashboard = () => {
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full glass rounded-xl p-5 border-border bg-indigo-500/5 text-left transition-all"
+                onClick={() => navigate("/radar-equipo")}
+                className="w-full glass rounded-xl p-5 border-border bg-indigo-500/5 text-left group hover:border-indigo-500/30 transition-all"
               >
                 <div className="flex items-center gap-3 mb-2">
                   <Users className="h-5 w-5 text-indigo-400" />
                   <h3 className="font-serif text-foreground font-semibold">Radar de Equipo</h3>
                 </div>
                 <p className="text-xs text-muted-foreground font-sans leading-relaxed">Analiza la compatibilidad numérica de tu equipo. Identifica fortalezas y tensiones.</p>
+                <span className="text-[10px] text-indigo-400 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">Abrir Radar →</span>
               </motion.button>
             </ProFeatureGate>
 
@@ -274,13 +276,15 @@ const Dashboard = () => {
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full glass rounded-xl p-5 border-border bg-emerald-500/5 text-left transition-all"
+                onClick={() => navigate("/deep-dive")}
+                className="w-full glass rounded-xl p-5 border-border bg-emerald-500/5 text-left group hover:border-emerald-500/30 transition-all"
               >
                 <div className="flex items-center gap-3 mb-2">
                   <FileText className="h-5 w-5 text-emerald-400" />
                   <h3 className="font-serif text-foreground font-semibold">Reporte Deep Dive Anual</h3>
                 </div>
                 <p className="text-xs text-muted-foreground font-sans leading-relaxed">Tu hoja de ruta estratégica para los próximos 12 meses, generada por IA en 15+ páginas.</p>
+                <span className="text-[10px] text-emerald-400 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">Solicitar Reporte →</span>
               </motion.button>
             </ProFeatureGate>
 

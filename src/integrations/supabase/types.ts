@@ -205,6 +205,36 @@ export type Database = {
           }
         ]
       }
+      team_readings: {
+        Row: {
+          id: string
+          owner_id: string
+          title: string
+          members: Json
+          analysis: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          owner_id: string
+          title?: string
+          members: Json
+          analysis?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          owner_id?: string
+          title?: string
+          members?: Json
+          analysis?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       missions: {
         Row: {
           id: string
