@@ -22,6 +22,7 @@ interface EvolucionEntry {
     date: string;
     content?: string;
     preview?: string;
+    analysisData?: any;
     source: "journal_entries" | "team_readings" | "readings";
 }
 
@@ -88,7 +89,8 @@ const Evolucion = () => {
                     title: `Radar: ${t.title}`,
                     type: "team_reading" as EntryType,
                     date: t.created_at,
-                    content: `${(t.members as any[]).length} integrantes analizados.`,
+                    content: "",
+                    analysisData: { members: t.members, analysis: t.analysis },
                     preview: `${(t.members as any[]).length} integrantes — ${(t.members as any[]).map((m: any) => m.name).join(", ")}`,
                     source: "team_readings" as const,
                 })),
@@ -174,8 +176,8 @@ const Evolucion = () => {
                                 key={f}
                                 onClick={() => setFilter(f)}
                                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-sans font-semibold border transition-all ${filter === f
-                                        ? (f === "all" ? "bg-foreground text-background border-transparent" : `${meta?.bg} ${meta?.color} border-current`)
-                                        : "bg-secondary/40 text-muted-foreground border-border hover:border-muted-foreground/40"
+                                    ? (f === "all" ? "bg-foreground text-background border-transparent" : `${meta?.bg} ${meta?.color} border-current`)
+                                    : "bg-secondary/40 text-muted-foreground border-border hover:border-muted-foreground/40"
                                     }`}
                             >
                                 {Icon && <Icon className="h-3 w-3" />}
@@ -273,7 +275,39 @@ const Evolucion = () => {
                                     <X className="h-4 w-4" />
                                 </button>
                             </div>
-                            <p className="text-sm font-sans text-foreground/85 leading-relaxed whitespace-pre-wrap">{viewing.content}</p>
+                            {viewing.type === "team_reading" && viewing.analysisData ? (
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
+                                        <h3 className="text-sm font-serif font-semibold text-indigo-300 mb-2 flex items-center gap-2"><Users className="h-4 w-4" /> Integrantes Analizados</h3>
+                                        <ul className="space-y-2">
+                                            {viewing.analysisData.members.map((m: any, i: number) => (
+                                                <li key={i} className="text-sm text-foreground/80 font-sans flex justify-between items-center bg-background/50 p-2 rounded-lg border border-border/50">
+                                                    <span>{m.name}</span>
+                                                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">Camino {m.life_path}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                    {(() => {
+                                        try {
+                                            const parsed = JSON.parse(viewing.analysisData.analysis);
+                                            return parsed.collective ? (
+                                                <div className="p-4 bg-primary/10 rounded-xl border border-primary/20 flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
+                                                        <span className="text-xl font-serif font-bold text-primary">{parsed.collective}</span>
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-sm font-serif font-semibold text-primary">Vibración Colectiva</h3>
+                                                        <p className="text-xs text-muted-foreground font-sans">Energía proyectada por el equipo.</p>
+                                                    </div>
+                                                </div>
+                                            ) : null;
+                                        } catch (e) { return null; }
+                                    })()}
+                                </div>
+                            ) : (
+                                <p className="text-sm font-sans text-foreground/85 leading-relaxed whitespace-pre-wrap">{viewing.content}</p>
+                            )}
                         </motion.div>
                     </motion.div>
                 )}

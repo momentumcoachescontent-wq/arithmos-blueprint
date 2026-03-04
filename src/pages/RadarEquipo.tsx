@@ -98,9 +98,9 @@ const RadarEquipo = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
-    // ── Al cargar: añadir perfil del usuario como primer miembro ──
+    // ── Al cargar: añadir perfil del usuario O cargar borrador ──
     useEffect(() => {
-        if (!profile) return;
+        if (!profile || !user) return;
         const ownerLifePath = profile.birthDate ? getLifePath(profile.birthDate) : null;
         const ownerMember: TeamMember = {
             id: "owner",
@@ -109,11 +109,38 @@ const RadarEquipo = () => {
             life_path: ownerLifePath,
             isOwner: true,
         };
+
+        // Intentar recuperar el borrador guardado en localStorage
+        const savedDraft = localStorage.getItem(`arithmos_radar_draft_${user.id}`);
+        if (savedDraft) {
+            try {
+                const parsed = JSON.parse(savedDraft);
+                setTitle(parsed.title || "Mi Equipo");
+                const draftMembers = parsed.members || [];
+                // Actualizar info del dueño por si cambió en el perfil
+                const ownerIdx = draftMembers.findIndex((m: any) => m.id === "owner");
+                if (ownerIdx !== -1) draftMembers[ownerIdx] = ownerMember;
+                else draftMembers.unshift(ownerMember);
+
+                setMembers(draftMembers);
+                return;
+            } catch (e) {
+                console.error("Error cargando borrador del radar:", e);
+            }
+        }
+
+        // Si no hay borrador, iniciar con un slot vacío
         setMembers([
             ownerMember,
             { id: Date.now().toString(), name: "", birth_date: "", life_path: null },
         ]);
-    }, [profile]);
+    }, [profile, user]);
+
+    // ── Guardar borrador automáticamente ──
+    useEffect(() => {
+        if (!user || members.length === 0) return;
+        localStorage.setItem(`arithmos_radar_draft_${user.id}`, JSON.stringify({ title, members }));
+    }, [members, title, user]);
 
     // ── Cargar historial de equipos ──
     const loadSavedTeams = useCallback(async () => {
