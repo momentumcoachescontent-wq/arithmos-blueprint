@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { supabase, SUPABASE_URL } from "@/integrations/supabase/client";
+import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useProfile } from "./useProfile";
 import { toast } from "sonner";
@@ -134,7 +134,8 @@ export function useCoachSession() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${session?.access_token}`
+                    "Authorization": `Bearer ${session?.access_token || SUPABASE_PUBLISHABLE_KEY}`,
+                    "apikey": SUPABASE_PUBLISHABLE_KEY
                 },
                 body: JSON.stringify({
                     messages: history,
