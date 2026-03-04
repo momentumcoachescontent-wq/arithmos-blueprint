@@ -310,6 +310,13 @@ export type Database = {
         Args: { p_user_id: string; p_xp: number }
         Returns: undefined
       }
+      admin_update_user_role: {
+        Args: {
+          target_user_id: string
+          new_role: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

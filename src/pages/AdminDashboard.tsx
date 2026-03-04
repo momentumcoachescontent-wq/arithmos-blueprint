@@ -22,6 +22,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminFinopsTab } from "@/components/admin/AdminFinopsTab";
+import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminDashboard = () => {
@@ -143,6 +144,13 @@ const AdminDashboard = () => {
                             >
                                 <CreditCard className="h-4 w-4 mr-2 inline-block" />
                                 FinOps (Pagos)
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="users"
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-sans text-sm rounded-md py-2 px-6"
+                            >
+                                <Users className="h-4 w-4 mr-2 inline-block" />
+                                Usuarios (Test)
                             </TabsTrigger>
                         </TabsList>
                     </div>
@@ -266,6 +274,10 @@ const AdminDashboard = () => {
 
                     <TabsContent value="finops" className="m-0 focus-visible:outline-none">
                         <AdminFinopsTab />
+                    </TabsContent>
+
+                    <TabsContent value="users" className="m-0 focus-visible:outline-none">
+                        <AdminUsersTab />
                     </TabsContent>
                 </Tabs>
             </div>
