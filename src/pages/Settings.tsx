@@ -66,9 +66,14 @@ const Settings = () => {
     const navigate = useNavigate();
     const { user, isAuthenticated, logout } = useAuth();
     const { profile } = useProfile();
-    const { stats, toggleRanking } = useStats(user?.id);
+    const { stats, fetchStats, toggleRanking } = useStats(user?.id);
     const { redirectToCheckout, redirectToPortal, isLoading: stripeLoading } = useSubscription(user?.id);
     const isPremium = profile?.role === 'premium' || profile?.role === 'admin';
+
+    // ── Cargar estadísticas al entrar ──
+    useEffect(() => {
+        if (user?.id) fetchStats(user.id);
+    }, [user?.id, fetchStats]);
 
     // ── Contraseña ──
     const [currentPwd, setCurrentPwd] = useState("");
