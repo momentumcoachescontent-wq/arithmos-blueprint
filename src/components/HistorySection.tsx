@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { History, Book, Sparkles, ArrowRight } from "lucide-react";
+import { History, Book, Sparkles, ArrowRight, Users } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ export const HistorySection = ({ userId }: HistorySectionProps) => {
         switch (type) {
             case 'journal_entry': return <Book className="h-4 w-4 text-amber-400" />;
             case 'daily_pulse': return <Sparkles className="h-4 w-4 text-primary" />;
+            case 'team_reading': return <Users className="h-4 w-4 text-indigo-400" />;
             default: return <History className="h-4 w-4 text-indigo-400" />;
         }
     };
@@ -63,7 +64,11 @@ export const HistorySection = ({ userId }: HistorySectionProps) => {
                     <div
                         key={item.id}
                         className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border/30 hover:border-primary/20 transition-all cursor-pointer group"
-                        onClick={() => navigate(item.type === 'journal_entry' ? '/journal' : '/dashboard')}
+                        onClick={() => {
+                            if (item.type === 'journal_entry') navigate('/journal');
+                            else if (item.type === 'team_reading') navigate('/radar-equipo');
+                            else navigate('/dashboard');
+                        }}
                     >
                         <div className="flex items-center gap-3">
                             <div className="p-2 rounded-md bg-background/50">

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface HistoryItem {
     id: string;
     title: string;
-    type: 'daily_pulse' | 'mini_blueprint' | 'journal_entry';
+    type: 'daily_pulse' | 'mini_blueprint' | 'journal_entry' | 'team_reading';
     date: string;
     summary?: string;
     metadata?: any;
@@ -39,6 +39,14 @@ export function useHistory(userId?: string) {
 
             if (journalsError) throw journalsError;
 
+            // Fetch team readings (Radar de Equipo)
+            const { data: teamReadings } = await supabase
+                .from('team_readings' as any)
+                .select('id, title, members, created_at')
+                .eq('owner_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
             // Combine and format
             const combined: HistoryItem[] = [
                 ...(readings?.map(r => ({
@@ -54,6 +62,13 @@ export function useHistory(userId?: string) {
                     type: 'journal_entry' as const,
                     date: j.created_at,
                     summary: j.content?.substring(0, 100) + '...'
+                })) || []),
+                ...((teamReadings as any[])?.map(t => ({
+                    id: t.id,
+                    title: `Radar: ${t.title}`,
+                    type: 'team_reading' as const,
+                    date: t.created_at,
+                    summary: `${(t.members as any[]).length} integrantes analizados`
                 })) || [])
             ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
