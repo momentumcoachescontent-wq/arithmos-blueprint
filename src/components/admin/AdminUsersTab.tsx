@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale/es";
-import { Users, Search, ShieldAlert, Award, AlertTriangle, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { Users, Search, ShieldAlert, Award, AlertTriangle, ArrowUpCircle, ArrowDownCircle, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -73,6 +73,31 @@ export function AdminUsersTab() {
         } catch (err: any) {
             console.error("Error updating role:", err);
             toast.error(err.message || "Error al actualizar el usuario. Asegúrate de ejecutar el script SQL.");
+        } finally {
+            setIsUpdating(null);
+        }
+    };
+
+    const handleDeleteUser = async (user_id: string, name: string) => {
+        const confirm1 = window.confirm(`⚠️ ADVERTENCIA: ¿Seguro que deseas eliminar a "${name || 'este usuario'}" permanentemente?\n\nEsta acción eliminará su cuenta de acceso, perfil, lecturas y datos del diario de forma irreversible.`);
+        if (!confirm1) return;
+
+        const confirm2 = window.confirm(`CONFIRMACIÓN FINAL: ¿Realmente deseas proceder con la eliminación? Esta acción NO se puede deshacer.`);
+        if (!confirm2) return;
+
+        setIsUpdating(user_id);
+        try {
+            const { error } = await (supabase as any).rpc('admin_delete_user', {
+                target_user_id: user_id
+            });
+
+            if (error) throw error;
+
+            toast.success("Usuario eliminado correctamente.");
+            setUsers(users.filter(u => u.user_id !== user_id));
+        } catch (err: any) {
+            console.error("Error deleting user:", err);
+            toast.error(err.message || "Error al eliminar el usuario. ¿Ejecutaste el SQL?");
         } finally {
             setIsUpdating(null);
         }
@@ -167,23 +192,36 @@ export function AdminUsersTab() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             {user.role !== 'admin' && (
-                                                <Button
-                                                    size="sm"
-                                                    variant={user.role === 'premium' ? "outline" : "default"}
-                                                    className={`text-xs h-8 ${user.role !== 'premium' ? 'bg-amber-500 hover:bg-amber-600 text-white border-none' : 'text-foreground hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/50'}`}
-                                                    onClick={() => handleUpdateRole(user.user_id, user.role)}
-                                                    disabled={isUpdating === user.user_id}
-                                                >
-                                                    {isUpdating === user.user_id ? "Actualizando..." : (
-                                                        <>
-                                                            {user.role === 'premium' ? (
-                                                                <><ArrowDownCircle className="h-3 w-3 mr-1" /> Remover Premium</>
-                                                            ) : (
-                                                                <><ArrowUpCircle className="h-3 w-3 mr-1" /> Dar Premium Manual</>
-                                                            )}
-                                                        </>
-                                                    )}
-                                                </Button>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        variant={user.role === 'premium' ? "outline" : "default"}
+                                                        className={`text-xs h-8 ${user.role !== 'premium' ? 'bg-amber-500 hover:bg-amber-600 text-white border-none' : 'text-foreground hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/50'}`}
+                                                        onClick={() => handleUpdateRole(user.user_id, user.role)}
+                                                        disabled={isUpdating === user.user_id}
+                                                    >
+                                                        {isUpdating === user.user_id ? "..." : (
+                                                            <>
+                                                                {user.role === 'premium' ? (
+                                                                    <><ArrowDownCircle className="h-3 w-3 mr-1" /> Freemium</>
+                                                                ) : (
+                                                                    <><ArrowUpCircle className="h-3 w-3 mr-1" /> Premium</>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </Button>
+
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10"
+                                                        onClick={() => handleDeleteUser(user.user_id, user.name)}
+                                                        disabled={isUpdating === user.user_id}
+                                                        title="Eliminar usuario definitivamente"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             )}
                                             {user.role === 'admin' && (
                                                 <span className="text-xs text-muted-foreground uppercase font-bold tracking-widest">Master</span>
