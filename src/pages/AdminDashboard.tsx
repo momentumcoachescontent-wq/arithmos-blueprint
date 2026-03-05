@@ -17,6 +17,7 @@ import {
     DollarSign,
     Brain,
     Tag,
+    Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,6 +30,7 @@ import { AdminAITab } from "@/components/admin/AdminAITab";
 import { AdminPricingTab } from "@/components/admin/AdminPricingTab";
 import { AdminOverviewTab } from "@/components/admin/AdminOverviewTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -45,6 +47,12 @@ const AdminDashboard = () => {
         premiumUsers: 0
     });
     const [isLoading, setIsLoading] = useState(true);
+    const [isChecking, setIsChecking] = useState(false);
+    const [healthResults, setHealthResults] = useState<Record<string, { status: 'ok' | 'error', latency?: number, notes?: string }>>({
+        supabase: { status: 'ok' },
+        n8n: { status: 'ok' },
+        stripe: { status: !!import.meta.env.VITE_STRIPE_PUBLIC_KEY ? 'ok' : 'error' },
+    });
 
     useEffect(() => {
         if (profile?.role !== 'admin') {
@@ -75,6 +83,73 @@ const AdminDashboard = () => {
 
         fetchAdminStats();
     }, [profile, navigate]);
+
+    const handleCheckup = async () => {
+        setIsChecking(true);
+        toast.info("Iniciando checkup completo del sistema...");
+
+        const results: any = {};
+
+        try {
+            // 1. Check Supabase Latency
+            const start = performance.now();
+            const { error: dbError } = await supabase.from('profiles').select('id').limit(1);
+            const end = performance.now();
+            const latency = Math.round(end - start);
+
+            results.supabase = {
+                status: dbError ? 'error' : 'ok',
+                latency,
+                notes: dbError ? dbError.message : 'Conexión estable con PostgreSQL'
+            };
+
+            // 2. Check Stripe Config
+            results.stripe = {
+                status: !!import.meta.env.VITE_STRIPE_PUBLIC_KEY ? 'ok' : 'error',
+                notes: import.meta.env.VITE_STRIPE_PUBLIC_KEY ? 'Llaves cargadas correctamente' : 'Falta VITE_STRIPE_PUBLIC_KEY'
+            };
+
+            // 3. Check n8n/Edge Functions (attempt a ping to chat-coach or similar)
+            try {
+                const { error: edgeError } = await supabase.functions.invoke('chat-coach', {
+                    body: { message: 'ping_health_check_ignore' }
+                });
+                // Even if it returns error because of missing params, if it's not a connection error it's "online"
+                results.n8n = {
+                    status: edgeError && edgeError.message?.includes('FetchError') ? 'error' : 'ok',
+                    notes: 'Servicio de Edge Functions disponible'
+                };
+            } catch (e) {
+                results.n8n = { status: 'error', notes: 'No se pudo contactar con Edge Functions' };
+            }
+
+            setHealthResults(results);
+
+            // Persist checkup results in DB
+            const checkData = Object.entries(results).map(([service, res]: [string, any]) => ({
+                service,
+                status: res.status,
+                latency_ms: res.latency || 0,
+                notes: res.notes,
+                checked_by: user?.id
+            }));
+
+            const { error: saveError } = await (supabase as any).from('admin_health_checks').insert(checkData);
+
+            if (saveError) {
+                console.error("Error saving health check history:", saveError);
+                toast.error("Salud ok, pero falló el registro histórico.");
+            } else {
+                toast.success("Checkup completado y registrado exitosamente.");
+            }
+
+        } catch (err) {
+            console.error("Checkup failed:", err);
+            toast.error("Ocurrió un error al ejecutar el diagnóstico.");
+        } finally {
+            setIsChecking(false);
+        }
+    };
 
     if (isLoading) return <div className="min-h-screen bg-background flex items-center justify-center font-serif text-2xl animate-pulse">Iniciando Portal del Arquitecto...</div>;
 
@@ -194,62 +269,64 @@ const AdminDashboard = () => {
                                         <Database className="h-5 w-5 text-indigo-400" />
                                         Diagnóstico de Salud del Sistema
                                     </h3>
-                                    <Button size="sm" variant="outline" className="text-xs font-sans">Ejecutar Checkup Completo</Button>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-xs font-sans"
+                                        onClick={handleCheckup}
+                                        disabled={isChecking}
+                                    >
+                                        {isChecking ? (
+                                            <>
+                                                <Loader2 className="h-3 w-3 animate-spin mr-2" />
+                                                Corriendo...
+                                            </>
+                                        ) : "Ejecutar Checkup Completo"}
+                                    </Button>
                                 </div>
 
                                 <div className="space-y-6">
                                     <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
                                         <div className="flex items-center gap-4">
-                                            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                                            <div className={`h-2 w-2 rounded-full ${healthResults.supabase.status === 'ok' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'} shadow-[0_0_8px_rgba(16,185,129,0.8)]`} />
                                             <div>
                                                 <p className="text-sm font-sans font-bold">Supabase Infrastructure</p>
-                                                <p className="text-xs text-muted-foreground">Auth, PostgreSQL & RLS Policies</p>
+                                                <p className="text-xs text-muted-foreground">Auth, PostgreSQL & RLS ({healthResults.supabase.latency || 0}ms)</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-emerald-500 text-sm font-sans font-bold">
-                                            <CheckCircle2 className="h-4 w-4" />
-                                            CONNECTED
+                                        <div className={`flex items-center gap-2 ${healthResults.supabase.status === 'ok' ? 'text-emerald-500' : 'text-rose-500'} text-sm font-sans font-bold`}>
+                                            {healthResults.supabase.status === 'ok' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                                            {healthResults.supabase.status === 'ok' ? 'CONNECTED' : 'ERROR'}
                                         </div>
                                     </div>
 
                                     <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
                                         <div className="flex items-center gap-4">
-                                            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                                            <div className={`h-2 w-2 rounded-full ${healthResults.n8n.status === 'ok' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'} shadow-[0_0_8px_rgba(16,185,129,0.8)]`} />
                                             <div>
-                                                <p className="text-sm font-sans font-bold">n8n Workflow Engine</p>
+                                                <p className="text-sm font-sans font-bold">Edge Functions Engine</p>
                                                 <p className="text-xs text-muted-foreground">Webhooks & Calculation Logic</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-emerald-500 text-sm font-sans font-bold">
-                                            <CheckCircle2 className="h-4 w-4" />
-                                            ONLINE
+                                        <div className={`flex items-center gap-2 ${healthResults.n8n.status === 'ok' ? 'text-emerald-500' : 'text-rose-500'} text-sm font-sans font-bold`}>
+                                            {healthResults.n8n.status === 'ok' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                                            {healthResults.n8n.status === 'ok' ? 'ONLINE' : 'OFFLINE'}
                                         </div>
                                     </div>
 
                                     <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
                                         <div className="flex items-center gap-4">
-                                            {import.meta.env.VITE_STRIPE_PUBLIC_KEY ? (
-                                                <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                                            ) : (
-                                                <div className="h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />
-                                            )}
+                                            <div className={`h-2 w-2 rounded-full ${healthResults.stripe.status === 'ok' ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'} shadow-[0_0_8px_rgba(16,185,129,0.8)]`} />
                                             <div>
                                                 <p className="text-sm font-sans font-bold">Stripe Payments (FinOps)</p>
                                                 <p className="text-xs text-muted-foreground">Checkout & Webhook Configuration</p>
                                             </div>
                                         </div>
 
-                                        {import.meta.env.VITE_STRIPE_PUBLIC_KEY ? (
-                                            <div className="flex items-center gap-2 text-emerald-500 text-sm font-sans font-bold">
-                                                <CheckCircle2 className="h-4 w-4" />
-                                                READY
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-2 text-rose-500 text-sm font-sans font-bold">
-                                                <XCircle className="h-4 w-4" />
-                                                MISSING KEYS
-                                            </div>
-                                        )}
+                                        <div className={`flex items-center gap-2 ${healthResults.stripe.status === 'ok' ? 'text-emerald-500' : 'text-rose-500'} text-sm font-sans font-bold`}>
+                                            {healthResults.stripe.status === 'ok' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                                            {healthResults.stripe.status === 'ok' ? 'READY' : 'MISSING KEYS'}
+                                        </div>
                                     </div>
                                 </div>
                             </section>
