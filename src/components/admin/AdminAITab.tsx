@@ -45,28 +45,39 @@ export function AdminAITab() {
                 .from("system_prompts")
                 .select("feature, content, model_id")
                 .order("feature");
+
             if (error) throw error;
-            const mapped: SystemPrompt[] = (data || []).map((p: Record<string, string>) => ({
+
+            const mapped: SystemPrompt[] = (data || []).map((p: any) => ({
                 feature: p.feature,
-                content: p.content,
+                content: p.content || "",
                 model_id: p.model_id || "gpt-4o-mini",
                 label: FEATURE_LABELS[p.feature] || p.feature,
             }));
+
             setPrompts(mapped);
-            const first = mapped.find((p) => p.feature === activeFeature) || mapped[0];
-            if (first) {
-                setActiveFeature(first.feature);
-                setEditedContent(first.content || "");
-                setEditedModel(first.model_id || "gpt-4o-mini");
+
+            // Set initial edit state based on current or first found
+            const current = mapped.find(p => p.feature === activeFeature) || mapped[0];
+            if (current) {
+                // IMPORTANT: Only set activeFeature if it was different to ensure UI stays in sync
+                if (activeFeature !== current.feature) {
+                    setActiveFeature(current.feature);
+                }
+                setEditedContent(current.content);
+                setEditedModel(current.model_id);
             }
         } catch (err) {
             console.error("AdminAITab — Error fetching prompts:", err);
+            setStatus({ message: "Error al cargar prompts. Asegúrate de que la tabla exista en Supabase.", type: "err" });
         } finally {
             setIsLoading(false);
         }
-    }, [activeFeature]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, []); // Empty dependency to fetch only on mount or manual refresh
 
-    useEffect(() => { fetchPrompts(); }, [fetchPrompts]);
+    useEffect(() => {
+        fetchPrompts();
+    }, [fetchPrompts]);
 
     const handleFeatureChange = (feature: string) => {
         setActiveFeature(feature);
@@ -78,24 +89,40 @@ export function AdminAITab() {
     };
 
     const handleSave = async () => {
+        if (!activeFeature) return;
+
         setIsSaving(true);
         setStatus(null);
         try {
             const { error } = await db
                 .from("system_prompts")
-                .update({ content: editedContent, model_id: editedModel, updated_at: new Date().toISOString() })
+                .update({
+                    content: editedContent,
+                    model_id: editedModel,
+                    updated_at: new Date().toISOString()
+                })
                 .eq("feature", activeFeature);
+
             if (error) throw error;
-            setPrompts((prev) =>
-                prev.map((p) => p.feature === activeFeature
+
+            // Update local memory list
+            setPrompts(prev => prev.map(p =>
+                p.feature === activeFeature
                     ? { ...p, content: editedContent, model_id: editedModel }
                     : p
-                )
-            );
-            setStatus({ message: "Prompt y modelo actualizados. Las Edge Functions usarán esta configuración en tiempo real.", type: "ok" });
+            ));
+
+            setStatus({
+                message: "Cambios guardados. El bot aplicará esta nueva personalidad inmediatamente.",
+                type: "ok"
+            });
             setTimeout(() => setStatus(null), 5000);
-        } catch {
-            setStatus({ message: "Error al guardar. Verifica los permisos RLS en Supabase.", type: "err" });
+        } catch (err: any) {
+            console.error("Error saving prompt:", err);
+            setStatus({
+                message: `Error al guardar: ${err.message || "Verifica permisos RLS"}`,
+                type: "err"
+            });
         } finally {
             setIsSaving(false);
         }
@@ -118,9 +145,16 @@ export function AdminAITab() {
     }
 
     const activePrompt = prompts.find((p) => p.feature === activeFeature);
+
+    // Improved change detection logic
+    const normalizedEditedContent = (editedContent || "").trim();
+    const normalizedSavedContent = (activePrompt?.content || "").trim();
+    const normalizedEditedModel = editedModel || "gpt-4o-mini";
+    const normalizedSavedModel = activePrompt?.model_id || "gpt-4o-mini";
+
     const hasChanges = activePrompt && (
-        (editedContent || "").trim() !== (activePrompt.content || "").trim() ||
-        (editedModel || "gpt-4o-mini") !== (activePrompt.model_id || "gpt-4o-mini")
+        normalizedEditedContent !== normalizedSavedContent ||
+        normalizedEditedModel !== normalizedSavedModel
     );
 
     return (
@@ -131,7 +165,7 @@ export function AdminAITab() {
                     IA & Configuración
                 </h2>
                 <p className="text-muted-foreground font-sans text-sm">
-                    Configura el modelo de OpenAI y los System Prompts que moldean la personalidad de cada bot. Los cambios se aplican inmediatamente.
+                    Configura el modelo de OpenAI y los System Prompts que moldean la personalidad de cada bot.
                 </p>
             </div>
 
@@ -140,17 +174,19 @@ export function AdminAITab() {
                 <div className="lg:col-span-1 space-y-2">
                     <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans mb-3">Bot / Función</p>
                     {prompts.length === 0 ? (
-                        <p className="text-sm text-muted-foreground font-sans italic">
-                            No hay prompts configurados en la base de datos.
-                        </p>
+                        <div className="p-4 rounded-xl border border-dashed border-border bg-secondary/20">
+                            <p className="text-sm text-muted-foreground font-sans italic text-center">
+                                No hay prompts configurados.
+                            </p>
+                        </div>
                     ) : (
                         prompts.map((p) => (
                             <button
                                 key={p.feature}
                                 onClick={() => handleFeatureChange(p.feature)}
                                 className={`w-full text-left px-4 py-3 rounded-xl text-sm font-sans transition-all border ${activeFeature === p.feature
-                                    ? "bg-primary/10 border-primary/30 text-foreground font-semibold"
-                                    : "bg-secondary/30 border-border text-muted-foreground hover:border-primary/20 hover:text-foreground"
+                                        ? "bg-primary/10 border-primary/30 text-foreground font-semibold"
+                                        : "bg-secondary/30 border-border text-muted-foreground hover:border-primary/20 hover:text-foreground"
                                     }`}
                             >
                                 {p.label}
@@ -166,79 +202,95 @@ export function AdminAITab() {
                     animate={{ opacity: 1, x: 0 }}
                     className="lg:col-span-3 glass rounded-2xl p-6 border-border space-y-5"
                 >
-                    {/* Model Selector */}
-                    <div className="space-y-2">
-                        <Label className="text-sm text-muted-foreground font-sans flex items-center gap-1.5">
-                            <Cpu className="h-3.5 w-3.5" /> Modelo de OpenAI
-                        </Label>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            {AI_MODELS.map((m) => (
-                                <button
-                                    key={m.value}
-                                    onClick={() => setEditedModel(m.value)}
-                                    className={`text-left p-4 rounded-xl border transition-all ${editedModel === m.value
-                                        ? "border-primary bg-primary/10"
-                                        : "border-border bg-secondary/30 hover:border-primary/40"
-                                        }`}
-                                >
-                                    <div className="text-xs font-bold font-sans text-primary mb-1">{m.badge}</div>
-                                    <div className="text-xs font-sans text-foreground leading-snug">{m.label}</div>
-                                </button>
-                            ))}
+                    {!activePrompt ? (
+                        <div className="flex flex-col items-center justify-center p-12 text-center">
+                            <AlertCircle className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                            <p className="text-muted-foreground font-sans">Selecciona un bot para editar su personalidad.</p>
                         </div>
-                    </div>
+                    ) : (
+                        <>
+                            {/* Model Selector */}
+                            <div className="space-y-2">
+                                <Label className="text-sm text-muted-foreground font-sans flex items-center gap-1.5">
+                                    <Cpu className="h-3.5 w-3.5" /> Modelo de OpenAI
+                                </Label>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    {AI_MODELS.map((m) => (
+                                        <button
+                                            key={m.value}
+                                            onClick={() => setEditedModel(m.value)}
+                                            className={`text-left p-4 rounded-xl border transition-all ${editedModel === m.value
+                                                    ? "border-primary bg-primary/10"
+                                                    : "border-border bg-secondary/30 hover:border-primary/40"
+                                                }`}
+                                        >
+                                            <div className="text-xs font-bold font-sans text-primary mb-1">{m.badge}</div>
+                                            <div className="text-xs font-sans text-foreground leading-snug">{m.label}</div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
-                    {/* Prompt Content */}
-                    <div className="space-y-2">
-                        <Label className="text-sm text-muted-foreground font-sans">System Prompt (Personalidad del Bot)</Label>
-                        <Textarea
-                            value={editedContent}
-                            onChange={(e) => setEditedContent(e.target.value)}
-                            rows={14}
-                            className="font-mono text-xs resize-none leading-relaxed"
-                            placeholder="Eres un coach de psicología aplicada especializado en..."
-                        />
-                        <p className="text-xs text-muted-foreground font-sans">
-                            {editedContent.length} caracteres · Las Edge Functions leen este valor en cada llamada.
-                        </p>
-                    </div>
+                            {/* Prompt Content */}
+                            <div className="space-y-2">
+                                <Label className="text-sm text-muted-foreground font-sans">System Prompt (Personalidad)</Label>
+                                <Textarea
+                                    value={editedContent}
+                                    onChange={(e) => setEditedContent(e.target.value)}
+                                    rows={14}
+                                    className="font-mono text-xs resize-none leading-relaxed focus:ring-primary/20"
+                                    placeholder="Escribe aquí la personalidad del bot..."
+                                />
+                                <div className="flex justify-between items-center text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
+                                    <span>{editedContent.length} caracteres</span>
+                                    <span>Real-time update enabled</span>
+                                </div>
+                            </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-3 flex-wrap">
-                        <Button onClick={handleSave} disabled={isSaving || !hasChanges} className="gap-2">
-                            {isSaving ? (
-                                <><Loader2 className="h-4 w-4 animate-spin" />Guardando...</>
-                            ) : (
-                                <><Save className="h-4 w-4" />Guardar Cambios</>
-                            )}
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            onClick={handleReset}
-                            disabled={!hasChanges}
-                            className="gap-2 text-muted-foreground"
-                        >
-                            <RotateCcw className="h-4 w-4" />
-                            Revertir
-                        </Button>
-                    </div>
+                            {/* Actions */}
+                            <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                                <div className="flex items-center gap-3">
+                                    <Button
+                                        onClick={handleSave}
+                                        disabled={isSaving || !hasChanges}
+                                        className="gap-2 min-w-[140px]"
+                                    >
+                                        {isSaving ? (
+                                            <><Loader2 className="h-4 w-4 animate-spin" />Guardando...</>
+                                        ) : (
+                                            <><Save className="h-4 w-4" />Grabar Personalidad</>
+                                        )}
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        onClick={handleReset}
+                                        disabled={!hasChanges}
+                                        className="gap-2 text-muted-foreground hover:text-foreground"
+                                    >
+                                        <RotateCcw className="h-4 w-4" />
+                                        Revertir
+                                    </Button>
+                                </div>
 
-                    {status && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className={`flex items-center gap-2 text-sm font-sans px-4 py-2 rounded-lg ${status.type === "ok"
-                                ? "bg-emerald-500/10 text-emerald-400"
-                                : "bg-red-500/10 text-red-400"
-                                }`}
-                        >
-                            {status.type === "ok" ? (
-                                <CheckCircle2 className="h-4 w-4" />
-                            ) : (
-                                <AlertCircle className="h-4 w-4" />
-                            )}
-                            {status.message}
-                        </motion.div>
+                                {status && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className={`flex items-center gap-2 text-xs font-sans px-3 py-1.5 rounded-full ${status.type === "ok"
+                                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                                : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                            }`}
+                                    >
+                                        {status.type === "ok" ? (
+                                            <CheckCircle2 className="h-3.5 w-3.5" />
+                                        ) : (
+                                            <AlertCircle className="h-3.5 w-3.5" />
+                                        )}
+                                        {status.message}
+                                    </motion.div>
+                                )}
+                            </div>
+                        </>
                     )}
                 </motion.div>
             </div>
