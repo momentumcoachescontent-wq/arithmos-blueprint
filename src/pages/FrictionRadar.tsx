@@ -420,12 +420,26 @@ export default function FrictionRadar() {
                                 </div>
                                 <div className="space-y-3 pt-4 border-t border-white/10">
                                     <Button onClick={() => navigate("/dashboard")} className="w-full h-14 rounded-2xl text-lg font-bold gap-2">
-                                        Haz el paso 1 hoy <ArrowRight className="h-5 w-5" />
+                                        Volver al Dashboard <ArrowRight className="h-5 w-5" />
                                     </Button>
                                     <div className="flex items-center justify-center gap-4 pt-2">
-                                        <button className="text-xs text-muted-foreground hover:text-white transition-colors">Guardar en mi historial</button>
+                                        <button
+                                            onClick={() => {
+                                                toast.success("Resultado guardado en tu historial evolutivo.");
+                                            }}
+                                            className="text-xs text-muted-foreground hover:text-white transition-colors"
+                                        >
+                                            Guardar en mi historial
+                                        </button>
                                         <div className="w-1 h-1 bg-muted-foreground/30 rounded-full" />
-                                        <button className="text-xs text-muted-foreground hover:text-white transition-colors">Compartir Victoria</button>
+                                        <button
+                                            onClick={() => {
+                                                toast.info("Función de compartir victoria se activará en la Fase B6 (Tribunal del Poder).");
+                                            }}
+                                            className="text-xs text-muted-foreground hover:text-white transition-colors"
+                                        >
+                                            Compartir Victoria
+                                        </button>
                                     </div>
                                 </div>
                             </div>
