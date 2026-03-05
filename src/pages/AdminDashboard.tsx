@@ -14,7 +14,9 @@ import {
     TrendingUp,
     MessageSquare,
     CreditCard,
-    DollarSign
+    DollarSign,
+    Brain,
+    Tag,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,6 +25,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminFinopsTab } from "@/components/admin/AdminFinopsTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
+import { AdminAITab } from "@/components/admin/AdminAITab";
+import { AdminPricingTab } from "@/components/admin/AdminPricingTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminDashboard = () => {
@@ -130,13 +134,27 @@ const AdminDashboard = () => {
                 {/* Main Content Area via Tabs */}
                 <Tabs defaultValue="system" className="space-y-8">
                     <div className="flex justify-center md:justify-start">
-                        <TabsList className="bg-secondary/50 border border-border p-1 w-full md:w-auto h-auto rounded-lg">
+                        <TabsList className="bg-secondary/50 border border-border p-1 w-full md:w-auto h-auto rounded-lg flex-wrap">
                             <TabsTrigger
                                 value="system"
                                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-sans text-sm rounded-md py-2 px-6"
                             >
                                 <Database className="h-4 w-4 mr-2 inline-block" />
-                                Sistema e IA
+                                Sistema
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="ai"
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-sans text-sm rounded-md py-2 px-6"
+                            >
+                                <Brain className="h-4 w-4 mr-2 inline-block" />
+                                IA & Config
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="pricing"
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-sans text-sm rounded-md py-2 px-6"
+                            >
+                                <Tag className="h-4 w-4 mr-2 inline-block" />
+                                Pricing
                             </TabsTrigger>
                             <TabsTrigger
                                 value="finops"
@@ -270,6 +288,14 @@ const AdminDashboard = () => {
                                 </div>
                             </section>
                         </div>
+                    </TabsContent>
+
+                    <TabsContent value="ai" className="m-0 focus-visible:outline-none">
+                        <AdminAITab />
+                    </TabsContent>
+
+                    <TabsContent value="pricing" className="m-0 focus-visible:outline-none">
+                        <AdminPricingTab />
                     </TabsContent>
 
                     <TabsContent value="finops" className="m-0 focus-visible:outline-none">

@@ -2,6 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, Zap, Shield, Users, BookOpen, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useAppConfig } from "@/hooks/useAppConfig";
 
 interface UpgradeModalProps {
     isOpen: boolean;
@@ -20,6 +21,8 @@ const features = [
 
 export function UpgradeModal({ isOpen, onClose, userId, featureRequested }: UpgradeModalProps) {
     const { redirectToCheckout, isLoading, error } = useSubscription(userId);
+    const { config } = useAppConfig();
+    const currencySymbol = config.premium_currency === "EUR" ? "€" : "$";
 
     return (
         <AnimatePresence>
@@ -79,7 +82,9 @@ export function UpgradeModal({ isOpen, onClose, userId, featureRequested }: Upgr
 
                         {/* Price */}
                         <div className="rounded-xl bg-primary/10 border border-primary/20 p-4 text-center mb-6">
-                            <span className="text-3xl font-serif font-bold text-foreground">$9.99</span>
+                            <span className="text-3xl font-serif font-bold text-foreground">
+                                {currencySymbol}{config.premium_price}
+                            </span>
                             <span className="text-muted-foreground font-sans text-sm"> / mes</span>
                             <p className="text-xs text-muted-foreground mt-1 font-sans">Cancela cuando quieras</p>
                         </div>
@@ -104,7 +109,7 @@ export function UpgradeModal({ isOpen, onClose, userId, featureRequested }: Upgr
                                 ) : (
                                     <>
                                         <Zap className="h-4 w-4" />
-                                        Pagar con Tarjeta (Stripe)
+                                        {config.premium_cta_label} (Stripe)
                                     </>
                                 )}
                             </Button>
