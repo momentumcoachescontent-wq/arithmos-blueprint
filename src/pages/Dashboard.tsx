@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Lock } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Lock, Scale } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -216,6 +216,27 @@ const Dashboard = () => {
               </p>
               <span className="text-[10px] text-primary font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">
                 Iniciar Sesión →
+              </span>
+            </motion.button>
+
+            {/* Radar de Fricción (Nuevo - Free) */}
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.18 }}
+              onClick={() => navigate("/radar-friccion")}
+              className="w-full glass rounded-xl p-6 border-indigo-500/20 bg-gradient-to-br from-indigo-500/10 to-transparent text-left group hover:border-indigo-500/50 transition-all shadow-lg shadow-indigo-500/5"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Scale className="h-5 w-5 text-indigo-400" />
+                <h3 className="font-serif text-foreground font-semibold">Radar de Fricción</h3>
+                <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-[10px] text-indigo-400 font-bold uppercase ml-auto">Free</span>
+              </div>
+              <p className="text-xs text-muted-foreground font-sans leading-relaxed">
+                ¿Sientes inercia? Descubre qué te está frenando hoy y obtén un protocolo de desbloqueo inmediato.
+              </p>
+              <span className="text-[10px] text-indigo-400 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">
+                Iniciar Radar →
               </span>
             </motion.button>
 

@@ -16,6 +16,7 @@ import RadarEquipo from "./pages/RadarEquipo";
 import DeepDive from "./pages/DeepDive";
 import Evolucion from "./pages/Evolucion";
 import CoachChat from "./pages/CoachChat";
+import FrictionRadar from "./pages/FrictionRadar";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/deep-dive" element={<DeepDive />} />
           <Route path="/evolucion" element={<Evolucion />} />
           <Route path="/coach" element={<CoachChat />} />
+          <Route path="/radar-friccion" element={<FrictionRadar />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
