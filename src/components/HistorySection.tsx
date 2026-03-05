@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { History, Book, Sparkles, ArrowRight, Users } from "lucide-react";
+import { History, Book, Sparkles, ArrowRight, Users, Scale } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ export const HistorySection = ({ userId }: HistorySectionProps) => {
             case 'journal_entry': return <Book className="h-4 w-4 text-amber-400" />;
             case 'daily_pulse': return <Sparkles className="h-4 w-4 text-primary" />;
             case 'team_reading': return <Users className="h-4 w-4 text-indigo-400" />;
+            case 'friction_radar': return <Scale className="h-4 w-4 text-indigo-400" />;
             default: return <History className="h-4 w-4 text-indigo-400" />;
         }
     };
@@ -67,6 +68,7 @@ export const HistorySection = ({ userId }: HistorySectionProps) => {
                         onClick={() => {
                             if (item.type === 'journal_entry') navigate('/journal');
                             else if (item.type === 'team_reading') navigate('/radar-equipo');
+                            else if (item.type === 'friction_radar') navigate('/radar-friccion');
                             else navigate('/dashboard');
                         }}
                     >

@@ -185,6 +185,38 @@ export default function FrictionRadar() {
         setStep(step - 1);
     };
 
+    const handleSave = async (silent = false) => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                if (!silent) toast.error("Debes iniciar sesión para guardar en tu historial.");
+                return;
+            }
+
+            const totalFriction = (scores.judgment + scores.certainty + scores.planning + scores.emotional + (100 - scores.clarity)) / 5;
+            const level = totalFriction > 70 ? "alta" : totalFriction > 40 ? "media" : "baja";
+
+            const { error } = await (supabase as any).from('friction_diagnostics').insert({
+                user_id: user.id,
+                goal_text: goal,
+                score_fear_judgment: scores.judgment,
+                score_need_certainty: scores.certainty,
+                score_overplanning: scores.planning,
+                score_emotional_load: scores.emotional,
+                score_clarity_next_step: scores.clarity,
+                profile_id: result?.id || 'ejecutante_dormido',
+                friction_level: level,
+                steps_completed: 3
+            });
+
+            if (error) throw error;
+            if (!silent) toast.success("Resultado guardado en tu historial evolutivo.");
+        } catch (err) {
+            console.error("Error saving diagnostic:", err);
+            if (!silent) toast.error("Error al guardar el diagnóstico.");
+        }
+    };
+
     const calculateResult = async () => {
         setIsCalculating(true);
         // Artificial delay for UX feel
@@ -214,30 +246,13 @@ export default function FrictionRadar() {
             archetypeId = "impulsivo_inconsistente";
         }
 
-        setResult(ARCHETYPES[archetypeId]);
+        const selectedArchetype = ARCHETYPES[archetypeId];
+        setResult(selectedArchetype);
         setStep(3);
         setIsCalculating(false);
 
-        // Persist to DB if logged in
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                await (supabase as any).from('friction_diagnostics').insert({
-                    user_id: user.id,
-                    goal_text: goal,
-                    score_fear_judgment: scores.judgment,
-                    score_need_certainty: scores.certainty,
-                    score_overplanning: scores.planning,
-                    score_emotional_load: scores.emotional,
-                    score_clarity_next_step: scores.clarity,
-                    profile_id: archetypeId,
-                    friction_level: level,
-                    steps_completed: 3
-                });
-            }
-        } catch (err) {
-            console.error("Error saving diagnostic:", err);
-        }
+        // Auto-persist (silent)
+        handleSave(true);
     };
 
     return (
@@ -424,9 +439,7 @@ export default function FrictionRadar() {
                                     </Button>
                                     <div className="flex items-center justify-center gap-4 pt-2">
                                         <button
-                                            onClick={() => {
-                                                toast.success("Resultado guardado en tu historial evolutivo.");
-                                            }}
+                                            onClick={() => handleSave(false)}
                                             className="text-xs text-muted-foreground hover:text-white transition-colors"
                                         >
                                             Guardar en mi historial

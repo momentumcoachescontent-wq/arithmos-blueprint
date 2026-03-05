@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface HistoryItem {
     id: string;
     title: string;
-    type: 'daily_pulse' | 'mini_blueprint' | 'journal_entry' | 'team_reading';
+    type: 'daily_pulse' | 'mini_blueprint' | 'journal_entry' | 'team_reading' | 'friction_radar';
     date: string;
     summary?: string;
     metadata?: any;
@@ -47,6 +47,14 @@ export function useHistory(userId?: string) {
                 .order('created_at', { ascending: false })
                 .limit(5);
 
+            // Fetch friction diagnostics
+            const { data: frictionData } = await supabase
+                .from('friction_diagnostics' as any)
+                .select('id, goal_text, profile_id, created_at')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false })
+                .limit(5);
+
             // Combine and format
             const combined: HistoryItem[] = [
                 ...(readings?.map(r => ({
@@ -69,6 +77,13 @@ export function useHistory(userId?: string) {
                     type: 'team_reading' as const,
                     date: t.created_at,
                     summary: `${(t.members as any[]).length} integrantes analizados`
+                })) || []),
+                ...((frictionData as any[])?.map(f => ({
+                    id: f.id,
+                    title: `Fricción: ${f.goal_text.substring(0, 20)}...`,
+                    type: 'friction_radar' as const,
+                    date: f.created_at,
+                    summary: `Perfil: ${f.profile_id}`
                 })) || [])
             ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
