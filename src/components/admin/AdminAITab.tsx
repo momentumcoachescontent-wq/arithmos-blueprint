@@ -55,6 +55,7 @@ export function AdminAITab() {
             setPrompts(mapped);
             const first = mapped.find((p) => p.feature === activeFeature) || mapped[0];
             if (first) {
+                setActiveFeature(first.feature);
                 setEditedContent(first.content || "");
                 setEditedModel(first.model_id || "gpt-4o-mini");
             }
@@ -63,7 +64,7 @@ export function AdminAITab() {
         } finally {
             setIsLoading(false);
         }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [activeFeature]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => { fetchPrompts(); }, [fetchPrompts]);
 
@@ -117,8 +118,10 @@ export function AdminAITab() {
     }
 
     const activePrompt = prompts.find((p) => p.feature === activeFeature);
-    const hasChanges = activePrompt &&
-        (editedContent !== activePrompt.content || editedModel !== activePrompt.model_id);
+    const hasChanges = activePrompt && (
+        (editedContent || "").trim() !== (activePrompt.content || "").trim() ||
+        (editedModel || "gpt-4o-mini") !== (activePrompt.model_id || "gpt-4o-mini")
+    );
 
     return (
         <div className="space-y-6">
@@ -146,8 +149,8 @@ export function AdminAITab() {
                                 key={p.feature}
                                 onClick={() => handleFeatureChange(p.feature)}
                                 className={`w-full text-left px-4 py-3 rounded-xl text-sm font-sans transition-all border ${activeFeature === p.feature
-                                        ? "bg-primary/10 border-primary/30 text-foreground font-semibold"
-                                        : "bg-secondary/30 border-border text-muted-foreground hover:border-primary/20 hover:text-foreground"
+                                    ? "bg-primary/10 border-primary/30 text-foreground font-semibold"
+                                    : "bg-secondary/30 border-border text-muted-foreground hover:border-primary/20 hover:text-foreground"
                                     }`}
                             >
                                 {p.label}
@@ -174,8 +177,8 @@ export function AdminAITab() {
                                     key={m.value}
                                     onClick={() => setEditedModel(m.value)}
                                     className={`text-left p-4 rounded-xl border transition-all ${editedModel === m.value
-                                            ? "border-primary bg-primary/10"
-                                            : "border-border bg-secondary/30 hover:border-primary/40"
+                                        ? "border-primary bg-primary/10"
+                                        : "border-border bg-secondary/30 hover:border-primary/40"
                                         }`}
                                 >
                                     <div className="text-xs font-bold font-sans text-primary mb-1">{m.badge}</div>
@@ -225,8 +228,8 @@ export function AdminAITab() {
                             initial={{ opacity: 0, y: -6 }}
                             animate={{ opacity: 1, y: 0 }}
                             className={`flex items-center gap-2 text-sm font-sans px-4 py-2 rounded-lg ${status.type === "ok"
-                                    ? "bg-emerald-500/10 text-emerald-400"
-                                    : "bg-red-500/10 text-red-400"
+                                ? "bg-emerald-500/10 text-emerald-400"
+                                : "bg-red-500/10 text-red-400"
                                 }`}
                         >
                             {status.type === "ok" ? (
