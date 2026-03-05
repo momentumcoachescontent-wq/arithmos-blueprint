@@ -27,6 +27,7 @@ import { AdminFinopsTab } from "@/components/admin/AdminFinopsTab";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 import { AdminAITab } from "@/components/admin/AdminAITab";
 import { AdminPricingTab } from "@/components/admin/AdminPricingTab";
+import { AdminOverviewTab } from "@/components/admin/AdminOverviewTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminDashboard = () => {
@@ -132,9 +133,16 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Main Content Area via Tabs */}
-                <Tabs defaultValue="system" className="space-y-8">
+                <Tabs defaultValue="overview" className="space-y-8">
                     <div className="flex justify-center md:justify-start">
                         <TabsList className="bg-secondary/50 border border-border p-1 w-full md:w-auto h-auto rounded-lg flex-wrap">
+                            <TabsTrigger
+                                value="overview"
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-sans text-sm rounded-md py-2 px-6"
+                            >
+                                <TrendingUp className="h-4 w-4 mr-2 inline-block" />
+                                Overview
+                            </TabsTrigger>
                             <TabsTrigger
                                 value="system"
                                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-sans text-sm rounded-md py-2 px-6"
@@ -172,6 +180,10 @@ const AdminDashboard = () => {
                             </TabsTrigger>
                         </TabsList>
                     </div>
+
+                    <TabsContent value="overview" className="m-0 focus-visible:outline-none">
+                        <AdminOverviewTab />
+                    </TabsContent>
 
                     <TabsContent value="system" className="grid grid-cols-1 lg:grid-cols-3 gap-8 m-0 focus-visible:outline-none">
                         {/* System Health */}

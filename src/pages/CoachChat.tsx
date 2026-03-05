@@ -1,16 +1,110 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useCoachSession } from "@/hooks/useCoachSession";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Send, Sparkles, AlertCircle, Save } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Send, Sparkles, Save, Lock, Zap, Eye } from "lucide-react";
+import { motion } from "framer-motion";
+
+const ShadowGate = ({ onUpgrade }: { onUpgrade: () => void }) => (
+    <div className="flex flex-col h-screen bg-background relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-rose-950/10 to-background pointer-events-none" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rose-500/5 rounded-full blur-3xl pointer-events-none" />
+
+        <header className="border-b border-border px-6 py-4 flex-none bg-background/80 backdrop-blur-md z-10 sticky top-0">
+            <div className="max-w-3xl mx-auto flex items-center gap-4">
+                <button
+                    onClick={() => window.history.back()}
+                    className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-muted/50"
+                >
+                    <ArrowLeft className="h-5 w-5" />
+                </button>
+                <div>
+                    <h1 className="text-lg font-serif font-semibold text-foreground flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-rose-400" />
+                        Coach de Sombras
+                    </h1>
+                    <p className="text-xs text-muted-foreground font-sans">Acceso Exclusivo Premium</p>
+                </div>
+            </div>
+        </header>
+
+        <main className="flex-1 flex items-center justify-center px-6">
+            <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className="max-w-lg w-full text-center space-y-8"
+            >
+                <motion.div
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    className="flex justify-center"
+                >
+                    <div className="relative">
+                        <div className="w-24 h-24 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+                            <Lock className="h-10 w-10 text-rose-400" />
+                        </div>
+                        <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+                            <Zap className="h-4 w-4 text-amber-400" />
+                        </div>
+                    </div>
+                </motion.div>
+
+                <div className="space-y-4">
+                    <h2 className="text-3xl font-serif font-semibold text-foreground">
+                        Tu sombra requiere<br />
+                        <span className="text-rose-400">valentía real.</span>
+                    </h2>
+                    <p className="text-muted-foreground font-sans leading-relaxed">
+                        El Coach de Sombras es el espacio donde se trabaja la oscuridad más profunda. La integración táctica del miedo, el trauma y los patterns inconscientes que te frenan.
+                    </p>
+                    <p className="text-sm text-muted-foreground/70 font-sans italic">
+                        Esta herramienta solo está disponible para miembros Premium de Arithmos.
+                    </p>
+                </div>
+
+                <div className="glass rounded-2xl p-6 border-rose-500/10 text-left space-y-3">
+                    <p className="text-xs font-sans font-bold uppercase tracking-widest text-rose-400 mb-4">Al desbloquear acceso Premium:</p>
+                    {[
+                        { icon: Eye, text: "Coach IA con tono de psicología post-traumática" },
+                        { icon: Sparkles, text: "Memoria persistente de tus sesiones de sombra" },
+                        { icon: Zap, text: "Transcripciones automáticas en tu Diario Evolutivo" },
+                    ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center flex-shrink-0">
+                                <item.icon className="h-4 w-4 text-rose-400" />
+                            </div>
+                            <p className="text-sm font-sans text-foreground/80">{item.text}</p>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="space-y-3">
+                    <Button
+                        onClick={onUpgrade}
+                        className="w-full h-14 rounded-2xl text-lg font-bold bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white border-0 gap-2"
+                    >
+                        <Zap className="h-5 w-5" />
+                        Desbloquear Coach de Sombras
+                    </Button>
+                    <p className="text-xs text-muted-foreground font-sans">
+                        Acceso completo a todas las herramientas Premium de Arithmos
+                    </p>
+                </div>
+            </motion.div>
+        </main>
+    </div>
+);
 
 const CoachChat = () => {
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
+    const { profile } = useProfile();
     const {
         messages,
         sendMessage,
@@ -37,10 +131,7 @@ const CoachChat = () => {
         if (!inputValue.trim() || isStreaming) return;
         const text = inputValue.trim();
         setInputValue("");
-
-        // Return focus to input if possible
         textareaRef.current?.focus();
-
         await sendMessage(text);
     };
 
@@ -50,6 +141,12 @@ const CoachChat = () => {
             handleSend();
         }
     };
+
+    // Paywall premium — muestra Shadow Gate a usuarios freemium
+    const isPremium = profile?.role === 'premium' || profile?.role === 'admin';
+    if (profile && !isPremium) {
+        return <ShadowGate onUpgrade={() => navigate('/dashboard')} />;
+    }
 
     return (
         <div className="flex flex-col h-screen bg-background">
