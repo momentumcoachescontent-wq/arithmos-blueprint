@@ -3,6 +3,7 @@ import { Sparkles, X, Zap, Shield, Users, BookOpen, Check, Loader2 } from "lucid
 import { Button } from "@/components/ui/button";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAppConfig } from "@/hooks/useAppConfig";
+import { useEffect } from "react";
 
 interface UpgradeModalProps {
     isOpen: boolean;
@@ -23,6 +24,17 @@ export function UpgradeModal({ isOpen, onClose, userId, featureRequested }: Upgr
     const { redirectToCheckout, redirectToMercadoPago, isLoading, error } = useSubscription(userId);
     const { config } = useAppConfig();
     const currencySymbol = config.premium_currency === "EUR" ? "€" : "$";
+
+    // Redirección AUTOMÁTICA si se solicita una feature (Aumenta conversión)
+    useEffect(() => {
+        if (isOpen && featureRequested && !isLoading && !error) {
+            const timer = setTimeout(() => {
+                console.log("Auto-redireccionando a checkout por:", featureRequested);
+                redirectToCheckout();
+            }, 1500); // 1.5s de cortesía para mostrar el beneficio antes de saltar
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen, featureRequested, redirectToCheckout]);
 
     return (
         <AnimatePresence>

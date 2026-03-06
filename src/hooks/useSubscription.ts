@@ -2,10 +2,10 @@ import { useState, useCallback } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { supabase } from "@/integrations/supabase/client";
 
-const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY || "";
+const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY || "pk_live_51LDzMqGdhRtIc6ULYspd91Q7x6Ys26s4si31edRIPLHe9UwDtcifvx9XaD0Pkp5xuIJxJZZjKUFcq5xWL04PVFcH0004oH7hHf";
 
 // Precio premium mensual (configurable vía variable de entorno)
-const STRIPE_PRICE_ID = import.meta.env.VITE_STRIPE_PRICE_ID || "";
+const STRIPE_PRICE_ID = import.meta.env.VITE_STRIPE_PRICE_ID || "price_1St98XGdhRtIc6ULbd4XTTNO";
 
 export type SubscriptionStatus = "free" | "premium" | "admin" | "loading";
 
