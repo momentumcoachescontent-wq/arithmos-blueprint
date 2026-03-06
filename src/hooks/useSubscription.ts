@@ -26,6 +26,9 @@ export function useSubscription(userId?: string) {
         setError(null);
 
         try {
+            if (!STRIPE_PUBLIC_KEY) {
+                throw new Error("Configuración incompleta: VITE_STRIPE_PUBLIC_KEY no encontrada en el frontend.");
+            }
             const stripe = await loadStripe(STRIPE_PUBLIC_KEY);
             if (!stripe) throw new Error("Stripe no pudo cargarse.");
 
