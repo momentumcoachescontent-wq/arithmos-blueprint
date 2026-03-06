@@ -72,11 +72,9 @@ export function useAuth() {
       });
       if (error) throw error;
       if (data.user) {
-        // Actualizar perfil en DB
-        await supabase.from('profiles').update({
-          email,
-          is_anonymous: false,
-        }).eq('user_id', data.user.id);
+        // En esta estructura, no actualizamos perfiles directamente con email/is_anonymous
+        // ya que esos campos no existen en la tabla 'profiles'.
+        // Si se requiere guardar estado anónimo, se debe hacer en otra tabla o auth metadata.
       }
       return data.user;
     }

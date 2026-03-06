@@ -99,7 +99,7 @@ ${profileContext}`
       },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error en chat-coach:", error);
     return new Response(
       JSON.stringify({ error: error.message || "Error processing request" }),

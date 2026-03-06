@@ -17,7 +17,6 @@ export interface Profile {
   shadowWork?: string;
   audioUrl?: string;
   role?: "freemium" | "premium" | "admin";
-  phone?: string;
   // Monetización Stripe
   stripe_customer_id?: string;
   stripe_subscription_id?: string;
@@ -121,7 +120,6 @@ export function useProfile() {
         powerStrategy: data.power_strategy || undefined,
         shadowWork: data.shadow_work || undefined,
         audioUrl: data.audio_url || undefined,
-        phone: data.phone || undefined,
         role: (data.role as "freemium" | "premium" | "admin") || "freemium",
         createdAt: data.created_at,
         id: data.id
@@ -153,7 +151,7 @@ export function useProfile() {
     return null;
   }, []);
 
-  const createProfile = useCallback(async (name: string, birthDate: string, userId?: string, phone?: string) => {
+  const createProfile = useCallback(async (name: string, birthDate: string, userId?: string) => {
     // 1. Cálculos Deterministas Locales (Respaldo Inmediato)
     const lifePathNumber = calculateLifePath(birthDate);
     const expressionNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'all'));
@@ -175,7 +173,6 @@ export function useProfile() {
       description: arch.description,
       createdAt: new Date().toISOString(),
       id: profile?.id || "",
-      phone,
     };
 
     try {
@@ -219,7 +216,6 @@ export function useProfile() {
             soul_urge_number: soulUrgeNumber,
             personality_number: personalityNumber,
             maturity_number: maturityNumber,
-            phone: phone || null,
             archetype: arch.name,
             archetype_description: arch.description,
             narrative: newProfile.narrative || null,
