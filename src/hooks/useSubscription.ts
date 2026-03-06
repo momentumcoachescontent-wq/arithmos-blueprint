@@ -46,14 +46,10 @@ export function useSubscription(userId?: string) {
             );
 
             if (fnError) throw fnError;
-            if (!data?.sessionId) throw new Error("No se recibió el ID de sesión.");
+            if (!data?.url) throw new Error("No se recibió la URL de sesión.");
 
-            // Redirigir al checkout de Stripe de forma oficial
-            const { error: redirectError } = await (stripe as any).redirectToCheckout({
-                sessionId: data.sessionId,
-            });
-
-            if (redirectError) throw redirectError;
+            // Redirigir al checkout de Stripe directamente usando la URL de la sesión
+            window.location.href = data.url;
         } catch (err: any) {
             console.error("Error en checkout:", err);
             setError(err.message || "Error al iniciar el pago. Intenta de nuevo.");

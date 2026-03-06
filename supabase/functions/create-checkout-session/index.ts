@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
             console.error("Payment intent track failed (ignoring):", e);
         }
 
-        return new Response(JSON.stringify({ sessionId: session.id }), {
+        return new Response(JSON.stringify({ sessionId: session.id, url: session.url }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
     } catch (error: any) {
