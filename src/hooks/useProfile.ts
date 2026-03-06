@@ -122,6 +122,7 @@ export function useProfile() {
         shadowWork: data.shadow_work || undefined,
         audioUrl: data.audio_url || undefined,
         role: (data.role as "freemium" | "premium" | "admin") || "freemium",
+        phone: data.phone || undefined,
         createdAt: data.created_at,
         id: data.id
       };
