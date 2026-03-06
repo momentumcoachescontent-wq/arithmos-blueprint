@@ -110,10 +110,10 @@ const Settings = () => {
 
     // ── Discord ──
     const [discordWebhook, setDiscordWebhook] = useState(
-        () => localStorage.getItem("arithmos_discord_webhook") || ""
+        () => sessionStorage.getItem("arithmos_discord_webhook") || ""
     );
     const [shareDiscord, setShareDiscord] = useState(
-        () => localStorage.getItem("arithmos_discord_share") === "true"
+        () => sessionStorage.getItem("arithmos_discord_share") === "true"
     );
     const [discordStatus, setDiscordStatus] = useState<{ message: string; type: "ok" | "err" } | null>(null);
     const [testingWebhook, setTestingWebhook] = useState(false);
@@ -185,8 +185,8 @@ const Settings = () => {
 
     // ─────────── Guardar Webhook Discord ───────────
     const handleSaveDiscord = () => {
-        localStorage.setItem("arithmos_discord_webhook", discordWebhook);
-        localStorage.setItem("arithmos_discord_share", String(shareDiscord));
+        sessionStorage.setItem("arithmos_discord_webhook", discordWebhook);
+        sessionStorage.setItem("arithmos_discord_share", String(shareDiscord));
         setDiscordStatus({ message: "Configuración de Discord guardada.", type: "ok" });
         setTimeout(() => setDiscordStatus(null), 3000);
     };
@@ -442,7 +442,7 @@ const Settings = () => {
                                 checked={shareDiscord}
                                 onCheckedChange={(v) => {
                                     setShareDiscord(v);
-                                    localStorage.setItem("arithmos_discord_share", String(v));
+                                    sessionStorage.setItem("arithmos_discord_share", String(v));
                                 }}
                             />
                         </div>

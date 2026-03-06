@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "./cors.ts";
+import { getSafeCorsHeaders } from "../_shared/cors.ts";
+import { sanitizePromptInput } from "../_shared/sanitize.ts";
 import OpenAI from "https://esm.sh/openai@4.28.0";
 
 const openai = new OpenAI({
@@ -7,6 +8,7 @@ const openai = new OpenAI({
 });
 
 serve(async (req) => {
+  const corsHeaders = getSafeCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -47,12 +49,11 @@ serve(async (req) => {
     // --- MODO CHAT NORMAL ---
     // Construir el system prompt dinámico
     // Sanitización básica para evitar prompt injection
-    const sanitize = (str: string) => str ? str.replace(/[\n\r]/g, ' ').substring(0, 100) : "";
 
     const profileContext = context ? `
 Contexto del usuario:
-- Nombre: ${sanitize(context.name || "Usuario")}
-- Camino de Vida: ${sanitize(String(context.lifePath || "Desconocido"))}
+- Nombre: ${sanitizePromptInput(context.name || "Usuario")}
+- Camino de Vida: ${sanitizePromptInput(context.lifePath || "Desconocido")}
 ` : "";
 
     const systemMessage = {

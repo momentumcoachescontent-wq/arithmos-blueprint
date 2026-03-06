@@ -21,6 +21,7 @@ export interface Profile {
   stripe_customer_id?: string;
   stripe_subscription_id?: string;
   subscription_status?: "active" | "past_due" | "cancelled" | "inactive";
+  phone?: string;
   createdAt: string;
   id: string; // ID de Supabase
 }
@@ -90,7 +91,7 @@ function calculateLifePath(dateStr: string): number {
 
 export function useProfile() {
   const [profile, setProfile] = useState<Profile | null>(() => {
-    const stored = localStorage.getItem("arithmos_profile");
+    const stored = sessionStorage.getItem("arithmos_profile");
     return stored ? JSON.parse(stored) : null;
   });
 
@@ -145,13 +146,13 @@ export function useProfile() {
       }
 
       setProfile({ ...fetchedProfile });
-      localStorage.setItem("arithmos_profile", JSON.stringify(fetchedProfile));
+      sessionStorage.setItem("arithmos_profile", JSON.stringify(fetchedProfile));
       return fetchedProfile;
     }
     return null;
   }, []);
 
-  const createProfile = useCallback(async (name: string, birthDate: string, userId?: string) => {
+  const createProfile = useCallback(async (name: string, birthDate: string, userId?: string, phone?: string) => {
     // 1. Cálculos Deterministas Locales (Respaldo Inmediato)
     const lifePathNumber = calculateLifePath(birthDate);
     const expressionNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'all'));
@@ -173,6 +174,7 @@ export function useProfile() {
       description: arch.description,
       createdAt: new Date().toISOString(),
       id: profile?.id || "",
+      phone: phone,
     };
 
     try {
@@ -198,8 +200,8 @@ export function useProfile() {
       console.warn("Fallo en motor IA (n8n), se usarán solo datos matemáticos locales:", error);
     }
 
-    // 3. Persistencia en LocalStorage y actualización de ESTADO reactivo
-    localStorage.setItem("arithmos_profile", JSON.stringify(newProfile));
+    // 3. Persistencia en SessionStorage y actualización de ESTADO reactivo
+    sessionStorage.setItem("arithmos_profile", JSON.stringify(newProfile));
     setProfile({ ...newProfile }); // Clonar para forzar re-render
 
     if (userId) {
@@ -222,6 +224,7 @@ export function useProfile() {
             power_strategy: newProfile.powerStrategy || null,
             shadow_work: newProfile.shadowWork || null,
             audio_url: newProfile.audioUrl || null,
+            phone: phone || null,
           }, { onConflict: 'user_id' }); // Usar user_id como target de conflicto si id es desconocido
 
         if (!upsertError) {
@@ -269,7 +272,7 @@ export function useProfile() {
           };
 
           setProfile({ ...updatedProfile });
-          localStorage.setItem("arithmos_profile", JSON.stringify(updatedProfile));
+          sessionStorage.setItem("arithmos_profile", JSON.stringify(updatedProfile));
 
           await supabase.from('profiles').update({
             narrative: updatedProfile.narrative,

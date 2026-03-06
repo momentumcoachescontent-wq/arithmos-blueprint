@@ -1,11 +1,8 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
-
-const corsHeaders = {
-    "Access-Control-Allow-Origin": "https://app.arithmos.mx",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getSafeCorsHeaders } from "../_shared/cors.ts";
 
 Deno.serve(async (req) => {
+    const corsHeaders = getSafeCorsHeaders(req);
     if (req.method === "OPTIONS") {
         return new Response("ok", { headers: corsHeaders });
     }
