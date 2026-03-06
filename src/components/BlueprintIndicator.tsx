@@ -38,17 +38,26 @@ const NUMBER_MEANINGS: Record<number, string> = {
 };
 
 export function BlueprintIndicator({ label, value, icon: Icon, className }: BlueprintIndicatorProps) {
+    const [isOpen, setIsOpen] = React.useState(false);
     const definition = INDICATOR_DEFINITIONS[label] || "";
     const meaning = value ? NUMBER_MEANINGS[value as number] : "";
 
     return (
         <TooltipProvider>
-            <Tooltip delayDuration={300}>
+            <Tooltip delayDuration={300} open={isOpen} onOpenChange={setIsOpen}>
                 <TooltipTrigger asChild>
-                    <div className={cn(
-                        "glass rounded-xl p-4 text-center border-border hover:border-primary/40 transition-all cursor-help group relative overflow-hidden",
-                        className
-                    )}>
+                    <div
+                        className={cn(
+                            "glass rounded-xl p-4 text-center border-border hover:border-primary/40 transition-all cursor-help group relative overflow-hidden",
+                            className
+                        )}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setIsOpen(!isOpen);
+                        }}
+                        onMouseEnter={() => setIsOpen(true)}
+                        onMouseLeave={() => setIsOpen(false)}
+                    >
                         <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="relative z-10">
                             <div className="flex justify-center mb-1">
