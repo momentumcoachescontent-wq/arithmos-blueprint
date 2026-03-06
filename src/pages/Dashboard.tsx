@@ -209,7 +209,6 @@ const Dashboard = () => {
               <div className="flex items-center gap-3 mb-2">
                 <MessageCircle className="h-5 w-5 text-primary" />
                 <h3 className="font-serif text-foreground font-semibold">Coach de Sombras</h3>
-                <span className="px-2 py-0.5 rounded-full bg-primary/20 text-[10px] text-primary font-bold uppercase ml-auto">IA</span>
               </div>
               <p className="text-xs text-muted-foreground font-sans leading-relaxed">
                 Conversaciones honestas para transformar tus patrones de sombra en claridad estratégica.
@@ -227,11 +226,11 @@ const Dashboard = () => {
               onClick={() => navigate("/radar-friccion")}
               className="w-full glass rounded-xl p-6 border-indigo-500/20 bg-gradient-to-br from-indigo-500/10 to-transparent text-left group hover:border-indigo-500/50 transition-all shadow-lg shadow-indigo-500/5"
             >
-              <div className="flex items-center gap-3 mb-2">
-                <Scale className="h-5 w-5 text-indigo-400" />
+              <div className="flex items-center gap-3 mb-2 w-full">
+                <Scale className="h-5 w-5 text-indigo-400 shrink-0" />
                 <h3 className="font-serif text-foreground font-semibold">Radar de Fricción</h3>
-                <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-[10px] text-indigo-400 font-bold uppercase ml-auto">Free</span>
               </div>
+
               <p className="text-xs text-muted-foreground font-sans leading-relaxed">
                 ¿Sientes inercia? Descubre qué te está frenando hoy y obtén un protocolo de desbloqueo inmediato.
               </p>
@@ -302,13 +301,12 @@ const Dashboard = () => {
                 onClick={() => navigate("/radar-equipo")}
                 className="w-full glass rounded-xl p-5 border-border bg-indigo-500/5 text-left group hover:border-indigo-500/30 transition-all"
               >
-                <div className="flex items-center gap-3 mb-2">
-                  <Users className="h-5 w-5 text-indigo-400" />
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-serif text-foreground font-semibold">Radar de Equipo</h3>
-                    {profile.role !== "premium" && profile.role !== "admin" && <Lock className="h-3 w-3 text-indigo-400/50" />}
-                  </div>
+                <div className="flex items-center gap-3 mb-2 w-full">
+                  <Users className="h-5 w-5 text-indigo-400 shrink-0" />
+                  <h3 className="font-serif text-foreground font-semibold">Radar de Equipo</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-[10px] text-indigo-400 font-bold uppercase ml-auto shrink-0">Premium</span>
                 </div>
+
                 <p className="text-xs text-muted-foreground font-sans leading-relaxed">Analiza la compatibilidad numérica de tu equipo. Identifica fortalezas y tensiones.</p>
                 <span className="text-[10px] text-indigo-400 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">Abrir Radar →</span>
               </motion.button>
@@ -326,13 +324,12 @@ const Dashboard = () => {
                 onClick={() => navigate("/deep-dive")}
                 className="w-full glass rounded-xl p-5 border-border bg-emerald-500/5 text-left group hover:border-emerald-500/30 transition-all"
               >
-                <div className="flex items-center gap-3 mb-2">
-                  <FileText className="h-5 w-5 text-emerald-400" />
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-serif text-foreground font-semibold">Reporte Deep Dive Anual</h3>
-                    {profile.role !== "premium" && profile.role !== "admin" && <Lock className="h-3 w-3 text-emerald-400/50" />}
-                  </div>
+                <div className="flex items-center gap-3 mb-2 w-full">
+                  <FileText className="h-5 w-5 text-emerald-400 shrink-0" />
+                  <h3 className="font-serif text-foreground font-semibold">Reporte Deep Dive Anual</h3>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-[10px] text-emerald-400 font-bold uppercase ml-auto shrink-0">Premium</span>
                 </div>
+
                 <p className="text-xs text-muted-foreground font-sans leading-relaxed">Tu hoja de ruta estratégica para los próximos 12 meses, generada por IA en 15+ páginas.</p>
                 <span className="text-[10px] text-emerald-400 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">Solicitar Reporte →</span>
               </motion.button>
