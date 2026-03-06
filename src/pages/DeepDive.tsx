@@ -12,7 +12,7 @@ import { ProFeatureGate } from "@/components/ProFeatureGate";
 import { useSubscription } from "@/hooks/useSubscription";
 import { toast } from "sonner";
 
-// Secciones del Deep Dive — informativas (el PDF real requiere n8n/IA en el backend)
+// Secciones del Deep Dive — informativas (el PDF real requiere Edge Functions/IA en el backend)
 const DEEP_DIVE_SECTIONS = [
     { icon: Calendar, title: "Ciclos Anuales 2025–2026", description: "Mapa completo de tus ciclos personales y universales para los próximos 12 meses." },
     { icon: Star, title: "Análisis de Números Maestros", description: "Camino de Vida, Expresión, Impulso del Alma y Personalidad integrados en un perfil estratégico." },
@@ -32,7 +32,7 @@ const DeepDive = () => {
 
     const handleRequestReport = async () => {
         setIsRequestingReport(true);
-        // Simula el disparo del flujo n8n que generará el PDF
+        // Simula el disparo del flujo de Edge Functions que generará el PDF
         // En producción: supabase.functions.invoke("generate-deep-dive-pdf", { body: { userId: user?.id } })
         await new Promise(r => setTimeout(r, 1500));
         setReportRequested(true);

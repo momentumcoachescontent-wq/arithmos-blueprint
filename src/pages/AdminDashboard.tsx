@@ -42,7 +42,7 @@ const AdminDashboard = () => {
         journalCount: 0,
         aiSuccessRate: 98,
         systemStatus: 'healthy',
-        n8nStatus: 'online',
+        edgeFunctionsStatus: 'online',
         supabaseStatus: 'connected',
         premiumUsers: 0
     });
@@ -50,7 +50,7 @@ const AdminDashboard = () => {
     const [isChecking, setIsChecking] = useState(false);
     const [healthResults, setHealthResults] = useState<Record<string, { status: 'ok' | 'error', latency?: number, notes?: string }>>({
         supabase: { status: 'ok' },
-        n8n: { status: 'ok' },
+        edgeFunctions: { status: 'ok' },
         stripe: { status: !!import.meta.env.VITE_STRIPE_PUBLIC_KEY ? 'ok' : 'error' },
     });
 
