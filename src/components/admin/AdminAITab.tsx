@@ -27,6 +27,7 @@ const FEATURE_LABELS: Record<string, string> = {
     coach_chat: "🎭 Coach AI Principal (Conversaciones y Sesiones)",
     scanner: "🔍 Scanner Numérico (Análisis de Equipos)",
     daily_pulse: "📡 Daily Pulse (Lectura del Día)",
+    friction_radar: "🛡️ Radar de Fricción (Diagnóstico de Sombras)",
 };
 
 export function AdminAITab() {
@@ -185,8 +186,8 @@ export function AdminAITab() {
                                 key={p.feature}
                                 onClick={() => handleFeatureChange(p.feature)}
                                 className={`w-full text-left px-4 py-3 rounded-xl text-sm font-sans transition-all border ${activeFeature === p.feature
-                                        ? "bg-primary/10 border-primary/30 text-foreground font-semibold"
-                                        : "bg-secondary/30 border-border text-muted-foreground hover:border-primary/20 hover:text-foreground"
+                                    ? "bg-primary/10 border-primary/30 text-foreground font-semibold"
+                                    : "bg-secondary/30 border-border text-muted-foreground hover:border-primary/20 hover:text-foreground"
                                     }`}
                             >
                                 {p.label}
@@ -220,8 +221,8 @@ export function AdminAITab() {
                                             key={m.value}
                                             onClick={() => setEditedModel(m.value)}
                                             className={`text-left p-4 rounded-xl border transition-all ${editedModel === m.value
-                                                    ? "border-primary bg-primary/10"
-                                                    : "border-border bg-secondary/30 hover:border-primary/40"
+                                                ? "border-primary bg-primary/10"
+                                                : "border-border bg-secondary/30 hover:border-primary/40"
                                                 }`}
                                         >
                                             <div className="text-xs font-bold font-sans text-primary mb-1">{m.badge}</div>
@@ -277,8 +278,8 @@ export function AdminAITab() {
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         className={`flex items-center gap-2 text-xs font-sans px-3 py-1.5 rounded-full ${status.type === "ok"
-                                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                                : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                            : "bg-red-500/10 text-red-400 border border-red-500/20"
                                             }`}
                                     >
                                         {status.type === "ok" ? (

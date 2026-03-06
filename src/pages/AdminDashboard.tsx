@@ -109,18 +109,18 @@ const AdminDashboard = () => {
                 notes: import.meta.env.VITE_STRIPE_PUBLIC_KEY ? 'Llaves cargadas correctamente' : 'Falta VITE_STRIPE_PUBLIC_KEY'
             };
 
-            // 3. Check n8n/Edge Functions (attempt a ping to chat-coach or similar)
+            // 3. Check Edge Functions (attempt a ping to chat-coach or similar)
             try {
                 const { error: edgeError } = await supabase.functions.invoke('chat-coach', {
                     body: { message: 'ping_health_check_ignore' }
                 });
                 // Even if it returns error because of missing params, if it's not a connection error it's "online"
-                results.n8n = {
+                results.edgeFunctions = {
                     status: edgeError && edgeError.message?.includes('FetchError') ? 'error' : 'ok',
                     notes: 'Servicio de Edge Functions disponible'
                 };
             } catch (e) {
-                results.n8n = { status: 'error', notes: 'No se pudo contactar con Edge Functions' };
+                results.edgeFunctions = { status: 'error', notes: 'No se pudo contactar con Edge Functions' };
             }
 
             setHealthResults(results);
@@ -302,15 +302,15 @@ const AdminDashboard = () => {
 
                                     <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
                                         <div className="flex items-center gap-4">
-                                            <div className={`h-2 w-2 rounded-full ${healthResults.n8n.status === 'ok' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'} shadow-[0_0_8px_rgba(16,185,129,0.8)]`} />
+                                            <div className={`h-2 w-2 rounded-full ${healthResults.edgeFunctions.status === 'ok' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'} shadow-[0_0_8px_rgba(16,185,129,0.8)]`} />
                                             <div>
                                                 <p className="text-sm font-sans font-bold">Edge Functions Engine</p>
                                                 <p className="text-xs text-muted-foreground">Webhooks & Calculation Logic</p>
                                             </div>
                                         </div>
-                                        <div className={`flex items-center gap-2 ${healthResults.n8n.status === 'ok' ? 'text-emerald-500' : 'text-rose-500'} text-sm font-sans font-bold`}>
-                                            {healthResults.n8n.status === 'ok' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                                            {healthResults.n8n.status === 'ok' ? 'ONLINE' : 'OFFLINE'}
+                                        <div className={`flex items-center gap-2 ${healthResults.edgeFunctions.status === 'ok' ? 'text-emerald-500' : 'text-rose-500'} text-sm font-sans font-bold`}>
+                                            {healthResults.edgeFunctions.status === 'ok' ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                                            {healthResults.edgeFunctions.status === 'ok' ? 'ONLINE' : 'OFFLINE'}
                                         </div>
                                     </div>
 
@@ -356,7 +356,7 @@ const AdminDashboard = () => {
                                     </div>
                                     <div className="p-4 rounded-lg bg-background/50 border border-emerald-500/10">
                                         <p className="text-xs font-sans font-bold uppercase tracking-tighter text-emerald-500 mb-1">Estabilidad</p>
-                                        <p className="text-sm text-foreground/80 leading-snug">Sin errores críticos de n8n reportados en las últimas 72 horas.</p>
+                                        <p className="text-sm text-foreground/80 leading-snug">Sin errores críticos de Edge Functions reportados en las últimas 72 horas.</p>
                                     </div>
                                 </div>
                                 <Button variant="ghost" className="w-full mt-6 text-rose-500 hover:bg-rose-500/10 text-xs uppercase tracking-widest font-bold">

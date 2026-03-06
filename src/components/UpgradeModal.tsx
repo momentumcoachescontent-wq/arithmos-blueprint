@@ -20,7 +20,7 @@ const features = [
 ];
 
 export function UpgradeModal({ isOpen, onClose, userId, featureRequested }: UpgradeModalProps) {
-    const { redirectToCheckout, isLoading, error } = useSubscription(userId);
+    const { redirectToCheckout, redirectToMercadoPago, isLoading, error } = useSubscription(userId);
     const { config } = useAppConfig();
     const currencySymbol = config.premium_currency === "EUR" ? "€" : "$";
 
@@ -115,15 +115,21 @@ export function UpgradeModal({ isOpen, onClose, userId, featureRequested }: Upgr
                             </Button>
 
                             <Button
-                                onClick={() => {
-                                    // Placeholder para integración futura de MercadoPago
-                                    alert("Integración de MercadoPago en proceso.");
-                                }}
+                                onClick={() => redirectToMercadoPago()}
                                 disabled={isLoading}
                                 variant="outline"
                                 className="w-full h-12 text-base font-sans font-bold gap-2 bg-[#009ee3]/5 text-[#009ee3] border-[#009ee3]/30 hover:bg-[#009ee3]/10 hover:text-[#009ee3]"
                             >
-                                Pagar con MercadoPago
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Cargando MercadoPago...
+                                    </>
+                                ) : (
+                                    <>
+                                        Pagar con MercadoPago
+                                    </>
+                                )}
                             </Button>
                         </div>
 

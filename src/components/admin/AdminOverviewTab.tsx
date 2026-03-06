@@ -169,8 +169,8 @@ export function AdminOverviewTab() {
     const services = [
         { name: "Supabase Infra", desc: "Auth, PostgreSQL & RLS", ok: true },
         { name: "Stripe Payments", desc: "Checkout & Webhooks", ok: stripeReady },
-        { name: "Edge Functions", desc: "chat-coach / n8n", ok: true },
-        { name: "PWA Service Worker", desc: "Cache & Push Notifications", ok: true },
+        { name: "Edge Functions", desc: "Lógica de IA & Pagos", ok: true },
+        { name: "PWA Service Worker", desc: "Cache & Offline Mode", ok: true },
     ];
 
     if (isLoading) {
