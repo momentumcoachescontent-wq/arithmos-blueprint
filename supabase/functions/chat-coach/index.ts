@@ -46,10 +46,13 @@ serve(async (req) => {
 
     // --- MODO CHAT NORMAL ---
     // Construir el system prompt dinámico
+    // Sanitización básica para evitar prompt injection
+    const sanitize = (str: string) => str ? str.replace(/[\n\r]/g, ' ').substring(0, 100) : "";
+
     const profileContext = context ? `
 Contexto del usuario:
-- Nombre: ${context.name || "Usuario"}
-- Camino de Vida: ${context.lifePath || "Desconocido"}
+- Nombre: ${sanitize(context.name || "Usuario")}
+- Camino de Vida: ${sanitize(String(context.lifePath || "Desconocido"))}
 ` : "";
 
     const systemMessage = {

@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.arithmos.app",
+            "sha256_cert_fingerprints": [
+                "72:66:A3:BE:A1:A0:57:7A:67:04:55:15:E4:17:1C:D0:A5:46:27:7D:82:14:29:52:BE:7E:28:86:52:03:EA:5A"
+            ]
+        }
+    }
+]

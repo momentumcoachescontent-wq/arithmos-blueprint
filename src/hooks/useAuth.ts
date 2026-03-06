@@ -10,7 +10,7 @@ export interface User {
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem("arithmos_user");
+    const stored = sessionStorage.getItem("arithmos_user");
     return stored ? JSON.parse(stored) : null;
   });
 
@@ -26,7 +26,7 @@ export function useAuth() {
           isAnonymous: isAnon,
         };
         setUser(userData);
-        localStorage.setItem("arithmos_user", JSON.stringify(userData));
+        sessionStorage.setItem("arithmos_user", JSON.stringify(userData));
       }
     });
 
@@ -41,10 +41,10 @@ export function useAuth() {
           isAnonymous: isAnon,
         };
         setUser(userData);
-        localStorage.setItem("arithmos_user", JSON.stringify(userData));
+        sessionStorage.setItem("arithmos_user", JSON.stringify(userData));
       } else {
         setUser(null);
-        localStorage.removeItem("arithmos_user");
+        sessionStorage.removeItem("arithmos_user");
       }
     });
 
@@ -125,15 +125,15 @@ export function useAuth() {
     }
 
     const finalUser = { ...userData, id: userId, isAnonymous: !session?.user?.email };
-    localStorage.setItem("arithmos_user", JSON.stringify(finalUser));
+    sessionStorage.setItem("arithmos_user", JSON.stringify(finalUser));
     setUser(finalUser);
     return finalUser;
   }, []);
 
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem("arithmos_user");
-    localStorage.removeItem("arithmos_profile");
+    sessionStorage.removeItem("arithmos_user");
+    sessionStorage.removeItem("arithmos_profile");
     setUser(null);
   }, []);
 
