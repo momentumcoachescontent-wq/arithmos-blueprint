@@ -46,6 +46,7 @@ export function useSubscription(userId?: string) {
             );
 
             if (fnError) throw fnError;
+            console.log("Respuesta de Edge Function:", data);
             if (!data?.url) throw new Error("No se recibió la URL de sesión.");
 
             // Redirigir al checkout de Stripe directamente usando la URL de la sesión
