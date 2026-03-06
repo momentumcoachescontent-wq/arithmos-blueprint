@@ -3,6 +3,8 @@ import { Sparkles, Heart, DollarSign, ShieldCheck, User, RefreshCcw } from "luci
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface GrabovoiMantraWidgetProps {
     birthDate: string;
@@ -26,7 +28,7 @@ export function GrabovoiMantraWidget({ birthDate }: GrabovoiMantraWidgetProps) {
         setSelectedCategory(categoryId);
 
         // Simular cálculo personalizado
-        setTimeout(() => {
+        setTimeout(async () => {
             const category = CATEGORIES.find(c => c.id === categoryId);
             if (!category) return;
 
@@ -36,11 +38,31 @@ export function GrabovoiMantraWidget({ birthDate }: GrabovoiMantraWidgetProps) {
             // Semilla de personalización basada en fecha nacimiento y hoy
             const seed = (bDate.getDate() + today.getDate()) % 9 || 9;
             const personalizedSuffix = seed.toString().repeat(3);
+            const finalCode = `${category.baseCode} ${personalizedSuffix}`;
 
             setMantra({
-                code: `${category.baseCode} ${personalizedSuffix}`,
+                code: finalCode,
                 label: category.label
             });
+
+            // Persistencia en Journal
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { error } = await supabase.from('journal_entries').insert({
+                        user_id: user.id,
+                        title: `Frecuencia Grabovoi: ${category.label}`,
+                        content: `Código Sintonizado: ${finalCode}. Enfoca tu mente en estos números mientras visualizas tu intención ya manifestada en la realidad.`,
+                        category: 'manifestation'
+                    });
+
+                    if (error) console.error("Error guardando mantra:", error);
+                    else toast.success("Frecuencia registrada en tu diario");
+                }
+            } catch (err) {
+                console.error("Error en persistencia Grabovoi:", err);
+            }
+
             setIsGenerating(false);
         }, 800);
     };

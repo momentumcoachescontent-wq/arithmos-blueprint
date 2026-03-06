@@ -7,6 +7,7 @@ import {
     TooltipTrigger
 } from "./ui/tooltip";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface DailyProtectionShieldProps {
     birthDate: string;
@@ -86,28 +87,57 @@ export function DailyProtectionShield({ birthDate }: DailyProtectionShieldProps)
         <TooltipProvider>
             <Tooltip delayDuration={200}>
                 <TooltipTrigger asChild>
-                    <div className={cn(
-                        "inline-flex items-center gap-2 px-2.5 py-1 rounded-full border transition-all cursor-help",
-                        risk.bg,
-                        risk.border
-                    )}>
-                        <Shield className={cn("h-4 w-4 fill-current", risk.color)} />
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        whileHover={{ scale: 1.05 }}
+                        className={cn(
+                            "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all cursor-help shadow-sm",
+                            risk.bg,
+                            risk.border,
+                            risk.status === 'verde' && "shadow-emerald-500/10 glow-emerald",
+                            risk.status === 'rojo' && "shadow-rose-500/10 glow-rose"
+                        )}>
+                        <motion.div
+                            animate={risk.status === 'verde' ? {
+                                scale: [1, 1.2, 1],
+                                opacity: [1, 0.8, 1]
+                            } : {}}
+                            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                        >
+                            <Shield className={cn("h-4 w-4 fill-current", risk.color)} />
+                        </motion.div>
                         <span className={cn("text-[10px] font-sans font-bold uppercase tracking-wider", risk.color)}>
-                            Escudo {risk.status === 'verde' ? 'Activo' : risk.status === 'amarillo' ? 'Alerta' : 'Refuerzo'}
+                            Escudo {risk.status === 'verde' ? 'Máximo' : risk.status === 'amarillo' ? 'Activo' : 'Refuerzo'}
                         </span>
-                    </div>
+                        {risk.status === 'verde' && (
+                            <motion.div
+                                animate={{ opacity: [0, 1, 0] }}
+                                transition={{ repeat: Infinity, duration: 1.5 }}
+                                className="w-1 h-1 rounded-full bg-emerald-500"
+                            />
+                        )}
+                    </motion.div>
                 </TooltipTrigger>
-                <TooltipContent side="right" className="max-w-[240px] p-3 glass border-border/50">
-                    <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                            <Shield className={cn("h-4 w-4", risk.color)} />
-                            <p className={cn("text-xs font-bold uppercase tracking-widest", risk.color)}>
-                                {risk.label} (Día {personalDay})
-                            </p>
+                <TooltipContent side="right" className="max-w-[260px] p-4 glass border-primary/20 shadow-xl backdrop-blur-xl">
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between border-b border-border/50 pb-2">
+                            <div className="flex items-center gap-2">
+                                <Shield className={cn("h-4 w-4", risk.color)} />
+                                <p className={cn("text-xs font-bold uppercase tracking-widest", risk.color)}>
+                                    {risk.label}
+                                </p>
+                            </div>
+                            <span className="text-[10px] font-mono opacity-50">Día {personalDay}</span>
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
+                        <p className="text-xs text-foreground leading-relaxed">
                             {risk.description}
                         </p>
+                        <div className="pt-1">
+                            <p className="text-[9px] text-muted-foreground uppercase tracking-tighter">
+                                Frecuencia calculada para hoy
+                            </p>
+                        </div>
                     </div>
                 </TooltipContent>
             </Tooltip>
