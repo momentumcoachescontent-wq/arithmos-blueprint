@@ -59,40 +59,6 @@ export function useSubscription(userId?: string) {
         }
     }, [userId]);
 
-    /**
-     * Redirige al usuario al checkout de MercadoPago.
-     */
-    const redirectToMercadoPago = useCallback(async () => {
-        if (!userId) {
-            setError("Debes iniciar sesión para suscribirte.");
-            return;
-        }
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const { data, error: fnError } = await supabase.functions.invoke(
-                "create-mercadopago-preference",
-                {
-                    body: {
-                        userId,
-                        successUrl: `${window.location.origin}/dashboard?payment=success`,
-                        cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
-                    },
-                }
-            );
-
-            if (fnError) throw fnError;
-            if (!data?.init_point) throw new Error("No se recibió el punto de inicio de MercadoPago.");
-
-            window.location.href = data.init_point;
-        } catch (err: any) {
-            console.error("Error en MercadoPago:", err);
-            setError(err.message || "Error al iniciar MercadoPago. Intenta de nuevo.");
-        } finally {
-            setIsLoading(false);
-        }
-    }, [userId]);
 
     /**
      * Abre el portal de Stripe para gestionar la suscripción
@@ -124,5 +90,5 @@ export function useSubscription(userId?: string) {
         }
     }, [userId]);
 
-    return { redirectToCheckout, redirectToMercadoPago, redirectToPortal, isLoading, error };
+    return { redirectToCheckout, redirectToPortal, isLoading, error };
 }
