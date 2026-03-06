@@ -17,6 +17,7 @@ import DeepDive from "./pages/DeepDive";
 import Evolucion from "./pages/Evolucion";
 import CoachChat from "./pages/CoachChat";
 import FrictionRadar from "./pages/FrictionRadar";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/evolucion" element={<Evolucion />} />
           <Route path="/coach" element={<CoachChat />} />
           <Route path="/radar-friccion" element={<FrictionRadar />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

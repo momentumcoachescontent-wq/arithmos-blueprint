@@ -14,6 +14,7 @@ import {
     EyeOff,
     CalendarIcon,
     Phone,
+    Shield,
     ExternalLink,
     CreditCard,
     Zap,
@@ -504,6 +505,16 @@ const Settings = () => {
                             checked={showInRanking}
                             onCheckedChange={handleRankingToggle}
                         />
+                    </div>
+
+                    <div className="pt-4 border-t border-border/50">
+                        <button
+                            onClick={() => navigate("/privacy")}
+                            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors font-sans"
+                        >
+                            <Shield className="h-3 w-3" />
+                            Política de Privacidad
+                        </button>
                     </div>
                 </Section>
 
