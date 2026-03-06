@@ -97,12 +97,12 @@ export function AdminAITab() {
         try {
             const { error } = await db
                 .from("system_prompts")
-                .update({
+                .upsert({
+                    feature: activeFeature,
                     content: editedContent,
                     model_id: editedModel,
                     updated_at: new Date().toISOString()
-                })
-                .eq("feature", activeFeature);
+                }, { onConflict: 'feature' });
 
             if (error) throw error;
 
