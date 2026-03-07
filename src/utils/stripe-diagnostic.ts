@@ -2,6 +2,7 @@
  * SCRIPT DE DIAGNÓSTICO: STRIPE & EDGE FUNCTIONS
  * Ejecuta este script para identificar dónde está el fallo.
  */
+import { supabase } from "@/integrations/supabase/client";
 
 async function runDiagnostic() {
     console.log("🚀 Iniciando diagnóstico...");
