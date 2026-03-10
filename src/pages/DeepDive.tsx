@@ -55,8 +55,20 @@ const DeepDive = () => {
         }, 5000);
 
         try {
+            // Obtener el JWT de sesión del usuario explícitamente
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                toast.error("Sesión expirada", { description: "Por favor, inicia sesión de nuevo." });
+                setIsRequestingReport(false);
+                clearInterval(msgInterval);
+                return;
+            }
+
             const { data, error } = await supabase.functions.invoke("generate-deep-dive-pdf", {
                 body: {},
+                headers: {
+                    Authorization: `Bearer ${session.access_token}`,
+                },
             });
 
             clearInterval(msgInterval);
