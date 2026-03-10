@@ -765,15 +765,12 @@ Deno.serve(async (req) => {
       });
 
     if (uploadError) {
-      console.error("Error subiendo a Storage:", uploadError);
-      // Si falla Storage, retornar el HTML directamente como descarga
-      return new Response(htmlContent, {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "text/html; charset=utf-8",
-          "Content-Disposition": `attachment; filename="deep-dive-${profile.name.replace(/ /g, '-')}-${reportYear}.html"`,
-        },
-      });
+      // Si falla Storage, retornar el HTML como JSON para que el frontend cree el Blob URL
+      console.warn("Storage upload failed, delivering HTML directly:", uploadError.message);
+      return new Response(
+        JSON.stringify({ success: true, html: htmlContent, type: "direct" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // 6. Crear URL firmada (válida 24 horas)
@@ -782,15 +779,11 @@ Deno.serve(async (req) => {
       .createSignedUrl(fileName, 86400); // 24 horas
 
     if (signedUrlError || !signedUrlData?.signedUrl) {
-      console.error("Error creando URL firmada:", signedUrlError);
-      // Fallback: retornar HTML directamente
-      return new Response(htmlContent, {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "text/html; charset=utf-8",
-          "Content-Disposition": `attachment; filename="deep-dive-${profile.name.replace(/ /g, '-')}-${reportYear}.html"`,
-        },
-      });
+      console.warn("Signed URL failed, delivering HTML directly:", signedUrlError?.message);
+      return new Response(
+        JSON.stringify({ success: true, html: htmlContent, type: "direct" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // 7. Registrar la lectura en la DB

@@ -75,8 +75,8 @@ const DeepDive = () => {
 
             if (error) throw new Error(error.message || "Error generando el reporte");
 
+            // Caso 1: URL firmada de Storage (path normal)
             if (data?.url) {
-                // Abrir el reporte en nueva pestaña para descarga
                 window.open(data.url, "_blank");
                 setDownloadUrl(data.url);
                 setReportRequested(true);
@@ -84,8 +84,21 @@ const DeepDive = () => {
                     description: "Tu Deep Dive Anual se ha abierto en una nueva pestaña. Usa Ctrl+P → Guardar como PDF.",
                     duration: 8000,
                 });
+                // Caso 2: HTML directo (fallback sin Storage)
+            } else if (data?.html) {
+                const blob = new Blob([data.html], { type: "text/html;charset=utf-8" });
+                const blobUrl = URL.createObjectURL(blob);
+                window.open(blobUrl, "_blank");
+                setDownloadUrl(blobUrl);
+                setReportRequested(true);
+                // Limpiar el blob URL después de 5 minutos
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 300000);
+                toast.success("¡Reporte generado!", {
+                    description: "Tu Deep Dive Anual se ha abierto en una nueva pestaña. Usa Ctrl+P → Guardar como PDF.",
+                    duration: 8000,
+                });
             } else {
-                throw new Error("No se recibió la URL del reporte");
+                throw new Error("No se recibió el contenido del reporte");
             }
         } catch (err: any) {
             clearInterval(msgInterval);
