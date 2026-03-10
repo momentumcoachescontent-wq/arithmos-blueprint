@@ -19,6 +19,7 @@ import {
     CreditCard,
     Zap,
     Loader2,
+    Trash2,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
@@ -514,6 +515,13 @@ const Settings = () => {
                         >
                             <Shield className="h-3 w-3" />
                             Política de Privacidad
+                        </button>
+                        <button
+                            onClick={() => navigate("/delete-account")}
+                            className="flex items-center gap-2 text-xs text-red-400/70 hover:text-red-400 transition-colors font-sans"
+                        >
+                            <Trash2 className="h-3 w-3" />
+                            Eliminar Cuenta y Datos
                         </button>
                     </div>
                 </Section>

@@ -19,6 +19,7 @@ import Evolucion from "./pages/Evolucion";
 import CoachChat from "./pages/CoachChat";
 import FrictionRadar from "./pages/FrictionRadar";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import DataDeletion from "./pages/DataDeletion";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/privacidad" element={<PrivacyPolicy />} />
           <Route path="/privasidad" element={<PrivacyPolicy />} />
+          <Route path="/delete-account" element={<DataDeletion />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

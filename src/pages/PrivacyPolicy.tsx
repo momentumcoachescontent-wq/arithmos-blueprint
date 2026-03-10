@@ -85,7 +85,7 @@ const PrivacyPolicy = () => {
                         Tus transacciones con **Stripe** son seguras y transparentes. No almacenamos datos financieros; nos enfocamos en el valor que recibes a cambio de tu inversión en autoconocimiento.
                     </p>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                        Cualquier duda sobre tus Derechos ARCO o tu camino en la plataforma, será atendida con la seriedad y la provocación constructiva que caracteriza nuestro enfoque de "Más allá del Miedo".
+                        Para cualquier solicitud de rectificación o eliminación de datos (Derechos ARCO), puedes visitar nuestro portal de <button onClick={() => navigate("/delete-account")} className="text-primary hover:underline">Soberanía de Datos</button> o contactar al administrador desde el portal de soporte.
                     </p>
                 </div>
 
