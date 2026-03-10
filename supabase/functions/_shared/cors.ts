@@ -12,7 +12,9 @@ export const getSafeCorsHeaders = (req: Request) => {
         "https://app.arithmos.mx",
         "http://localhost:8080",
         "http://localhost:5173",
-        "https://lovable.dev", // Para entorno de previsualización
+        "https://lovable.dev",             // Editor de Lovable
+        "https://arithmos-blueprint.lovable.app", // Preview de Lovable
+        "https://preview--arithmos-blueprint.lovable.app", // Preview alternativo
     ];
 
     const headers = { ...corsHeaders };
