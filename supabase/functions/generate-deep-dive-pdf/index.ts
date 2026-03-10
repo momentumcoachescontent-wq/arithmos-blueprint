@@ -743,7 +743,17 @@ Deno.serve(async (req) => {
     // 4. Construir el HTML del reporte
     const htmlContent = buildPremiumHTML(profile, aiContent, personalYear);
 
-    // 5. Subir a Supabase Storage
+    // 5. Auto-provisionar el bucket si no existe (self-healing)
+    const { error: bucketError } = await supabase.storage.createBucket("deep-dive-reports", {
+      public: false,
+      fileSizeLimit: 10485760,
+      allowedMimeTypes: ["text/html", "application/pdf"],
+    });
+    if (bucketError && !bucketError.message.includes("already exists")) {
+      console.warn("Bucket creation warning:", bucketError.message);
+    }
+
+    // 6. Subir a Supabase Storage
     const fileName = `deep-dive-${user.id}-${Date.now()}.html`;
     const fileBytes = new TextEncoder().encode(htmlContent);
 
