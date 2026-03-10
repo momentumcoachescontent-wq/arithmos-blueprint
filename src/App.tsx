@@ -45,6 +45,8 @@ const App = () => (
           <Route path="/coach" element={<CoachChat />} />
           <Route path="/radar-friccion" element={<FrictionRadar />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/privacidad" element={<PrivacyPolicy />} />
+          <Route path="/privasidad" element={<PrivacyPolicy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

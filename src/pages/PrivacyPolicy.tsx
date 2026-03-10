@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, Shield, Lock, Eye, Scale } from "lucide-react";
+import { ArrowLeft, Shield, Lock, Eye, Scale, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -18,7 +18,7 @@ const PrivacyPolicy = () => {
                         <ArrowLeft className="h-4 w-4" />
                         Volver
                     </button>
-                    <h1 className="font-serif font-bold text-xl tracking-tight text-gradient-silver">Política de Privacidad</h1>
+                    <h1 className="font-serif font-bold text-xl tracking-tight text-gradient-silver">Aviso de Privacidad y Transformación</h1>
                     <div className="w-10" />
                 </div>
             </header>
@@ -32,10 +32,13 @@ const PrivacyPolicy = () => {
                     <div className="inline-flex items-center justify-center p-2 rounded-lg bg-primary/10 border border-primary/20 mb-2">
                         <Shield className="h-6 w-6 text-primary" />
                     </div>
-                    <p className="text-muted-foreground leading-relaxed">
-                        En **Arithmos AI Strategist**, tu privacidad y la integridad de tu camino estratégico son nuestra máxima prioridad. Esta política detalla cómo manejamos tus datos en nuestra plataforma PWA/TWA.
+                    <p className="text-xl font-serif text-foreground leading-relaxed">
+                        En **Arithmos AI Strategist**, entendemos que tu información no son solo datos; es el reflejo de tu estructura interna. Como Coach Senior en Psicología Aplicada, nuestra misión es resguardar la santidad de tu proceso de crecimiento.
                     </p>
-                    <p className="text-xs text-muted-foreground italic">Última actualización: 6 de marzo, 2026</p>
+                    <p className="text-muted-foreground leading-relaxed">
+                        Este espacio está diseñado para la **resiliencia y la transformación**. Aquí, la oscuridad personal se convierte en poder a través de la claridad técnica y el rigor psicológico.
+                    </p>
+                    <p className="text-xs text-muted-foreground italic">Última actualización: 10 de marzo, 2026</p>
                 </motion.div>
 
                 <section className="space-y-6">
@@ -44,9 +47,9 @@ const PrivacyPolicy = () => {
                             <Eye className="h-4 w-4 text-primary" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="font-serif text-lg font-semibold">1. Datos que Recolectamos</h2>
+                            <h2 className="font-serif text-lg font-semibold">1. Datos: La Métrica de tu Potencial</h2>
                             <p className="text-sm text-muted-foreground leading-relaxed">
-                                Recolectamos datos básicos para calcular tu Blueprint Numerológico: Nombre, Fecha de Nacimiento y, opcionalmente, número de teléfono para comunicaciones estratégicas.
+                                Recolectamos lo esencial para mapear tu Blueprint: Nombre, Fecha de Nacimiento y datos de interacción. No buscamos invadir tu espacio, sino iluminar tus patrones de miedo para que puedas romperlos.
                             </p>
                         </div>
                     </div>
@@ -56,33 +59,33 @@ const PrivacyPolicy = () => {
                             <Lock className="h-4 w-4 text-indigo-400" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="font-serif text-lg font-semibold">2. Uso de Inteligencia Artificial</h2>
+                            <h2 className="font-serif text-lg font-semibold">2. IA y Psique: Ética en la Innovación</h2>
                             <p className="text-sm text-muted-foreground leading-relaxed">
-                                Utilizamos la tecnología GPT-4o de **OpenAI** para generar interpretaciones personalizadas. Tus datos se envían de forma anónima y sanitizada para procesar únicamente la lógica narrativa del Coach de Sombras y el Blueprint. OpenAI no utiliza estos datos para entrenar sus modelos según nuestros acuerdos de API empresarial.
+                                Utilizamos modelos avanzados de **OpenAI** para decodificar comportamientos narrativos. Tus datos se procesan con absoluta confidencialidad, bajo protocolos que impiden el entrenamiento de modelos externos. La profundidad de nuestra IA está al servicio de tu crecimiento post-traumático.
                             </p>
                         </div>
                     </div>
 
                     <div className="flex items-start gap-4">
                         <div className="mt-1 bg-secondary/50 p-2 rounded-md">
-                            <Scale className="h-4 w-4 text-emerald-400" />
+                            <Sparkles className="h-4 w-4 text-amber-400" />
                         </div>
                         <div className="space-y-2">
-                            <h2 className="font-serif text-lg font-semibold">3. Almacenamiento y Seguridad</h2>
+                            <h2 className="font-serif text-lg font-semibold">3. Seguridad: Infraestructura Inquebrantable</h2>
                             <p className="text-sm text-muted-foreground leading-relaxed">
-                                Tus datos están resguardados en **Supabase** (infraestructura AWS) con cifrado de grado militar. La persistencia de sesión en tu dispositivo utiliza `sessionStorage` para asegurar que tu información no permanezca expuesta tras cerrar la aplicación.
+                                Alojamos tu información en **Supabase** (arquitectura AWS) con estándares de resiliencia superiores. Al igual que el proceso terapéutico, lo que sucede en Arithmos se mantiene bajo tu control soberano.
                             </p>
                         </div>
                     </div>
                 </section>
 
                 <div className="glass rounded-2xl p-8 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-                    <h2 className="font-serif text-xl font-bold mb-4">4. Pagos y Suscripciones</h2>
+                    <h2 className="font-serif text-xl font-bold mb-4">4. Compromiso con la Verdad</h2>
                     <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                        Todas las transacciones son procesadas por **Stripe**. Arithmos nunca almacena los datos de tu tarjeta de crédito o débito. Stripe Link y otros métodos de pago se rigen bajo los términos de seguridad de Stripe.
+                        Tus transacciones con **Stripe** son seguras y transparentes. No almacenamos datos financieros; nos enfocamos en el valor que recibes a cambio de tu inversión en autoconocimiento.
                     </p>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                        Para cualquier solicitud de rectificación o eliminación de datos (Derechos ARCO), puedes contactar al administrador desde el portal de soporte.
+                        Cualquier duda sobre tus Derechos ARCO o tu camino en la plataforma, será atendida con la seriedad y la provocación constructiva que caracteriza nuestro enfoque de "Más allá del Miedo".
                     </p>
                 </div>
 
@@ -94,7 +97,7 @@ const PrivacyPolicy = () => {
                     >
                         Volver al Dashboard
                     </Button>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Arithmos — Poder a través de la Claridad</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest italic">Arithmos — Poder a través de la Resiliencia</p>
                 </footer>
             </main>
         </div>
