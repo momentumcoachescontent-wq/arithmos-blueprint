@@ -332,15 +332,7 @@ const AdminDashboard = () => {
                                 </div>
                             </section>
 
-                            <section className="glass rounded-2xl p-8 border-border">
-                                <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2">
-                                    <TrendingUp className="h-5 w-5 text-primary" />
-                                    Uso de IA y Tokens
-                                </h3>
-                                <div className="h-48 bg-secondary/30 rounded-xl flex items-center justify-center text-muted-foreground text-sm font-sans border border-border border-dashed">
-                                    Gráfico de tendencia de uso de IA (En desarrollo)
-                                </div>
-                            </section>
+
                         </div>
 
                         {/* End Grid */}

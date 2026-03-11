@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Lock, Scale } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Lock, Scale, WifiOff, Cloud } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -84,6 +84,12 @@ const Dashboard = () => {
               <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground tracking-tight">
                 Tu <span className="text-primary italic">Blueprint</span> Estratégico
               </h1>
+              {!profile.narrative && (
+                <div className="flex items-center gap-2 mt-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 w-fit">
+                  <WifiOff className="h-3 w-3 text-amber-500" />
+                  <span className="text-[10px] text-amber-500 font-sans font-bold uppercase tracking-wider">Modo Resiliencia: Matemática Pura</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-3">

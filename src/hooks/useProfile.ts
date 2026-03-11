@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export interface Profile {
   name: string;
@@ -179,26 +180,49 @@ export function useProfile() {
     };
 
     try {
-      // 2. Intentar obtener interpretación IA de n8n
-      const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook/arithmos-calculate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ full_name: name, birth_date: birthDate })
-      });
+      // 2. Intentar obtener interpretación IA de n8n con lógica de reintento simple
+      let attempts = 0;
+      const maxAttempts = 2;
+      let success = false;
 
-      if (response.ok) {
-        let data = await response.json();
-        if (Array.isArray(data)) data = data[0];
+      while (attempts < maxAttempts && !success) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
 
-        if (data && data.success && data.interpretation) {
-          newProfile.narrative = data.interpretation.narrative;
-          newProfile.powerStrategy = data.interpretation.power_strategy;
-          newProfile.shadowWork = data.interpretation.shadow_work;
-          newProfile.audioUrl = data.interpretation.audio_url;
+          const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook/arithmos-calculate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ full_name: name, birth_date: birthDate }),
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+
+          if (response.ok) {
+            let data = await response.json();
+            if (Array.isArray(data)) data = data[0];
+
+            if (data && data.success && data.interpretation) {
+              newProfile.narrative = data.interpretation.narrative;
+              newProfile.powerStrategy = data.interpretation.power_strategy;
+              newProfile.shadowWork = data.interpretation.shadow_work;
+              newProfile.audioUrl = data.interpretation.audio_url;
+              success = true;
+            }
+          } else {
+            console.warn(`Intento ${attempts + 1} fallido con status: ${response.status}`);
+          }
+        } catch (e) {
+          console.warn(`Error en intento ${attempts + 1}:`, e);
+        }
+        attempts++;
+        if (!success && attempts < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempts)); // Backoff simple
         }
       }
     } catch (error) {
-      console.warn("Fallo en motor IA (n8n), se usarán solo datos matemáticos locales:", error);
+      console.warn("Fallo persistente en motor IA (n8n), operando en modo matemático:", error);
     }
 
     // 3. Persistencia en SessionStorage y actualización de ESTADO reactivo
@@ -253,11 +277,17 @@ export function useProfile() {
     if (!profile) return;
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
       const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook/arithmos-calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ full_name: profile.name, birth_date: profile.birthDate })
+        body: JSON.stringify({ full_name: profile.name, birth_date: profile.birthDate }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         let data = await response.json();
@@ -282,11 +312,17 @@ export function useProfile() {
             audio_url: updatedProfile.audioUrl,
           }).eq('id', profile.id);
 
+          toast.success("Blueprint sincronizado con éxito.");
           return updatedProfile;
+        } else {
+          toast.error("El servidor de IA no devolvió una interpretación válida.");
         }
+      } else {
+        toast.error(`Error de conexión con el Oráculo (Status: ${response.status})`);
       }
     } catch (error) {
       console.error("Error sincronizando IA:", error);
+      toast.error("No se pudo sintonizar con el servidor de IA. Inténtalo más tarde.");
     }
     return null;
   }, [profile]);
