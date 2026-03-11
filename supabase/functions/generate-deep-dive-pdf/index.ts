@@ -750,7 +750,7 @@ Deno.serve(async (req) => {
 
           // Log usage
           if (openaiData.usage) {
-            logTokenUsage(
+            await logTokenUsage(
               user.id,
               "deep_dive_report",
               "gpt-4o-mini",

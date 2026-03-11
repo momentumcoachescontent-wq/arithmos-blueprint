@@ -61,7 +61,7 @@ Deno.serve(async (req: Request) => {
       });
 
       if (summaryReq.usage) {
-        logTokenUsage(
+        await logTokenUsage(
           userId,
           "coach_summarize",
           "gpt-4o-mini",
@@ -121,7 +121,7 @@ ${profileContext}`
 
           // 2. Extraer métricas (vienen en el último chunk cuando include_usage es true)
           if (chunk.usage) {
-            logTokenUsage(
+            await logTokenUsage(
               userId,
               "coach_chat_stream",
               "gpt-4o",

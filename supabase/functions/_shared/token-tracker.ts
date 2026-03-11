@@ -8,10 +8,15 @@ export async function logTokenUsage(
   prompt_tokens: number,
   completion_tokens: number
 ) {
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-  );
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error("Token Tracker: Missing Supabase environment variables.");
+    return;
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Costos estimados por cada 1,000,000 de tokens (OpenAI rates approx)
   const rates: Record<string, { prompt: number; completion: number }> = {
@@ -27,6 +32,8 @@ export async function logTokenUsage(
     (completion_tokens / 1000000) * currentRate.completion
   );
 
+  console.log(`[TokenTracker] Logging ${feature} (${model}): ${prompt_tokens + completion_tokens} tokens. Cost: $${estimated_cost.toFixed(6)}`);
+
   try {
     const { error } = await supabase
       .from("ai_token_usage")
@@ -39,8 +46,24 @@ export async function logTokenUsage(
         estimated_cost_usd: estimated_cost
       });
 
-    if (error) console.error("Error logging token usage:", error.message);
+    if (error) {
+        console.error("Token Tracker DB Error:", error.message);
+        // Intentar insertar sin user_id si hubo error de FK
+        if (user_id && error.message.includes("foreign key")) {
+             console.log("[TokenTracker] Retrying without user_id due to FK error...");
+             await supabase.from("ai_token_usage").insert({
+                user_id: null,
+                feature,
+                model_id: model,
+                prompt_tokens,
+                completion_tokens,
+                estimated_cost_usd: estimated_cost
+             });
+        }
+    } else {
+        console.log("✅ Token usage logged successfully.");
+    }
   } catch (err) {
-    console.error("Token Tracker Failed:", err);
+    console.error("Token Tracker Exception:", err);
   }
 }
