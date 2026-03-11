@@ -7,7 +7,9 @@
             "namespace": "android_app",
             "package_name": "com.arithmos.app",
             "sha256_cert_fingerprints": [
-                "07:D1:E8:51:9E:4E:96:F1:B0:A3:4D:E8:55:E6:78:68:45:B7:94:4F:9B:A1:4C:50:6C:8A:BB:9A:B0:68:68:7F"
+                "07:D1:E8:51:9E:4E:96:F1:B0:A3:4D:E8:55:E6:78:68:45:B7:94:4F:9B:A1:4C:50:6C:8A:BB:9A:B0:68:68:7F",
+                "72:66:A3:BE:A1:A0:57:7A:67:04:55:15:E4:17:1C:D0:A5:46:27:7D:82:14:29:52:BE:7E:28:86:52:03:EA:5A",
+                "D1:03:3D:A6:CB:EB:DC:B0:00:5F:7B:43:F2:91:66:C0:76:DF:01:50:0A:09:FF:93:20:D2:D1:18:40:A6:CC:DF"
             ]
         }
     }
