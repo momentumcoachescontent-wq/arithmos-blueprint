@@ -1,10 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Cpu, Save, CheckCircle2, AlertCircle, Loader2, RotateCcw, Brain } from "lucide-react";
+import { Cpu, Save, CheckCircle2, AlertCircle, Loader2, RotateCcw, Brain, Activity, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { useAITokenStats } from "@/hooks/useAITokenStats";
+import {
+    AreaChart, Area, XAxis, YAxis, CartesianGrid,
+    Tooltip, ResponsiveContainer
+} from "recharts";
 
 // Bypass Supabase generated types for tables not yet reflected in schema
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,6 +43,9 @@ export function AdminAITab() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [status, setStatus] = useState<{ message: string; type: "ok" | "err" } | null>(null);
+
+    // AI Stats Hook
+    const { summary, trendData, topUsers, isLoading: isLoadingStats, fetchStats } = useAITokenStats();
 
     const fetchPrompts = useCallback(async () => {
         setIsLoading(true);
@@ -78,7 +86,8 @@ export function AdminAITab() {
 
     useEffect(() => {
         fetchPrompts();
-    }, [fetchPrompts]);
+        fetchStats(30); // Cargar últimos 30 días de métricas al montar
+    }, [fetchPrompts, fetchStats]);
 
     const handleFeatureChange = (feature: string) => {
         setActiveFeature(feature);
@@ -294,6 +303,137 @@ export function AdminAITab() {
                         </>
                     )}
                 </motion.div>
+            </div>
+
+            {/* SECCIÓN NUEVA: MÉTRICAS DE CONSUMO Y COSTOS IA */}
+            <div className="mt-12 space-y-6">
+                <div>
+                    <h3 className="text-xl font-serif font-semibold text-foreground flex items-center gap-2 mb-1">
+                        <Activity className="h-5 w-5 text-emerald-400" />
+                        FinOps: Costo del Intelecto Sintético
+                    </h3>
+                    <p className="text-muted-foreground font-sans text-sm">
+                        Auditoría del consumo de tokens a través de los diversos bots del ecosistema (Últimos 30 días).
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    {/* Costo Acumulado KPI */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="glass rounded-xl p-6 border-border flex flex-col justify-center"
+                    >
+                        <p className="text-xs font-sans uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+                           <Target className="h-4 w-4 text-emerald-500" />
+                           Total Gastado
+                        </p>
+                        {isLoadingStats ? (
+                            <div className="h-10 w-24 bg-secondary/50 rounded animate-pulse" />
+                        ) : (
+                            <>
+                                <p className="text-4xl font-serif font-bold text-foreground">
+                                    ${summary.totalCostUSD.toFixed(3)} <span className="text-sm text-muted-foreground font-sans">USD</span>
+                                </p>
+                                <p className="text-sm font-sans text-muted-foreground mt-2">
+                                    {summary.totalPromptTokens + summary.totalCompletionTokens} Tokens Totales
+                                </p>
+                            </>
+                        )}
+                    </motion.div>
+
+                    {/* Prompts vs Completions */}
+                    <div className="lg:col-span-3 glass rounded-xl p-6 border-border flex gap-8 items-center bg-secondary/10">
+                        {isLoadingStats ? (
+                            <div className="w-full h-16 bg-secondary/30 rounded animate-pulse" />
+                        ) : (
+                            <>
+                                <div className="flex-1 space-y-2">
+                                    <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans">Prompt Tokens (Escuchado)</p>
+                                    <p className="text-2xl font-serif font-bold text-sky-400">{summary.totalPromptTokens}</p>
+                                </div>
+                                <div className="w-px h-12 bg-border"></div>
+                                <div className="flex-1 space-y-2">
+                                    <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans">Completion Tokens (Hablado)</p>
+                                    <p className="text-2xl font-serif font-bold text-violet-400">{summary.totalCompletionTokens}</p>
+                                </div>
+                                <div className="w-px h-12 bg-border"></div>
+                                <div className="flex-1 space-y-2">
+                                    <p className="text-xs uppercase tracking-widest text-muted-foreground font-sans">Función Dominante</p>
+                                    <p className="text-lg font-serif font-bold text-amber-400 capitalize">
+                                        {summary.topFeature ? summary.topFeature.name.replace('_', ' ') : 'N/A'}
+                                    </p>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Gráfico de Tendencia */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="lg:col-span-2 glass rounded-2xl p-6 border-border"
+                    >
+                        <h4 className="text-sm font-sans font-bold text-foreground mb-6">Tendencia de Costo Operativo (USD)</h4>
+                        {isLoadingStats ? (
+                            <div className="w-full h-[250px] bg-secondary/20 rounded-xl animate-pulse" />
+                        ) : (
+                            <ResponsiveContainer width="100%" height={250}>
+                                <AreaChart data={trendData} margin={{ top: 5, right: 10, bottom: 0, left: -20 }}>
+                                    <defs>
+                                        <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                                    <XAxis dataKey="date" tick={{ fill: '#888', fontSize: 11 }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fill: '#888', fontSize: 11 }} axisLine={false} tickLine={false} />
+                                    <Tooltip
+                                        contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                                        labelStyle={{ color: '#fff', marginBottom: '8px' }}
+                                        itemStyle={{ fontSize: '14px', fontWeight: 'bold' }}
+                                    />
+                                    <Area type="monotone" dataKey="cost" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorCost)" name="Costo (USD)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        )}
+                    </motion.div>
+
+                    {/* Ranking Superusuarios */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="lg:col-span-1 glass rounded-2xl p-6 border-border flex flex-col"
+                    >
+                        <h4 className="text-sm font-sans font-bold text-foreground mb-6">Top 5 Creyentes (Consumo)</h4>
+                        {isLoadingStats ? (
+                             <div className="w-full h-full bg-secondary/20 rounded-xl animate-pulse" />
+                        ) : topUsers.length === 0 ? (
+                            <div className="flex-1 flex items-center justify-center p-6 border border-dashed border-border rounded-xl">
+                                <p className="text-xs text-muted-foreground font-sans italic text-center">Sin consumo registrado aún</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {topUsers.map((user, idx) => (
+                                    <div key={user.user_id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                                        <div className="flex items-center gap-3 overflow-hidden">
+                                            <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary flex-shrink-0">
+                                                {idx + 1}
+                                            </div>
+                                            <p className="text-xs font-sans text-foreground truncate">{user.name}</p>
+                                        </div>
+                                        <div className="text-right flex-shrink-0">
+                                            <p className="text-xs font-bold text-emerald-400">${user.total_cost.toFixed(3)}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </motion.div>
+                </div>
             </div>
         </div>
     );

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import {
     Users, TrendingUp, Zap, MessageSquare, BookOpen,
     Activity, CheckCircle2, XCircle, BarChart3, Scale,
-    ArrowUpRight, Crown
+    ArrowUpRight, Crown, Cpu
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { format, subDays } from "date-fns";
 import { es } from "date-fns/locale";
+import { useAITokenStats } from "@/hooks/useAITokenStats";
 
 interface OverviewStats {
     totalUsers: number;
@@ -41,9 +42,11 @@ export function AdminOverviewTab() {
     const [weeklyData, setWeeklyData] = useState<DailyData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [stripeReady] = useState(!!import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+    const { summary: aiSummary, isLoading: isLoadingAI, fetchStats: fetchAIStats } = useAITokenStats();
 
     useEffect(() => {
         fetchStats();
+        fetchAIStats(30); // Ultimos 30 días
     }, []);
 
     const fetchStats = async () => {
@@ -157,12 +160,12 @@ export function AdminOverviewTab() {
             trend: "up"
         },
         {
-            label: "Radares Fricción",
-            value: stats.totalDiagnostics,
-            sub: "Diagnósticos completados",
-            icon: Scale,
+            label: "Costo OpenAI",
+            value: isLoadingAI ? "..." : `$${aiSummary.totalCostUSD.toFixed(2)}`,
+            sub: `${aiSummary.totalPromptTokens + aiSummary.totalCompletionTokens} tokens (Mes)`,
+            icon: Cpu,
             color: "text-rose-400",
-            trend: "up"
+            trend: "neutral"
         },
     ];
 
