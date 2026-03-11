@@ -149,6 +149,77 @@ const ARCHETYPES: Record<string, Archetype> = {
     }
 };
 
+const QUESTION_BANK: Record<string, { judgment: string, certainty: string, planning: string, emotional: string, clarity: string }> = {
+    trabajo: {
+        judgment: "¿Cuánto te paraliza la idea de que tus colegas o líderes expongan una supuesta incompetencia tuya?",
+        certainty: "¿Exiges tener todo el escenario corporativo y sus variables 'garantizadas' antes de dar un solo paso?",
+        planning: "¿Te escondes detrás de optimizar estrategias y tableros en lugar de ensuciarte las manos ejecutando?",
+        emotional: "¿Qué nivel de angustia secreta te genera pensar en el peor escenario operativo de esto?",
+        clarity: "¿Qué tan nublada está la visión de cuál es tu verdadera 'Siguiente Acción' imprescindible?"
+    },
+    familia: {
+        judgment: "¿Respiras la presión secreta de no ser 'suficiente' para los estándares de tu familia?",
+        certainty: "¿Exiges promesas o paz absoluta antes de iniciar esa inevitable e incómoda conversación?",
+        planning: "¿Das vueltas al diálogo en tu cabeza mil veces en lugar de sentarte de frente con ellos?",
+        emotional: "¿Qué tanta toxicidad o culpa ancestral cargas hoy sobre tus hombros al pensar en esto?",
+        clarity: "¿Qué tan ciego estás respecto a cuál es el límite exacto que debes trazar o soltar?"
+    },
+    relaciones: {
+        judgment: "¿Cuánto de lo que callas es por terror profundo a que la otra persona te rechace o se aleje?",
+        certainty: "¿Qué tanto postergas el movimiento solo porque no tienes la certeza de que será bien recibido?",
+        planning: "¿Sobredimensionas cada detalle y cada posible desenlace en lugar de entregarte a la vulnerabilidad?",
+        emotional: "¿Cuánto dolor de viejas heridas traes como equipaje a esta situación amorosa o de amistad?",
+        clarity: "¿Qué tan ciego estás en este momento sobre lo que realmente deseas extraer de esta relación?"
+    },
+    emociones: {
+        judgment: "¿Cuánto te frena la vergüenza profunda de que otros vean esta sombra con la que peleas?",
+        certainty: "¿Sientes que debes 'estar bien' y equilibrado antes de permitirte avanzar un milímetro?",
+        planning: "¿Te atrapas racionalizando tu dolor en lugar de simplemente permitirte transitar el caos?",
+        emotional: "¿Qué tanto se siente esta herida interna como una carga insostenible que oxida tus días?",
+        clarity: "¿Qué tan perdido estás hoy en la niebla mental para identificar el núcleo real de esto?"
+    },
+    perdida: {
+        judgment: "¿Te castigas internamente creyendo que los demás piensan que ya deberías 'haberlo superado'?",
+        certainty: "¿Te resistes a dar el siguiente paso al exigir garantías de que nunca más dolerá así?",
+        planning: "¿Vives organizando formas de evitar los recuerdos en lugar de caminar frontalmente hacia el duelo?",
+        emotional: "¿Qué intensidad tiene esa punzada de vacío que aparece cuando la anestesia de la rutina se apaga?",
+        clarity: "¿Qué tan nula es tu visión del futuro ahora que esa pieza ha sido extraída de la ecuación?"
+    },
+    aspiraciones: {
+        judgment: "¿Cuánto te encoge el síndrome del impostor, haciéndote sentir que alguien te señalará como farsa?",
+        certainty: "¿Condicionas el inicio de ese proyecto a que los astros y la economía sean absurdamente perfectos?",
+        planning: "¿Sigues leyendo libros y armando mapas mentales gigantes para evadir la ejecución brutal y real?",
+        emotional: "¿Qué tanto terror disfrazado te causa la posibilidad de que realmente tengas éxito y todo cambie?",
+        clarity: "¿Qué tan imprecisa es la ruta crítica táctica de la macro meta hacia el simple micro movimiento de hoy?"
+    },
+    personal: {
+        judgment: "¿Cuánto pesa la mirada imaginaria de otros evaluando en silencio tu cuerpo, hábitos o disciplina?",
+        certainty: "¿Retrasas el arranque exigiendo que todo tu entorno y herramientas estén inmaculados para empezar?",
+        planning: "¿Cuántas rutinas teóricas y sistemas perfectos creas en tu cabeza sin sostenerlos en el plano físico?",
+        emotional: "¿Qué tanta frustración cruda y silenciosa sientes contigo mismo por haber roto tus propias promesas?",
+        clarity: "¿Qué tan difuso se ve tu autoimagen real y el paso específico mínimo que rompería la inercia celular?"
+    }
+};
+
+const classifyGoal = (goalText: string): string => {
+    const text = goalText.toLowerCase();
+    const keywords = {
+        trabajo: ['trabaj', 'proyect', 'jefe', 'empres', 'negoci', 'venta', 'client', 'diner', 'equip', 'profesional', 'oficin', 'ganar'],
+        familia: ['famili', 'madr', 'padr', 'hij', 'herman', 'hogar', 'mama', 'papa'],
+        relaciones: ['pareja', 'novi', 'espos', 'amig', 'relacion', 'amor', 'matrimonio', 'separacion', 'ex', 'chica', 'chico'],
+        emociones: ['ansiedad', 'depresion', 'vacio', 'culpa', 'miedo', 'tristez', 'sombra', 'trauma', 'sanar', 'estres', 'enojo'],
+        perdida: ['muri', 'falleci', 'duelo', 'perdida', 'perdi', 'luto', 'extrañ', 'muerte'],
+        aspiraciones: ['viajar', 'sueño', 'proposit', 'libro', 'exito', 'libertad', 'meta', 'emprender', 'vision'],
+    };
+
+    for (const [category, words] of Object.entries(keywords)) {
+        if (words.some(word => text.includes(word))) {
+            return category;
+        }
+    }
+    return 'personal';
+};
+
 const SUGGESTED_GOALS = [
     "Empezar mi propio proyecto",
     "Tener una conversación difícil",
@@ -172,11 +243,15 @@ export default function FrictionRadar() {
     const [isCalculating, setIsCalculating] = useState(false);
     const [result, setResult] = useState<Archetype | null>(null);
     const [frictionLevel, setFrictionLevel] = useState<"baja" | "media" | "alta">("media");
+    const [goalCategory, setGoalCategory] = useState<string>("personal");
 
     const handleNext = () => {
-        if (step === 1 && !goal.trim()) {
-            toast.error("Escribe una meta para continuar.");
-            return;
+        if (step === 1) {
+            if (!goal.trim()) {
+                toast.error("Escribe una meta para continuar.");
+                return;
+            }
+            setGoalCategory(classifyGoal(goal));
         }
         setStep(step + 1);
     };
@@ -321,11 +396,11 @@ export default function FrictionRadar() {
                         >
                             <div className="space-y-10">
                                 {[
-                                    { id: "judgment" as const, label: "¿Cuánto te frena el juicio ajeno?", left: "Nada", right: "Demasiado", icon: <Search className="h-4 w-4" /> },
-                                    { id: "certainty" as const, label: "¿Necesitas certeza total para empezar?", left: "No importa", right: "Imprescindible", icon: <Scale className="h-4 w-4" /> },
-                                    { id: "planning" as const, label: "¿Pasas más tiempo planeando que haciendo?", left: "Solo actúo", right: "Hiper-planifico", icon: <Brain className="h-4 w-4" /> },
-                                    { id: "emotional" as const, label: "¿Mucha carga emocional o ansiedad?", left: "Paz total", right: "Tensión alta", icon: <AlertCircle className="h-4 w-4" /> },
-                                    { id: "clarity" as const, label: "¿Qué tan claro tienes el siguiente paso?", left: "Nulo", right: "Cristalino", icon: <Target className="h-4 w-4" /> },
+                                    { id: "judgment" as const, label: QUESTION_BANK[goalCategory].judgment, left: "Nada", right: "Demasiado", icon: <Search className="h-4 w-4" /> },
+                                    { id: "certainty" as const, label: QUESTION_BANK[goalCategory].certainty, left: "No importa", right: "Imprescindible", icon: <Scale className="h-4 w-4" /> },
+                                    { id: "planning" as const, label: QUESTION_BANK[goalCategory].planning, left: "Solo actúo", right: "Hiper-planifico", icon: <Brain className="h-4 w-4" /> },
+                                    { id: "emotional" as const, label: QUESTION_BANK[goalCategory].emotional, left: "Paz total", right: "Tensión alta", icon: <AlertCircle className="h-4 w-4" /> },
+                                    { id: "clarity" as const, label: QUESTION_BANK[goalCategory].clarity, left: "Nulo", right: "Cristalino", icon: <Target className="h-4 w-4" /> },
                                 ].map((s) => (
                                     <div key={s.id} className="space-y-4">
                                         <div className="flex justify-between items-center">
