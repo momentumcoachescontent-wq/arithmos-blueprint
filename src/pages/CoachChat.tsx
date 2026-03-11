@@ -145,15 +145,7 @@ const CoachChat = () => {
     const userMessageCount = messages.filter(m => m.role === 'user').length;
     const isLimitReached = userMessageCount >= 5;
 
-    // Disparar endSession automáticamente cuando el asistente termine de responder el 5to mensaje
-    useEffect(() => {
-        if (isLimitReached && !isStreaming && !isLoading && messages[messages.length - 1]?.role === 'assistant') {
-            const hasDraftSummary = messages.some(m => m.content.includes("Sesión concluida")); // Evitar loops
-            if (!hasDraftSummary) {
-                endSession();
-            }
-        }
-    }, [isLimitReached, isStreaming, isLoading, messages, endSession]);
+    // El usuario decide cuándo terminar la sesión manualmente
 
     // Paywall premium — muestra Shadow Gate a usuarios freemium
     const isPremium = profile?.role === 'premium' || profile?.role === 'admin';
@@ -252,14 +244,14 @@ const CoachChat = () => {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder={isLimitReached ? "Sesión concluida. Tu diario está siendo actualizado." : "Habla desde la sombra..."}
+                        placeholder="Habla desde la sombra..."
                         className="min-h-[60px] max-h-[160px] bg-secondary border-border font-sans resize-none py-4 px-5 rounded-2xl pr-14 focus:ring-primary/20"
-                        disabled={isLoading || isLimitReached}
+                        disabled={isLoading}
                     />
                     <Button
                         size="icon"
                         onClick={handleSend}
-                        disabled={!inputValue.trim() || isStreaming || isLoading || isLimitReached}
+                        disabled={!inputValue.trim() || isStreaming || isLoading}
                         className="absolute right-2 bottom-2 h-11 w-11 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
                     >
                         <Send className="h-5 w-5 ml-1" />

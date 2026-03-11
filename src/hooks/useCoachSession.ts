@@ -200,15 +200,22 @@ export function useCoachSession() {
             });
 
             if (summaryError || !summaryData?.summary) throw new Error("Fallo al resumir");
+            
+            // 1.1 Construir transcripción completa
+            const transcript = messages
+                .filter(m => m.role !== 'system')
+                .map(m => `${m.role === 'user' ? 'Tú' : 'Coach'}: ${m.content}`)
+                .join("\n\n");
 
-            // 2. Guardar en Journal
+            // 2. Guardar en Journal (Resumen + Transcripción)
             const dateStr = new Date().toISOString().split('T')[0];
             const title = `Coach MADM (${dateStr}): Conversaciones Honestas`;
+            const fullContent = `## Resumen de la Sesión\n${summaryData.summary}\n\n---\n## Transcripción Completa\n${transcript}`;
 
             await supabase.from("journal_entries").insert({
                 user_id: user.id,
                 title: title,
-                content: summaryData.summary
+                content: fullContent
             });
 
             // 3. Marcar Sesión como completada
