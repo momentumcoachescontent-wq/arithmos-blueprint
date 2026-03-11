@@ -1,13 +1,12 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getSafeCorsHeaders } from "../_shared/cors.ts";
 import { sanitizePromptInput } from "../_shared/sanitize.ts";
-import OpenAI from "https://esm.sh/openai@4.28.0";
+import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: Deno.env.get("OPENAI_API_KEY"),
 });
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   const corsHeaders = getSafeCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });

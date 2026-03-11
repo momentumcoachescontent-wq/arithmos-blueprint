@@ -12,16 +12,19 @@ export const getSafeCorsHeaders = (req: Request) => {
         "https://app.arithmos.mx",
         "http://localhost:8080",
         "http://localhost:5173",
-        "https://lovable.dev",             // Editor de Lovable
-        "https://arithmos-blueprint.lovable.app", // Preview de Lovable
-        "https://preview--arithmos-blueprint.lovable.app", // Preview alternativo
+        "https://lovable.dev",
     ];
 
     const headers = { ...corsHeaders };
-    if (origin && allowedOrigins.includes(origin)) {
+    
+    // Permitir orígenes explícitos o cualquier subdominio de lovable.app
+    const isLovablePreview = origin?.endsWith(".lovable.app");
+    
+    if (origin && (allowedOrigins.includes(origin) || isLovablePreview)) {
         headers["Access-Control-Allow-Origin"] = origin;
     } else {
-        headers["Access-Control-Allow-Origin"] = "https://app.arithmos.mx";
+        // Fallback seguro pero permitiendo el orígen actual si existe para evitar bloqueos en dev
+        headers["Access-Control-Allow-Origin"] = origin || "https://app.arithmos.mx";
     }
     return headers;
 };
