@@ -236,26 +236,61 @@ const CoachChat = () => {
                 </div>
             </main>
 
-            {/* Input Footer */}
+            {/* Input Footer o Cierre de Sesión */}
             <footer className="px-4 py-4 bg-background/80 backdrop-blur-md border-t border-border flex-none">
-                <div className="max-w-3xl mx-auto flex gap-3 items-end relative">
-                    <Textarea
-                        ref={textareaRef}
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Habla desde la sombra..."
-                        className="min-h-[60px] max-h-[160px] bg-secondary border-border font-sans resize-none py-4 px-5 rounded-2xl pr-14 focus:ring-primary/20"
-                        disabled={isLoading}
-                    />
-                    <Button
-                        size="icon"
-                        onClick={handleSend}
-                        disabled={!inputValue.trim() || isStreaming || isLoading}
-                        className="absolute right-2 bottom-2 h-11 w-11 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
-                    >
-                        <Send className="h-5 w-5 ml-1" />
-                    </Button>
+                <div className="max-w-3xl mx-auto">
+                    {isLimitReached && !isStreaming ? (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center space-y-4 shadow-sm"
+                        >
+                            <div className="flex items-center justify-center gap-2 text-primary">
+                                <Sparkles className="h-5 w-5" />
+                                <h3 className="font-serif font-semibold">Ciclo de 5 pasos completado</h3>
+                            </div>
+                            <p className="text-sm text-muted-foreground font-sans">
+                                Has alcanzado el límite de esta sesión táctica. ¿Cómo deseas proceder?
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <Button 
+                                    onClick={endSession}
+                                    disabled={isLoading}
+                                    className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground font-bold shadow-md gap-2"
+                                >
+                                    <Save className="h-4 w-4" />
+                                    Guardar en Diario & Concluir
+                                </Button>
+                                <Button 
+                                    variant="outline"
+                                    onClick={() => window.location.reload()} // Forma más limpia de resetear todo el estado del hook
+                                    className="flex-1 h-12 rounded-xl border-primary/20 hover:bg-primary/5 font-semibold"
+                                >
+                                    Nueva Consulta
+                                </Button>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <div className="flex gap-3 items-end relative">
+                            <Textarea
+                                ref={textareaRef}
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Habla desde la sombra..."
+                                className="min-h-[60px] max-h-[160px] bg-secondary border-border font-sans resize-none py-4 px-5 rounded-2xl pr-14 focus:ring-primary/20"
+                                disabled={isLoading}
+                            />
+                            <Button
+                                size="icon"
+                                onClick={handleSend}
+                                disabled={!inputValue.trim() || isStreaming || isLoading}
+                                className="absolute right-2 bottom-2 h-11 w-11 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
+                            >
+                                <Send className="h-5 w-5 ml-1" />
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </footer>
         </div>
