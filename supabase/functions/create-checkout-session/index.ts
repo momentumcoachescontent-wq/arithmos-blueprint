@@ -1,12 +1,13 @@
-import Stripe from "npm:stripe@14";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+// @ts-nocheck
+import Stripe from "stripe";
+import { createClient } from "@supabase/supabase-js";
 import { getSafeCorsHeaders } from "../_shared/cors.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
     apiVersion: "2024-04-10",
 });
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
     const corsHeaders = getSafeCorsHeaders(req);
     if (req.method === "OPTIONS") {
         return new Response("ok", { headers: corsHeaders });

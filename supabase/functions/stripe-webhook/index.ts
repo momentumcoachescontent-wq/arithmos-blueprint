@@ -1,5 +1,6 @@
-import Stripe from "npm:stripe@14";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+// @ts-nocheck
+import Stripe from "stripe";
+import { createClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
     apiVersion: "2024-04-10",
@@ -7,7 +8,7 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
 
 const WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
     const body = await req.text();
     const signature = req.headers.get("stripe-signature")!;
 
