@@ -26,7 +26,7 @@ export interface Profile {
   id: string; // ID de Supabase
 }
 
-const ARCHETYPES: Record<number, { name: string; description: string }> = {
+export const ARCHETYPES: Record<number, { name: string; description: string }> = {
   1: { name: "El Pionero", description: "Líder nato con una voluntad inquebrantable. Tu energía es la de quien abre caminos donde nadie ve posibilidad." },
   2: { name: "El Diplomático", description: "Maestro de la cooperación y la intuición sutil. Tu poder reside en la capacidad de ver lo que otros ignoran en las relaciones." },
   3: { name: "El Comunicador", description: "Catalizador creativo que transforma ideas abstractas en realidades tangibles. Tu expresión es tu arma estratégica." },
@@ -55,11 +55,11 @@ const PYTHAGOREAN_TABLE: Record<string, number> = {
 
 const VOWELS = ['a', 'e', 'i', 'o', 'u'];
 
-function sumDigits(num: number): number {
+export function sumDigits(num: number): number {
   return num.toString().split('').reduce((acc, curr) => acc + parseInt(curr), 0);
 }
 
-function reduceToSingleDigitOrMaster(num: number): number {
+export function reduceToSingleDigitOrMaster(num: number): number {
   const masters = [11, 22, 33];
   let current = num;
   while (current > 9 && !masters.includes(current)) {
@@ -68,7 +68,7 @@ function reduceToSingleDigitOrMaster(num: number): number {
   return current;
 }
 
-function calculateNameValue(nameStr: string, type: 'all' | 'vowels' | 'consonants' = 'all'): number {
+export function calculateNameValue(nameStr: string, type: 'all' | 'vowels' | 'consonants' = 'all'): number {
   let sum = 0;
   const chars = nameStr.toLowerCase().replace(/[^a-z]/g, '').split('');
   for (const char of chars) {
@@ -80,7 +80,7 @@ function calculateNameValue(nameStr: string, type: 'all' | 'vowels' | 'consonant
   return sum;
 }
 
-function calculateLifePath(dateStr: string): number {
+export function calculateLifePath(dateStr: string): number {
   const parts = dateStr.split('-');
   if (parts.length !== 3) return 0;
   const yearReduced = reduceToSingleDigitOrMaster(parseInt(parts[0]));

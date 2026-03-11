@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
@@ -41,6 +41,35 @@ const DeepDive = () => {
     const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
     const [reportRequested, setReportRequested] = useState(false);
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+    const [hasRecentReport, setHasRecentReport] = useState(false);
+    const [isCheckingReport, setIsCheckingReport] = useState(true);
+
+    useEffect(() => {
+        const checkRecentReport = async () => {
+            if (!user) {
+                setIsCheckingReport(false);
+                return;
+            }
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+            const { data } = await supabase
+                .from("readings")
+                .select("metadata")
+                .eq("user_id", user.id)
+                .eq("type", "deep_dive_pdf")
+                .gte("created_at", sixMonthsAgo.toISOString())
+                .order("created_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if ((data?.metadata as any)?.file_name) {
+                setHasRecentReport(true);
+            }
+            setIsCheckingReport(false);
+        };
+        checkRecentReport();
+    }, [user]);
 
     const handleRequestReport = async () => {
         if (!user) return;
@@ -49,10 +78,16 @@ const DeepDive = () => {
 
         // Rotar mensajes de carga para dar feedback al usuario
         let msgIdx = 0;
-        const msgInterval = setInterval(() => {
-            msgIdx = (msgIdx + 1) % LOADING_MESSAGES.length;
-            setLoadingMessage(LOADING_MESSAGES[msgIdx]);
-        }, 5000);
+        let msgInterval: number | undefined;
+
+        if (!hasRecentReport) {
+            msgInterval = window.setInterval(() => {
+                msgIdx = (msgIdx + 1) % LOADING_MESSAGES.length;
+                setLoadingMessage(LOADING_MESSAGES[msgIdx]);
+            }, 5000);
+        } else {
+            setLoadingMessage("Recuperando tu reporte almacenado...");
+        }
 
         try {
             // Obtener el JWT de sesión del usuario explícitamente
@@ -71,7 +106,7 @@ const DeepDive = () => {
                 },
             });
 
-            clearInterval(msgInterval);
+            if (msgInterval) window.clearInterval(msgInterval);
 
             if (error) throw new Error(error.message || "Error generando el reporte");
 
@@ -101,7 +136,7 @@ const DeepDive = () => {
                 throw new Error("No se recibió el contenido del reporte");
             }
         } catch (err: any) {
-            clearInterval(msgInterval);
+            if (msgInterval) window.clearInterval(msgInterval);
             console.error("Error solicitando Deep Dive:", err);
             toast.error("Error generando el reporte", {
                 description: err.message || "Inténtalo nuevamente en unos minutos.",
@@ -220,10 +255,11 @@ const DeepDive = () => {
                                         )}
                                         <Button
                                             variant="outline"
+                                            disabled={hasRecentReport}
                                             onClick={() => { setReportRequested(false); setDownloadUrl(null); }}
                                             className="text-sm"
                                         >
-                                            Generar Nuevo Reporte
+                                            Generar Nuevo Reporte {hasRecentReport && "(Disponible en 6 meses)"}
                                         </Button>
                                     </div>
                                 </div>
@@ -238,14 +274,16 @@ const DeepDive = () => {
                                     </p>
                                     <Button
                                         onClick={handleRequestReport}
-                                        disabled={isRequestingReport}
+                                        disabled={isRequestingReport || isCheckingReport}
                                         className="gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white border-none px-8"
                                     >
                                         <FileText className="h-4 w-4" />
-                                        Solicitar Mi Reporte Anual
+                                        {hasRecentReport ? "Descargar Reporte Existente" : "Solicitar Mi Reporte Anual"}
                                     </Button>
                                     <p className="text-xs text-muted-foreground/60">
-                                        Incluido en tu plan Premium · Procesamiento: ~30 segundos
+                                        {hasRecentReport
+                                            ? "Generado recientemente. Opción de re-generar disponible cada 6 meses."
+                                            : "Incluido en tu plan Premium · Procesamiento: ~30 segundos"}
                                     </p>
                                 </div>
                             )}

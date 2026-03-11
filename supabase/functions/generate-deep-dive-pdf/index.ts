@@ -681,7 +681,43 @@ Deno.serve(async (req) => {
 
     const personalYear = getPersonalYear(profile.birth_date);
 
-    // 3. Llamar a OpenAI para generar contenido
+    // 2.5 Verificar si existe un reporte reciente (menos de 6 meses)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const { data: recentReading } = await supabase
+      .from("readings")
+      .select("metadata")
+      .eq("user_id", user.id)
+      .eq("type", "deep_dive_pdf")
+      .gte("created_at", sixMonthsAgo.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (recentReading?.metadata?.file_name) {
+      // Ya existe un reporte reciente, solo crear URL firmada y retornarla
+      console.log(`Reporte reciente encontrado para ${profile.name}. Evitando re-generación.`);
+      const fileName = recentReading.metadata.file_name;
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from("deep-dive-reports")
+        .createSignedUrl(fileName, 86400); // 24 horas
+
+      if (!signedUrlError && signedUrlData?.signedUrl) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            url: signedUrlData.signedUrl,
+            type: "signed_url",
+            isCached: true
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      } else {
+        console.warn("Error generando URL firmada para reporte en caché:", signedUrlError?.message);
+        // Fallback: continuar con generación
+      }
+    }
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
     let aiContent: Record<string, string> = {};
 

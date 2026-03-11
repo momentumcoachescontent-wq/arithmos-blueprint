@@ -287,13 +287,18 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="w-full glass rounded-xl p-5 border-border bg-amber-500/5 text-left group hover:border-amber-500/40 transition-all opacity-60 cursor-not-allowed"
+              onClick={() => navigate("/tribunal-poder")}
+              className="w-full glass rounded-xl p-5 border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-transparent text-left group hover:border-amber-500/40 transition-all shadow-lg shadow-amber-500/5"
             >
               <div className="flex items-center gap-3 mb-2">
                 <Trophy className="h-5 w-5 text-amber-500" />
                 <h3 className="font-serif text-foreground font-semibold">Tribunal de Poder</h3>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-[10px] text-amber-500 font-bold uppercase ml-auto shrink-0">Free</span>
               </div>
-              <p className="text-xs text-muted-foreground font-sans leading-relaxed">Próximamente: Comparte tu Blueprint y compite en el ranking global.</p>
+              <p className="text-xs text-muted-foreground font-sans leading-relaxed">Simulador de Sinergia Numerológica. Descubre cómo tu frecuencia se combina con otras.</p>
+              <span className="text-[10px] text-amber-500 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">
+                Iniciar Simulador →
+              </span>
             </motion.button>
 
             {/* Teaser Pro Features */}
@@ -359,16 +364,6 @@ const Dashboard = () => {
               </motion.button>
             )}
 
-            <div className="p-6 rounded-xl bg-gradient-to-br from-bronze/10 to-transparent border border-bronze/20 mt-6">
-              <h3 className="text-sm font-serif font-semibold text-bronze mb-2">Comunidad Consciente</h3>
-              <p className="text-xs text-muted-foreground font-sans leading-relaxed mb-4">
-                Únete a nuestro Discord para compartir hallazgos con otros buscadores.
-              </p>
-              <Button size="sm" variant="outline" className="w-full text-xs font-sans gap-2 h-8">
-                <MessageCircle className="h-3 w-3" />
-                Unirse a Discord
-              </Button>
-            </div>
           </div>
         </div>
       </div>

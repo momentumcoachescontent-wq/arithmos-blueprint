@@ -142,6 +142,19 @@ const CoachChat = () => {
         }
     };
 
+    const userMessageCount = messages.filter(m => m.role === 'user').length;
+    const isLimitReached = userMessageCount >= 5;
+
+    // Disparar endSession automáticamente cuando el asistente termine de responder el 5to mensaje
+    useEffect(() => {
+        if (isLimitReached && !isStreaming && !isLoading && messages[messages.length - 1]?.role === 'assistant') {
+            const hasDraftSummary = messages.some(m => m.content.includes("Sesión concluida")); // Evitar loops
+            if (!hasDraftSummary) {
+                endSession();
+            }
+        }
+    }, [isLimitReached, isStreaming, isLoading, messages, endSession]);
+
     // Paywall premium — muestra Shadow Gate a usuarios freemium
     const isPremium = profile?.role === 'premium' || profile?.role === 'admin';
     if (profile && !isPremium) {
@@ -165,9 +178,16 @@ const CoachChat = () => {
                                 <Sparkles className="h-4 w-4 text-primary" />
                                 Coach de Sombras
                             </h1>
-                            <p className="text-xs text-muted-foreground font-sans">
-                                {isStreaming ? "Conectando con tu frecuencia..." : "Conversaciones Honestas"}
-                            </p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-xs text-muted-foreground font-sans">
+                                    {isStreaming ? "Conectando con tu frecuencia..." : "Conversaciones Honestas"}
+                                </p>
+                                {userMessageCount > 0 && (
+                                    <span className="text-[10px] font-sans font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">
+                                        {Math.min(userMessageCount, 5)} / 5
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -232,14 +252,14 @@ const CoachChat = () => {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Habla desde la sombra..."
+                        placeholder={isLimitReached ? "Sesión concluida. Tu diario está siendo actualizado." : "Habla desde la sombra..."}
                         className="min-h-[60px] max-h-[160px] bg-secondary border-border font-sans resize-none py-4 px-5 rounded-2xl pr-14 focus:ring-primary/20"
-                        disabled={isLoading}
+                        disabled={isLoading || isLimitReached}
                     />
                     <Button
                         size="icon"
                         onClick={handleSend}
-                        disabled={!inputValue.trim() || isStreaming || isLoading}
+                        disabled={!inputValue.trim() || isStreaming || isLoading || isLimitReached}
                         className="absolute right-2 bottom-2 h-11 w-11 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md"
                     >
                         <Send className="h-5 w-5 ml-1" />

@@ -110,15 +110,6 @@ const Settings = () => {
     const [pwdStatus, setPwdStatus] = useState<{ message: string; type: "ok" | "err" } | null>(null);
     const [savingPwd, setSavingPwd] = useState(false);
 
-    // ── Discord ──
-    const [discordWebhook, setDiscordWebhook] = useState(
-        () => sessionStorage.getItem("arithmos_discord_webhook") || ""
-    );
-    const [shareDiscord, setShareDiscord] = useState(
-        () => sessionStorage.getItem("arithmos_discord_share") === "true"
-    );
-    const [discordStatus, setDiscordStatus] = useState<{ message: string; type: "ok" | "err" } | null>(null);
-    const [testingWebhook, setTestingWebhook] = useState(false);
 
     // ── Notificaciones Push ──
     const [pushEnabled, setPushEnabled] = useState(false);
@@ -185,46 +176,6 @@ const Settings = () => {
         }
     };
 
-    // ─────────── Guardar Webhook Discord ───────────
-    const handleSaveDiscord = () => {
-        sessionStorage.setItem("arithmos_discord_webhook", discordWebhook);
-        sessionStorage.setItem("arithmos_discord_share", String(shareDiscord));
-        setDiscordStatus({ message: "Configuración de Discord guardada.", type: "ok" });
-        setTimeout(() => setDiscordStatus(null), 3000);
-    };
-
-    // ─────────── Probar Webhook ───────────
-    const handleTestWebhook = async () => {
-        if (!discordWebhook.startsWith("https://discord.com/api/webhooks/")) {
-            setDiscordStatus({ message: "URL de Webhook no válida.", type: "err" });
-            return;
-        }
-        setTestingWebhook(true);
-        setDiscordStatus(null);
-        try {
-            const res = await fetch(discordWebhook, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    embeds: [{
-                        title: "⚡ Arithmos Conectado",
-                        description: `**${profile?.name || user?.name}** ha vinculado su cuenta de Arithmos a este canal.\n\nSus victorias y logros se publicarán aquí automáticamente.`,
-                        color: 5814783,
-                        footer: { text: "Arithmos — Tu Poder Estratégico" },
-                    }],
-                }),
-            });
-            if (res.ok) {
-                setDiscordStatus({ message: "✅ Mensaje de prueba enviado al canal de Discord.", type: "ok" });
-            } else {
-                setDiscordStatus({ message: `Error HTTP ${res.status}. Verifica la URL.`, type: "err" });
-            }
-        } catch {
-            setDiscordStatus({ message: "No se pudo conectar. Verifica la URL.", type: "err" });
-        } finally {
-            setTestingWebhook(false);
-        }
-    };
 
     // ─────────── Activar Push Notifications ───────────
     const handleTogglePush = async () => {
@@ -410,64 +361,6 @@ const Settings = () => {
                     </Section>
                 )}
 
-                {/* ─── Discord (Solo Admin) ─── */}
-                {profile?.role === 'admin' && (
-                    <Section title="Integración Discord" icon={MessageSquare}>
-                        <p className="text-sm text-muted-foreground font-sans leading-relaxed">
-                            Conecta un canal de Discord para publicar tus victorias, logros y subidas de nivel en tu comunidad automáticamente.
-                        </p>
-
-                        <div className="space-y-2">
-                            <Label className="font-sans text-sm text-muted-foreground">URL del Webhook</Label>
-                            <Input
-                                placeholder="https://discord.com/api/webhooks/..."
-                                value={discordWebhook}
-                                onChange={(e) => setDiscordWebhook(e.target.value)}
-                                className="font-mono text-xs"
-                            />
-                            <a
-                                href="https://support.discord.com/hc/es/articles/228383668"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-xs text-primary hover:underline font-sans"
-                            >
-                                ¿Cómo crear un Webhook en Discord? <ExternalLink className="h-3 w-3" />
-                            </a>
-                        </div>
-
-                        <div className="flex items-center justify-between pt-1">
-                            <div>
-                                <p className="text-sm font-sans text-foreground">Compartir victorias automáticamente</p>
-                                <p className="text-xs text-muted-foreground font-sans">Al completar misiones y subir de nivel</p>
-                            </div>
-                            <Switch
-                                checked={shareDiscord}
-                                onCheckedChange={(v) => {
-                                    setShareDiscord(v);
-                                    sessionStorage.setItem("arithmos_discord_share", String(v));
-                                }}
-                            />
-                        </div>
-
-                        <div className="flex gap-2 pt-1">
-                            <Button size="sm" variant="outline" onClick={handleSaveDiscord} className="flex-1">
-                                <Save className="h-4 w-4 mr-2" />
-                                Guardar
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleTestWebhook}
-                                disabled={testingWebhook || !discordWebhook}
-                                className="flex-1"
-                            >
-                                {testingWebhook ? "Enviando..." : "🧪 Probar Webhook"}
-                            </Button>
-                        </div>
-
-                        {discordStatus && <Feedback {...discordStatus} />}
-                    </Section>
-                )}
 
                 {/* ─── Notificaciones Push ─── */}
                 <Section title="Notificaciones Push" icon={Bell}>

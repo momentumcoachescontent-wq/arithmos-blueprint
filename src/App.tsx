@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-// Arithmos AI Strategist - Production Build v1.2.4
+// Arithmos AI Strategist - Production Build v1.2.5
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -15,6 +15,7 @@ import Synchronicity from "./pages/Synchronicity";
 import AdminDashboard from "./pages/AdminDashboard";
 import RadarEquipo from "./pages/RadarEquipo";
 import DeepDive from "./pages/DeepDive";
+import TribunalPoder from "./pages/TribunalPoder";
 import Evolucion from "./pages/Evolucion";
 import CoachChat from "./pages/CoachChat";
 import FrictionRadar from "./pages/FrictionRadar";
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/radar-equipo" element={<RadarEquipo />} />
           <Route path="/deep-dive" element={<DeepDive />} />
+          <Route path="/tribunal-poder" element={<TribunalPoder />} />
           <Route path="/evolucion" element={<Evolucion />} />
           <Route path="/coach" element={<CoachChat />} />
           <Route path="/radar-friccion" element={<FrictionRadar />} />
