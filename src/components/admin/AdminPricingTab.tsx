@@ -19,6 +19,7 @@ export function AdminPricingTab() {
     const [price, setPrice] = useState("");
     const [currency, setCurrency] = useState("");
     const [ctaLabel, setCtaLabel] = useState("");
+    const [stripePriceId, setStripePriceId] = useState("");
     const [saving, setSaving] = useState(false);
     const [status, setStatus] = useState<{ message: string; type: "ok" | "err" } | null>(null);
     const [initialized, setInitialized] = useState(false);
@@ -28,6 +29,7 @@ export function AdminPricingTab() {
         setPrice(config.premium_price);
         setCurrency(config.premium_currency);
         setCtaLabel(config.premium_cta_label);
+        setStripePriceId(config.premium_stripe_price_id);
         setInitialized(true);
     }
 
@@ -43,6 +45,7 @@ export function AdminPricingTab() {
                 premium_price: price,
                 premium_currency: currency,
                 premium_cta_label: ctaLabel,
+                premium_stripe_price_id: stripePriceId,
             });
             setStatus({ message: "¡Configuración de precio guardada correctamente!", type: "ok" });
             setTimeout(() => setStatus(null), 4000);
@@ -136,6 +139,18 @@ export function AdminPricingTab() {
                         onChange={(e) => setCtaLabel(e.target.value)}
                         placeholder="Activar Premium"
                     />
+                </div>
+
+                <div className="space-y-2">
+                    <Label className="text-sm text-muted-foreground font-sans">Stripe Price ID (API)</Label>
+                    <Input
+                        value={stripePriceId}
+                        onChange={(e) => setStripePriceId(e.target.value)}
+                        placeholder="price_..."
+                    />
+                    <p className="text-[10px] text-muted-foreground font-sans mt-1">
+                        Asegúrate de que este ID corresponda al producto configurado en Stripe Dashboard.
+                    </p>
                 </div>
 
                 <Button

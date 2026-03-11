@@ -51,7 +51,7 @@ const AdminDashboard = () => {
     const [healthResults, setHealthResults] = useState<Record<string, { status: 'ok' | 'error', latency?: number, notes?: string }>>({
         supabase: { status: 'ok' },
         edgeFunctions: { status: 'ok' },
-        stripe: { status: (!!import.meta.env.VITE_STRIPE_PUBLIC_KEY || true) ? 'ok' : 'error' },
+        stripe: { status: !!import.meta.env.VITE_STRIPE_PUBLIC_KEY ? 'ok' : 'error' },
     });
 
     useEffect(() => {
@@ -106,8 +106,8 @@ const AdminDashboard = () => {
             // 2. Check Stripe Config (Con fallback seguro)
             const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
             results.stripe = {
-                status: (!!stripeKey || true) ? 'ok' : 'error',
-                notes: stripeKey ? 'Llaves cargadas correctamente' : 'Usando llave de backup configurada en el hook'
+                status: !!stripeKey ? 'ok' : 'error',
+                notes: stripeKey ? 'Llaves cargadas correctamente' : 'Falta VITE_STRIPE_PUBLIC_KEY en variables de entorno'
             };
 
             // 3. Check Edge Functions (attempt a ping to chat-coach or similar)

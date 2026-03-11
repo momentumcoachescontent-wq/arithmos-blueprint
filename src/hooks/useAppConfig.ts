@@ -5,12 +5,14 @@ export interface AppConfig {
     premium_price: string;
     premium_currency: string;
     premium_cta_label: string;
+    premium_stripe_price_id: string;
 }
 
 const DEFAULT_CONFIG: AppConfig = {
     premium_price: "9.99",
     premium_currency: "USD",
     premium_cta_label: "Activar Premium",
+    premium_stripe_price_id: "price_1St98XGdhRtIc6ULbd4XTTNO",
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

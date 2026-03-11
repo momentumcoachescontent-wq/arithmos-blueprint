@@ -40,7 +40,7 @@ export function AdminOverviewTab() {
     });
     const [weeklyData, setWeeklyData] = useState<DailyData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [stripeReady] = useState(!!import.meta.env.VITE_STRIPE_PUBLIC_KEY || true); // Forzamos true ya que implementamos fallbacks robustos en el hook
+    const [stripeReady] = useState(!!import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
     useEffect(() => {
         fetchStats();

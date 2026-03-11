@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
         );
 
-        const { priceId, userId, successUrl, cancelUrl } = await req.json();
+        const { priceId, userId, successUrl, cancelUrl, amount, currency } = await req.json();
 
         if (!priceId || !userId) {
             return new Response(JSON.stringify({ error: "priceId and userId are required" }), {
@@ -88,8 +88,8 @@ Deno.serve(async (req) => {
                 provider: "stripe",
                 status: "pending",
                 checkout_session_id: session.id,
-                amount: 9.99, // Podríamos intentar obtener el precio real de Stripe aquí si fuera necesario
-                currency: "usd"
+                amount: amount || 9.99, // Podríamos intentar obtener el precio real de Stripe aquí si fuera necesario
+                currency: currency || "usd"
             });
             if (intentError) console.error("Error tracking payment intent:", intentError);
         } catch (e) {

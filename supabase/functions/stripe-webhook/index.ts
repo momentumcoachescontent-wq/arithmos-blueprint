@@ -88,35 +88,53 @@ Deno.serve(async (req) => {
             break;
         }
 
-        case "checkout.session.expired": {
-            // Un intento se cerró por timeout sin pagar (carrito abandonado pasivo/oficial)
+        case "checkout.session.expired":
+        case "checkout.session.async_payment_failed": {
+            // Un intento se cerró por timeout o falló el pago asíncrono
             const session = event.data.object as Stripe.Checkout.Session;
             await supabase
                 .from("payment_intents")
-                .update({ status: "cancelled" })
+                .update({ status: "failed" })
                 .eq("checkout_session_id", session.id);
+            console.log(`⚠️ Payment session failed/expired: ${session.id}`);
+            break;
+        }
+
+        case "invoice.payment_succeeded": {
+            const invoice = event.data.object as Stripe.Invoice;
+            if (invoice.customer) {
+                // Asegurar que el usuario vuelva a premium si el pago recurrente fue exitoso
+                const { data: profile } = await supabase
+                    .from("profiles")
+                    .update({ 
+                        role: "premium",
+                        subscription_status: "active" 
+                    })
+                    .eq("stripe_customer_id", invoice.customer as string)
+                    .select("user_id")
+                    .single();
+                
+                if (profile) {
+                    console.log(`✅ Recursive payment succeeded for user: ${profile.user_id}`);
+                }
+            }
             break;
         }
 
         case "invoice.payment_failed": {
             const invoice = event.data.object as Stripe.Invoice;
 
-            // Si el pago falla (recurrente o inicial), buscamos la suscripción/cliente relacionada
-            // (Para un payment intent simple, Stripe emite checkout.session.async_payment_failed)
-
-            // Marcar la suscripción como en riesgo (sin degradar todavía)
+            // Si el pago falla (recurrente o inicial), marcamos como past_due
             if (invoice.customer) {
                 const { data: profile } = await supabase
                     .from("profiles")
-                    .select("user_id")
+                    .update({ subscription_status: "past_due" })
                     .eq("stripe_customer_id", invoice.customer as string)
+                    .select("user_id")
                     .single();
+                
                 if (profile) {
-                    await supabase
-                        .from("profiles")
-                        .update({ subscription_status: "past_due" })
-                        .eq("user_id", profile.user_id);
-                    console.log(`⚠️ Payment failed for customer: ${invoice.customer}`);
+                    console.log(`⚠️ Payment failed for customer: ${invoice.customer} (User: ${profile.user_id})`);
                 }
             }
             break;

@@ -1,21 +1,20 @@
 import { useState, useCallback } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { supabase } from "@/integrations/supabase/client";
+import { useAppConfig } from "./useAppConfig";
 
 const STRIPE_PUBLIC_KEY = import.meta.env.VITE_STRIPE_PUBLIC_KEY || "pk_live_51LDzMqGdhRtIc6ULYspd91Q7x6Ys26s4si31edRIPLHe9UwDtcifvx9XaD0Pkp5xuIJxJZZjKUFcq5xWL04PVFcH0004oH7hHf";
-
-// Precio premium mensual (configurable vía variable de entorno)
-const STRIPE_PRICE_ID = import.meta.env.VITE_STRIPE_PRICE_ID || "price_1St98XGdhRtIc6ULbd4XTTNO";
 
 export type SubscriptionStatus = "free" | "premium" | "admin" | "loading";
 
 export function useSubscription(userId?: string) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { config } = useAppConfig();
 
     /**
      * Redirige al usuario al checkout de Stripe para el plan Premium.
-     * Requiere: VITE_STRIPE_PUBLIC_KEY y VITE_STRIPE_PRICE_ID en .env
+     * Requiere: VITE_STRIPE_PUBLIC_KEY y VITE_STRIPE_PRICE_ID en .env (o config de DB)
      */
     const redirectToCheckout = useCallback(async () => {
         if (!userId) {
@@ -32,15 +31,25 @@ export function useSubscription(userId?: string) {
             const stripe = await loadStripe(STRIPE_PUBLIC_KEY);
             if (!stripe) throw new Error("Stripe no pudo cargarse.");
 
+            // Usar el ID de precio de la configuración (DB) o fallback de env
+            const priceId = config.premium_stripe_price_id || import.meta.env.VITE_STRIPE_PRICE_ID;
+
+            if (!priceId) {
+                throw new Error("Configuración incompleta: No se encontró un ID de precio válido.");
+            }
+
             // Llamar a la Edge Function de Supabase para crear la sesión de checkout
             const { data, error: fnError } = await supabase.functions.invoke(
                 "create-checkout-session",
                 {
                     body: {
-                        priceId: STRIPE_PRICE_ID,
+                        priceId,
                         userId,
                         successUrl: `${window.location.origin}/dashboard?payment=success`,
                         cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
+                        // Pasamos también el precio y moneda para tracking en base de datos
+                        amount: config.premium_price,
+                        currency: config.premium_currency
                     },
                 }
             );
