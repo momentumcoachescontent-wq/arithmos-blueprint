@@ -41,7 +41,7 @@ export function AdminOverviewTab() {
     });
     const [weeklyData, setWeeklyData] = useState<DailyData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [stripeReady] = useState(!!import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+    const [stripeReady] = useState(!!(import.meta.env.VITE_STRIPE_PUBLIC_KEY || "pk_live_51LDzMqGdhRtIc6ULYspd91Q7x6Ys26s4si31edRIPLHe9UwDtcifvx9XaD0Pkp5xuIJxJZZjKUFcq5xWL04PVFcH0004oH7hHf"));
     const { summary: aiSummary, isLoading: isLoadingAI, fetchStats: fetchAIStats } = useAITokenStats();
 
     useEffect(() => {
