@@ -293,7 +293,6 @@ const Dashboard = () => {
               <div className="flex items-center gap-3 mb-2">
                 <Trophy className="h-5 w-5 text-amber-500" />
                 <h3 className="font-serif text-foreground font-semibold">Tribunal de Poder</h3>
-                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-[10px] text-amber-500 font-bold uppercase ml-auto shrink-0">Free</span>
               </div>
               <p className="text-xs text-muted-foreground font-sans leading-relaxed">Simulador de Sinergia Numerológica. Descubre cómo tu frecuencia se combina con otras.</p>
               <span className="text-[10px] text-amber-500 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">

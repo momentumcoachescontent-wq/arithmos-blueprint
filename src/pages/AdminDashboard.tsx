@@ -343,43 +343,8 @@ const AdminDashboard = () => {
                             </section>
                         </div>
 
-                        {/* Sidebar Admin: Risk & Shadow Monitor */}
-                        <div className="space-y-8">
-                            <section className="glass rounded-2xl p-8 border-rose-500/20 bg-rose-500/5">
-                                <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2 text-rose-500">
-                                    <ShieldAlert className="h-5 w-5" />
-                                    Monitor de Riesgos
-                                </h3>
-                                <div className="space-y-4">
-                                    <div className="p-4 rounded-lg bg-background/50 border border-rose-500/10">
-                                        <p className="text-xs font-sans font-bold uppercase tracking-tighter text-rose-500 mb-1">Alerta de Sombra</p>
-                                        <p className="text-sm text-foreground/80 leading-snug">Se detectó alta frecuencia de términos "Shadow" en 5 perfiles nuevos.</p>
-                                    </div>
-                                    <div className="p-4 rounded-lg bg-background/50 border border-emerald-500/10">
-                                        <p className="text-xs font-sans font-bold uppercase tracking-tighter text-emerald-500 mb-1">Estabilidad</p>
-                                        <p className="text-sm text-foreground/80 leading-snug">Sin errores críticos de Edge Functions reportados en las últimas 72 horas.</p>
-                                    </div>
-                                </div>
-                                <Button variant="ghost" className="w-full mt-6 text-rose-500 hover:bg-rose-500/10 text-xs uppercase tracking-widest font-bold">
-                                    Ver Análisis de Sombras Completo
-                                </Button>
-                            </section>
-
-                            <section className="glass rounded-2xl p-8 border-border">
-                                <h3 className="text-xl font-serif font-semibold mb-6 flex items-center gap-2">
-                                    <Settings className="h-5 w-5 text-muted-foreground" />
-                                    Acciones Rápidas
-                                </h3>
-                                <div className="space-y-2">
-                                    <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Limpiar Cache de IA</Button>
-                                    <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Exportar Base de Datos (CSV)</Button>
-                                    <Button variant="ghost" className="w-full justify-start text-sm hover:bg-primary/5">Re-sincronizar con Discord</Button>
-                                    <Button variant="ghost" className="w-full justify-start text-sm text-rose-400 hover:bg-rose-500/5">Modo de Mantenimiento</Button>
-                                </div>
-                            </section>
-                        </div>
+                        {/* End Grid */}
                     </TabsContent>
-
                     <TabsContent value="ai" className="m-0 focus-visible:outline-none">
                         <AdminAITab />
                     </TabsContent>
@@ -397,7 +362,7 @@ const AdminDashboard = () => {
                     </TabsContent>
                 </Tabs>
             </div>
-        </div>
+        </div >
     );
 };
 

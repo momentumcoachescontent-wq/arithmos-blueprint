@@ -39,8 +39,8 @@ const DeepDive = () => {
     const { redirectToCheckout, isLoading: isLoadingCheckout } = useSubscription(user?.id);
     const [isRequestingReport, setIsRequestingReport] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
-    const [reportRequested, setReportRequested] = useState(false);
-    const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+    const [reportRequested, setReportRequested] = useState(() => sessionStorage.getItem('deepDiveRequested') === 'true');
+    const [downloadUrl, setDownloadUrl] = useState<string | null>(() => sessionStorage.getItem('deepDiveUrl'));
     const [hasRecentReport, setHasRecentReport] = useState(false);
     const [isCheckingReport, setIsCheckingReport] = useState(true);
 
@@ -115,6 +115,9 @@ const DeepDive = () => {
                 window.open(data.url, "_blank");
                 setDownloadUrl(data.url);
                 setReportRequested(true);
+                setHasRecentReport(true);
+                sessionStorage.setItem('deepDiveUrl', data.url);
+                sessionStorage.setItem('deepDiveRequested', 'true');
                 toast.success("¡Reporte generado!", {
                     description: "Tu Deep Dive Anual se ha abierto en una nueva pestaña. Usa Ctrl+P → Guardar como PDF.",
                     duration: 8000,
@@ -126,6 +129,9 @@ const DeepDive = () => {
                 window.open(blobUrl, "_blank");
                 setDownloadUrl(blobUrl);
                 setReportRequested(true);
+                setHasRecentReport(true);
+                sessionStorage.setItem('deepDiveUrl', blobUrl);
+                sessionStorage.setItem('deepDiveRequested', 'true');
                 // Limpiar el blob URL después de 5 minutos
                 setTimeout(() => URL.revokeObjectURL(blobUrl), 300000);
                 toast.success("¡Reporte generado!", {
@@ -256,7 +262,12 @@ const DeepDive = () => {
                                         <Button
                                             variant="outline"
                                             disabled={hasRecentReport}
-                                            onClick={() => { setReportRequested(false); setDownloadUrl(null); }}
+                                            onClick={() => {
+                                                setReportRequested(false);
+                                                setDownloadUrl(null);
+                                                sessionStorage.removeItem('deepDiveUrl');
+                                                sessionStorage.removeItem('deepDiveRequested');
+                                            }}
                                             className="text-sm"
                                         >
                                             Generar Nuevo Reporte {hasRecentReport && "(Disponible en 6 meses)"}
