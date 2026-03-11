@@ -2,7 +2,7 @@ project_id = "eshqwokytobiywzxkhyw"
 [functions.chat-coach]
 enabled = true
 verify_jwt = true
-import_map = "./functions/chat-coach/deno.json"
+import_map = "./functions/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/chat-coach/index.ts"
