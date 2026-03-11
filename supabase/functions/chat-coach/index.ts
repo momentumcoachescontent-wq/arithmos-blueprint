@@ -1,5 +1,7 @@
+import { createClient } from "jsr:@supabase/supabase-js@2";
 import { getSafeCorsHeaders } from "../_shared/cors.ts";
 import { sanitizePromptInput } from "../_shared/sanitize.ts";
+import { logTokenUsage } from "../_shared/token-tracker.ts";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
@@ -38,6 +40,17 @@ Deno.serve(async (req: Request) => {
         temperature: 0.7,
         max_tokens: 250,
       });
+
+      if (summaryReq.usage) {
+        // En segundo plano para no bloquear respuesta
+        logTokenUsage(
+          null, // Podriamos obtener user_id si validamos JWT
+          "coach_summarize",
+          "gpt-4o-mini",
+          summaryReq.usage.prompt_tokens,
+          summaryReq.usage.completion_tokens
+        );
+      }
 
       return new Response(
         JSON.stringify({ summary: summaryReq.choices[0].message.content }),

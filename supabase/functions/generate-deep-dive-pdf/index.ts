@@ -1,5 +1,6 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { getSafeCorsHeaders } from "../_shared/cors.ts";
+import { logTokenUsage } from "../_shared/token-tracker.ts";
 
 // ─── Tipos de Perfil ─────────────────────────────────
 interface ProfileData {
@@ -746,6 +747,17 @@ Deno.serve(async (req) => {
           const rawContent = openaiData.choices?.[0]?.message?.content || "{}";
           aiContent = JSON.parse(rawContent);
           console.log("✅ Contenido OpenAI generado correctamente");
+
+          // Log usage
+          if (openaiData.usage) {
+            logTokenUsage(
+              user.id,
+              "deep_dive_report",
+              "gpt-4o-mini",
+              openaiData.usage.prompt_tokens,
+              openaiData.usage.completion_tokens
+            );
+          }
         } else {
           const errText = await openaiResponse.text();
           console.error("Error OpenAI:", errText);
