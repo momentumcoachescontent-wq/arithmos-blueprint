@@ -9,3 +9,12 @@ entrypoint = "./functions/chat-coach/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/chat-coach/*.html" ]
+
+[functions.create-checkout-session]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.create-portal-session]
+verify_jwt = false
