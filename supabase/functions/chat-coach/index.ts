@@ -1,3 +1,4 @@
+
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { getSafeCorsHeaders } from "../_shared/cors.ts";
 import { sanitizePromptInput } from "../_shared/sanitize.ts";
@@ -26,6 +27,24 @@ Deno.serve(async (req: Request) => {
 
     const { messages = [], action = "chat", context = {} } = body;
 
+    // --- AUTENTICACIÓN & USER_ID ---
+    const authHeader = req.headers.get("Authorization");
+    let userId: string | null = null;
+    
+    if (authHeader) {
+      try {
+        const supabase = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+        );
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user } } = await supabase.auth.getUser(token);
+        if (user) userId = user.id;
+      } catch (e) {
+        console.warn("No se pudo extraer userId del token:", e.message);
+      }
+    }
+
     // Si la accion es resumir la sesión
     if (action === "summarize") {
       const summaryReq = await openai.chat.completions.create({
@@ -42,9 +61,8 @@ Deno.serve(async (req: Request) => {
       });
 
       if (summaryReq.usage) {
-        // En segundo plano para no bloquear respuesta
         logTokenUsage(
-          null, // Podriamos obtener user_id si validamos JWT
+          userId,
           "coach_summarize",
           "gpt-4o-mini",
           summaryReq.usage.prompt_tokens,
@@ -59,9 +77,6 @@ Deno.serve(async (req: Request) => {
     }
 
     // --- MODO CHAT NORMAL ---
-    // Construir el system prompt dinámico
-    // Sanitización básica para evitar prompt injection
-
     const profileContext = context ? `
 Contexto del usuario:
 - Nombre: ${sanitizePromptInput(context.name || "Usuario")}
@@ -90,16 +105,29 @@ ${profileContext}`
       messages: chatMessages,
       temperature: 0.8,
       stream: true,
+      stream_options: { include_usage: true }
     });
 
     // Crear stream nativo de Deno/Web API
     const stream = new ReadableStream({
       async start(controller) {
         for await (const chunk of response) {
+          // 1. Extraer contenido para el usuario
           const content = chunk.choices[0]?.delta?.content || "";
           if (content) {
             const encoder = new TextEncoder();
             controller.enqueue(encoder.encode(content));
+          }
+
+          // 2. Extraer métricas (vienen en el último chunk cuando include_usage es true)
+          if (chunk.usage) {
+            logTokenUsage(
+              userId,
+              "coach_chat_stream",
+              "gpt-4o",
+              chunk.usage.prompt_tokens,
+              chunk.usage.completion_tokens
+            );
           }
         }
         controller.close();
