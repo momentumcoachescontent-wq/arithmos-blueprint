@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
@@ -16,9 +15,10 @@ Deno.serve(async (req: Request) => {
 
     try {
         event = await stripe.webhooks.constructEventAsync(body, signature, WEBHOOK_SECRET);
-    } catch (err: any) {
-        console.error("Webhook signature verification failed:", err.message);
-        return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        console.error("Webhook signature verification failed:", errorMessage);
+        return new Response(`Webhook Error: ${errorMessage}`, { status: 400 });
     }
 
     const supabase = createClient(
