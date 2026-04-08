@@ -31,16 +31,25 @@ WITH CHECK (false);
 
 -- Los administradores (usando SERVICE_ROLE) se saltarán estas políticas por defecto
 -- pero añadamos un policy explícito si acceden desde la Interfaz de Admin con JWT:
-CREATE POLICY "Admins have full access to payment intents"
-ON public.payment_intents
-FOR ALL
-TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM profiles 
-    WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
-  )
-);
+-- Only create this policy if the role column exists
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'role'
+  ) THEN
+    CREATE POLICY "Admins have full access to payment intents"
+    ON public.payment_intents
+    FOR ALL
+    TO authenticated
+    USING (
+      EXISTS (
+        SELECT 1 FROM profiles
+        WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
+      )
+    );
+  END IF;
+END $$;
 
 -- Trigger para automatizar updated_at
 CREATE OR REPLACE FUNCTION public.handle_updated_at()

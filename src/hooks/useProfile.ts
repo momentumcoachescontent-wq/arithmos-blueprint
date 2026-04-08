@@ -3,28 +3,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export interface Profile {
+  userId: string;          // was: id (profiles.user_id is now the PK)
   name: string;
   birthDate: string;
   lifePathNumber: number;
   expressionNumber?: number;
   soulUrgeNumber?: number;
   personalityNumber?: number;
-  maturityNumber?: number;
+  personalYearNumber?: number;
   archetype: string;
   description: string;
-  // Fase 2: Narrativa IA
   narrative?: string;
   powerStrategy?: string;
   shadowWork?: string;
   audioUrl?: string;
-  role?: "freemium" | "premium" | "admin";
-  // Monetización Stripe
-  stripe_customer_id?: string;
-  stripe_subscription_id?: string;
-  subscription_status?: "active" | "past_due" | "cancelled" | "inactive";
   phone?: string;
+  role?: "user" | "admin";
+  onboardingCompletedAt?: string;
   createdAt: string;
-  id: string; // ID de Supabase
 }
 
 export const ARCHETYPES: Record<number, { name: string; description: string }> = {
@@ -104,50 +100,43 @@ export function useProfile() {
       .single();
 
     if (data && !error) {
-      const name = (data as any).name || (data as any).full_name || "Buscador";
-      const birthDate = data.birth_date;
-      const lifePathNumber = data.life_path_number;
-
       const fetchedProfile: Profile = {
-        name,
-        birthDate,
-        lifePathNumber,
-        expressionNumber: data.expression_number || undefined,
-        soulUrgeNumber: data.soul_urge_number || undefined,
-        personalityNumber: data.personality_number || undefined,
-        maturityNumber: data.maturity_number || undefined,
+        userId: data.user_id,
+        name: data.name,
+        birthDate: data.birth_date,
+        lifePathNumber: data.life_path_number,
+        expressionNumber: data.expression_number ?? undefined,
+        soulUrgeNumber: data.soul_urge_number ?? undefined,
+        personalityNumber: data.personality_number ?? undefined,
+        personalYearNumber: data.personal_year_number ?? undefined,
         archetype: data.archetype,
-        description: data.archetype_description || "",
-        narrative: data.narrative || undefined,
-        powerStrategy: data.power_strategy || undefined,
-        shadowWork: data.shadow_work || undefined,
-        audioUrl: data.audio_url || undefined,
-        role: (data.role as "freemium" | "premium" | "admin") || "freemium",
-        phone: data.phone || undefined,
+        description: data.archetype_description ?? "",
+        narrative: data.narrative ?? undefined,
+        powerStrategy: data.power_strategy ?? undefined,
+        shadowWork: data.shadow_work ?? undefined,
+        audioUrl: data.audio_url ?? undefined,
+        role: (data.role as "user" | "admin") ?? "user",
+        phone: data.phone ?? undefined,
+        onboardingCompletedAt: data.onboarding_completed_at ?? undefined,
         createdAt: data.created_at,
-        id: data.id
       };
 
-      // --- SMART REPAIR ---
-      // Si faltan números pero tenemos nombre/fecha, repararlos localmente y en DB
-      if (!fetchedProfile.expressionNumber || !fetchedProfile.soulUrgeNumber || !fetchedProfile.personalityNumber || !fetchedProfile.maturityNumber) {
-        fetchedProfile.expressionNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'all'));
-        fetchedProfile.soulUrgeNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'vowels'));
-        fetchedProfile.personalityNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'consonants'));
-        fetchedProfile.maturityNumber = reduceToSingleDigitOrMaster(lifePathNumber + (fetchedProfile.expressionNumber || 0));
+      // Auto-repair missing computed numbers
+      if (!fetchedProfile.expressionNumber || !fetchedProfile.soulUrgeNumber || !fetchedProfile.personalityNumber) {
+        fetchedProfile.expressionNumber = reduceToSingleDigitOrMaster(calculateNameValue(fetchedProfile.name, 'all'));
+        fetchedProfile.soulUrgeNumber = reduceToSingleDigitOrMaster(calculateNameValue(fetchedProfile.name, 'vowels'));
+        fetchedProfile.personalityNumber = reduceToSingleDigitOrMaster(calculateNameValue(fetchedProfile.name, 'consonants'));
 
-        // Background update to fix DB record
         supabase.from('profiles').update({
           expression_number: fetchedProfile.expressionNumber,
           soul_urge_number: fetchedProfile.soulUrgeNumber,
           personality_number: fetchedProfile.personalityNumber,
-          maturity_number: fetchedProfile.maturityNumber
         }).eq('user_id', userId).then(({ error }) => {
           if (error) console.warn("Auto-reparación falló en DB:", error.message);
         });
       }
 
-      setProfile({ ...fetchedProfile });
+      setProfile(fetchedProfile);
       sessionStorage.setItem("arithmos_profile", JSON.stringify(fetchedProfile));
       return fetchedProfile;
     }
@@ -160,22 +149,20 @@ export function useProfile() {
     const expressionNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'all'));
     const soulUrgeNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'vowels'));
     const personalityNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'consonants'));
-    const maturityNumber = reduceToSingleDigitOrMaster(lifePathNumber + expressionNumber);
 
     const arch = ARCHETYPES[lifePathNumber] || ARCHETYPES[1];
 
     let newProfile: Profile = {
+      userId: profile?.userId || "",
       name,
       birthDate,
       lifePathNumber,
       expressionNumber,
       soulUrgeNumber,
       personalityNumber,
-      maturityNumber,
       archetype: arch.name,
       description: arch.description,
       createdAt: new Date().toISOString(),
-      id: profile?.id || "",
       phone: phone,
     };
 
@@ -242,31 +229,17 @@ export function useProfile() {
             expression_number: expressionNumber,
             soul_urge_number: soulUrgeNumber,
             personality_number: personalityNumber,
-            maturity_number: maturityNumber,
             archetype: arch.name,
             archetype_description: arch.description,
-            narrative: newProfile.narrative || null,
-            power_strategy: newProfile.powerStrategy || null,
-            shadow_work: newProfile.shadowWork || null,
-            audio_url: newProfile.audioUrl || null,
-            phone: phone || null,
-          }, { onConflict: 'user_id' }); // Usar user_id como target de conflicto si id es desconocido
+            narrative: newProfile.narrative ?? null,
+            power_strategy: newProfile.powerStrategy ?? null,
+            shadow_work: newProfile.shadowWork ?? null,
+            audio_url: newProfile.audioUrl ?? null,
+            phone: phone ?? null,
+          }, { onConflict: 'user_id' });
 
-        if (!upsertError) {
-          await supabase
-            .from('readings')
-            .upsert({
-              user_id: userId,
-              title: `Blueprint de ${name}`,
-              type: 'mini_blueprint',
-              metadata: {
-                life_path_number: lifePathNumber,
-                expression_number: expressionNumber,
-                soul_urge_number: soulUrgeNumber,
-                personality_number: personalityNumber,
-                maturity_number: maturityNumber
-              }
-            }, { onConflict: 'user_id,type' });
+        if (upsertError) {
+          console.warn("Error upserting profile:", upsertError.message);
         }
       }
     }
@@ -310,7 +283,7 @@ export function useProfile() {
             power_strategy: updatedProfile.powerStrategy,
             shadow_work: updatedProfile.shadowWork,
             audio_url: updatedProfile.audioUrl,
-          }).eq('id', profile.id);
+          }).eq('user_id', profile.userId);
 
           toast.success("Blueprint sincronizado con éxito.");
           return updatedProfile;

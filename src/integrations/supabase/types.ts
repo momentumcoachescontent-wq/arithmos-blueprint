@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       admin_health_checks: {
@@ -44,6 +69,47 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_token_usage: {
+        Row: {
+          completion_tokens: number
+          created_at: string
+          estimated_cost_usd: number
+          feature: string
+          id: string
+          model_id: string
+          prompt_tokens: number
+          user_id: string | null
+        }
+        Insert: {
+          completion_tokens?: number
+          created_at?: string
+          estimated_cost_usd?: number
+          feature: string
+          id?: string
+          model_id: string
+          prompt_tokens?: number
+          user_id?: string | null
+        }
+        Update: {
+          completion_tokens?: number
+          created_at?: string
+          estimated_cost_usd?: number
+          feature?: string
+          id?: string
+          model_id?: string
+          prompt_tokens?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_token_usage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       app_config: {
         Row: {
           key: string
@@ -61,6 +127,72 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      bonds: {
+        Row: {
+          archetype: string | null
+          birth_date: string
+          created_at: string
+          expression_number: number | null
+          id: string
+          life_path_number: number
+          linked_user_id: string | null
+          name: string
+          notes: string | null
+          owner_user_id: string
+          personality_number: number | null
+          relationship_type: string | null
+          soul_urge_number: number | null
+          updated_at: string
+        }
+        Insert: {
+          archetype?: string | null
+          birth_date: string
+          created_at?: string
+          expression_number?: number | null
+          id?: string
+          life_path_number: number
+          linked_user_id?: string | null
+          name: string
+          notes?: string | null
+          owner_user_id: string
+          personality_number?: number | null
+          relationship_type?: string | null
+          soul_urge_number?: number | null
+          updated_at?: string
+        }
+        Update: {
+          archetype?: string | null
+          birth_date?: string
+          created_at?: string
+          expression_number?: number | null
+          id?: string
+          life_path_number?: number
+          linked_user_id?: string | null
+          name?: string
+          notes?: string | null
+          owner_user_id?: string
+          personality_number?: number | null
+          relationship_type?: string | null
+          soul_urge_number?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bonds_linked_user_id_fkey"
+            columns: ["linked_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "bonds_owner_user_id_fkey"
+            columns: ["owner_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       coach_messages: {
         Row: {
@@ -124,6 +256,53 @@ export type Database = {
         }
         Relationships: []
       }
+      diary_entries: {
+        Row: {
+          ai_reflection: string | null
+          content: string
+          created_at: string | null
+          id: string
+          shadow_pattern: string | null
+          title: string
+          type: string | null
+          updated_at: string | null
+          user_id: string
+          vibration_at_entry: number | null
+        }
+        Insert: {
+          ai_reflection?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          shadow_pattern?: string | null
+          title: string
+          type?: string | null
+          updated_at?: string | null
+          user_id: string
+          vibration_at_entry?: number | null
+        }
+        Update: {
+          ai_reflection?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          shadow_pattern?: string | null
+          title?: string
+          type?: string | null
+          updated_at?: string | null
+          user_id?: string
+          vibration_at_entry?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       friction_diagnostics: {
         Row: {
           created_at: string | null
@@ -175,53 +354,6 @@ export type Database = {
         }
         Relationships: []
       }
-      journal_entries: {
-        Row: {
-          ai_reflection: string | null
-          content: string
-          created_at: string | null
-          id: string
-          personal_number_at_entry: number | null
-          shadow_pattern: string | null
-          title: string
-          type: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          ai_reflection?: string | null
-          content: string
-          created_at?: string | null
-          id?: string
-          personal_number_at_entry?: number | null
-          shadow_pattern?: string | null
-          title: string
-          type?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          ai_reflection?: string | null
-          content?: string
-          created_at?: string | null
-          id?: string
-          personal_number_at_entry?: number | null
-          shadow_pattern?: string | null
-          title?: string
-          type?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "journal_entries_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
       missions: {
         Row: {
           created_at: string | null
@@ -251,6 +383,47 @@ export type Database = {
           xp_reward?: number
         }
         Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          channel: string
+          id: string
+          read_at: string | null
+          sent_at: string
+          title: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          channel: string
+          id?: string
+          read_at?: string | null
+          sent_at?: string
+          title?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          channel?: string
+          id?: string
+          read_at?: string | null
+          sent_at?: string
+          title?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       payment_intents: {
         Row: {
@@ -292,7 +465,7 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -305,23 +478,17 @@ export type Database = {
           created_at: string
           email: string | null
           expression_number: number | null
-          free_readings_left: number | null
-          id: string
-          is_anonymous: boolean | null
           life_path_number: number
-          maturity_number: number | null
           name: string
           narrative: string | null
+          onboarding_completed_at: string | null
+          personal_year_number: number | null
           personality_number: number | null
           phone: string | null
           power_strategy: string | null
           role: string
           shadow_work: string | null
           soul_urge_number: number | null
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
-          subscription_status: string | null
-          subscription_tier: string | null
           updated_at: string
           user_id: string
         }
@@ -333,23 +500,17 @@ export type Database = {
           created_at?: string
           email?: string | null
           expression_number?: number | null
-          free_readings_left?: number | null
-          id?: string
-          is_anonymous?: boolean | null
           life_path_number: number
-          maturity_number?: number | null
           name: string
           narrative?: string | null
+          onboarding_completed_at?: string | null
+          personal_year_number?: number | null
           personality_number?: number | null
           phone?: string | null
           power_strategy?: string | null
           role?: string
           shadow_work?: string | null
           soul_urge_number?: number | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          subscription_status?: string | null
-          subscription_tier?: string | null
           updated_at?: string
           user_id: string
         }
@@ -361,23 +522,17 @@ export type Database = {
           created_at?: string
           email?: string | null
           expression_number?: number | null
-          free_readings_left?: number | null
-          id?: string
-          is_anonymous?: boolean | null
           life_path_number?: number
-          maturity_number?: number | null
           name?: string
           narrative?: string | null
+          onboarding_completed_at?: string | null
+          personal_year_number?: number | null
           personality_number?: number | null
           phone?: string | null
           power_strategy?: string | null
           role?: string
           shadow_work?: string | null
           soul_urge_number?: number | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
-          subscription_status?: string | null
-          subscription_tier?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -392,13 +547,15 @@ export type Database = {
           id: string
           is_read: boolean | null
           metadata: Json | null
+          personal_day: number | null
           personal_month: number | null
           personal_year: number | null
-          reading_type: string | null
           scheduled_for: string | null
           title: string
           type: string
+          updated_at: string
           user_id: string
+          vibration: number | null
         }
         Insert: {
           ai_response?: string | null
@@ -408,13 +565,15 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           metadata?: Json | null
+          personal_day?: number | null
           personal_month?: number | null
           personal_year?: number | null
-          reading_type?: string | null
           scheduled_for?: string | null
           title: string
           type?: string
+          updated_at?: string
           user_id: string
+          vibration?: number | null
         }
         Update: {
           ai_response?: string | null
@@ -424,12 +583,97 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           metadata?: Json | null
+          personal_day?: number | null
           personal_month?: number | null
           personal_year?: number | null
-          reading_type?: string | null
           scheduled_for?: string | null
           title?: string
           type?: string
+          updated_at?: string
+          user_id?: string
+          vibration?: number | null
+        }
+        Relationships: []
+      }
+      streak_logs: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          logged_date: string
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          logged_date: string
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          logged_date?: string
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streak_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          mercadopago_subscription_id: string | null
+          plan: string
+          provider: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_ends_at: string | null
+          subscription_started_at: string | null
+          trial_ends_at: string
+          trial_started_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mercadopago_subscription_id?: string | null
+          plan?: string
+          provider?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          trial_ends_at: string
+          trial_started_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mercadopago_subscription_id?: string | null
+          plan?: string
+          provider?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          trial_ends_at?: string
+          trial_started_at?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -494,38 +738,71 @@ export type Database = {
         }
         Relationships: []
       }
-      team_readings: {
+      team_members: {
         Row: {
-          analysis: string | null
-          created_at: string | null
+          added_at: string
+          bond_id: string
           id: string
-          members: Json
-          owner_id: string
-          title: string
-          updated_at: string | null
+          team_id: string
         }
         Insert: {
-          analysis?: string | null
-          created_at?: string | null
+          added_at?: string
+          bond_id: string
           id?: string
-          members?: Json
-          owner_id: string
-          title?: string
-          updated_at?: string | null
+          team_id: string
         }
         Update: {
-          analysis?: string | null
-          created_at?: string | null
+          added_at?: string
+          bond_id?: string
           id?: string
-          members?: Json
-          owner_id?: string
-          title?: string
-          updated_at?: string | null
+          team_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "team_readings_owner_id_fkey"
-            columns: ["owner_id"]
+            foreignKeyName: "team_members_bond_id_fkey"
+            columns: ["bond_id"]
+            isOneToOne: false
+            referencedRelation: "bonds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          analysis: string | null
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          analysis?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          owner_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          analysis?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          owner_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_owner_user_id_fkey"
+            columns: ["owner_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
@@ -752,6 +1029,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

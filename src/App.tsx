@@ -3,9 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 // Arithmos AI Strategist - Production Build v1.2.7
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
-import Onboarding from "./pages/Onboarding";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Missions from "./pages/Missions";
 import Journal from "./pages/Journal";
@@ -33,7 +33,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/onboarding" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/missions" element={<Missions />} />
           <Route path="/journal" element={<Journal />} />

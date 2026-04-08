@@ -8,6 +8,7 @@ CREATE TABLE public.profiles (
   life_path_number INTEGER NOT NULL,
   archetype TEXT NOT NULL,
   archetype_description TEXT,
+  role TEXT DEFAULT 'user',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE(user_id)
