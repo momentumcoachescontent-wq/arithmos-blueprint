@@ -23,6 +23,8 @@ export async function logTokenUsage(
     "gpt-4o": { prompt: 5.0, completion: 15.0 },
     "gpt-4o-mini": { prompt: 0.15, completion: 0.60 },
     "gpt-4-turbo": { prompt: 10.0, completion: 30.0 },
+    "claude-sonnet-4-6": { prompt: 3.0, completion: 15.0 },
+    "claude-haiku-4-5-20251001": { prompt: 0.80, completion: 4.0 },
     "default": { prompt: 10.0, completion: 30.0 }
   };
 

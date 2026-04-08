@@ -1,12 +1,12 @@
-
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import Anthropic from "npm:@anthropic-ai/sdk";
 import { getSafeCorsHeaders } from "../_shared/cors.ts";
 import { sanitizePromptInput } from "../_shared/sanitize.ts";
 import { logTokenUsage } from "../_shared/token-tracker.ts";
-import OpenAI from "openai";
+import { buildCoachSystemPrompt, buildSummarizePrompt, type CoachContext } from "../_shared/prompts.ts";
 
-const openai = new OpenAI({
-  apiKey: Deno.env.get("OPENAI_API_KEY"),
+const anthropic = new Anthropic({
+  apiKey: Deno.env.get("ANTHROPIC_API_KEY"),
 });
 
 Deno.serve(async (req: Request) => {
@@ -17,124 +17,116 @@ Deno.serve(async (req: Request) => {
 
   try {
     const bodyText = await req.text();
-    let body;
+    let body: {
+      messages?: Array<{ role: string; content: string }>;
+      action?: string;
+      context?: Partial<CoachContext>;
+    };
     try {
       body = JSON.parse(bodyText);
-    } catch (e) {
+    } catch (_e) {
       console.error("No se pudo parsear JSON:", bodyText);
       throw new Error("Invalid JSON body");
     }
 
     const { messages = [], action = "chat", context = {} } = body;
 
-    // --- AUTENTICACIÓN & USER_ID ---
+    // --- AUTH & USER_ID ---
     const authHeader = req.headers.get("Authorization");
     let userId: string | null = null;
-    
+
     if (authHeader) {
       try {
         const supabase = createClient(
           Deno.env.get("SUPABASE_URL")!,
-          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
         );
         const token = authHeader.replace("Bearer ", "");
         const { data: { user } } = await supabase.auth.getUser(token);
         if (user) userId = user.id;
       } catch (e) {
-        console.warn("No se pudo extraer userId del token:", e.message);
+        console.warn("No se pudo extraer userId del token:", (e as Error).message);
       }
     }
 
-    // Si la accion es resumir la sesión
+    // --- SUMMARIZE ---
     if (action === "summarize") {
-      const summaryReq = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `Eres el Coach de Arithmos. Resume la siguiente conversación del usuario en un párrafo conciso enfocado en la "Sombra" o patrón que se trabajó, y el aprendizaje u objetivo final establecido. Sé directo y analítico. No uses saludos.`
-          },
-          ...(Array.isArray(messages) ? messages : [])
-        ],
-        temperature: 0.7,
-        max_tokens: 250,
+      const conversationText = (Array.isArray(messages) ? messages : [])
+        .map((m) => `${m.role === "user" ? "Usuario" : "Coach"}: ${m.content}`)
+        .join("\n\n");
+
+      const summaryReq = await anthropic.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 300,
+        system: buildSummarizePrompt(),
+        messages: [{ role: "user", content: conversationText }],
       });
 
-      if (summaryReq.usage) {
-        await logTokenUsage(
-          userId,
-          "coach_summarize",
-          "gpt-4o-mini",
-          summaryReq.usage.prompt_tokens,
-          summaryReq.usage.completion_tokens
-        );
-      }
+      await logTokenUsage(
+        userId,
+        "coach_summarize",
+        "claude-haiku-4-5-20251001",
+        summaryReq.usage.input_tokens,
+        summaryReq.usage.output_tokens,
+      );
+
+      const block = summaryReq.content[0];
+      const summary = block.type === "text" ? block.text : "";
 
       return new Response(
-        JSON.stringify({ summary: summaryReq.choices[0].message.content }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ summary }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // --- MODO CHAT NORMAL ---
-    const profileContext = context ? `
-Contexto del usuario:
-- Nombre: ${sanitizePromptInput(context.name || "Usuario")}
-- Camino de Vida: ${sanitizePromptInput(context.lifePath || "Desconocido")}
-` : "";
-
-    const systemMessage = {
-      role: "system",
-      content: `Eres el "Coach MADM" (Mente, Alma, Dios, Materia) dentro de la app Arithmos. 
-Tu objetivo es tener "Conversaciones Honestas" con el usuario, operando bajo un tono de Psicología Aplicada, crecimiento post-traumático y confrontación compasiva. 
-Eres provocativo pero sanador. Tu objetivo es romper patrones de miedo y transformar la oscuridad personal en poder.
-No eres condescendiente ni usas positividad tóxica. Haces preguntas incisivas que invitan a la introspección.
-
-Reglas:
-1. Respuestas cortas, concisas y directas. Un párrafo máximo a menos que sea necesario.
-2. Termina a menudo (pero no siempre) con una pregunta profunda.
-3. No des sermones largos.
-${profileContext}`
+    // --- CHAT (STREAMING) ---
+    const safeContext: CoachContext = {
+      name: sanitizePromptInput(context.name || "Usuario"),
+      lifePathNumber: typeof context.lifePathNumber === "number" ? context.lifePathNumber : 1,
+      archetype: context.archetype || "El Pionero",
+      archetypePowers: Array.isArray(context.archetypePowers) ? context.archetypePowers : [],
+      archetypeShadow: context.archetypeShadow || "",
+      archetypeCoachingNote: context.archetypeCoachingNote || "",
     };
 
-    const chatMessages = [systemMessage, ...(Array.isArray(messages) ? messages : [])];
+    const chatMessages = (Array.isArray(messages) ? messages : []) as Array<{
+      role: "user" | "assistant";
+      content: string;
+    }>;
 
-    // MODO STREAMING
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const claudeStream = anthropic.messages.stream({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1024,
+      system: buildCoachSystemPrompt(safeContext),
       messages: chatMessages,
-      temperature: 0.8,
-      stream: true,
-      stream_options: { include_usage: true }
     });
 
-    // Crear stream nativo de Deno/Web API
-    const stream = new ReadableStream({
+    const encoder = new TextEncoder();
+    const readableStream = new ReadableStream({
       async start(controller) {
-        for await (const chunk of response) {
-          // 1. Extraer contenido para el usuario
-          const content = chunk.choices[0]?.delta?.content || "";
-          if (content) {
-            const encoder = new TextEncoder();
-            controller.enqueue(encoder.encode(content));
-          }
+        try {
+          claudeStream.on("text", (text) => {
+            controller.enqueue(encoder.encode(text));
+          });
 
-          // 2. Extraer métricas (vienen en el último chunk cuando include_usage es true)
-          if (chunk.usage) {
-            await logTokenUsage(
-              userId,
-              "coach_chat_stream",
-              "gpt-4o",
-              chunk.usage.prompt_tokens,
-              chunk.usage.completion_tokens
-            );
-          }
+          const finalMsg = await claudeStream.finalMessage();
+          await logTokenUsage(
+            userId,
+            "coach_chat_stream",
+            "claude-sonnet-4-6",
+            finalMsg.usage.input_tokens,
+            finalMsg.usage.output_tokens,
+          );
+
+          controller.close();
+        } catch (err) {
+          console.error("Stream error:", err);
+          controller.error(err);
         }
-        controller.close();
       },
     });
 
-    return new Response(stream, {
+    return new Response(readableStream, {
       headers: {
         ...corsHeaders,
         "Content-Type": "text/event-stream",
@@ -143,11 +135,12 @@ ${profileContext}`
       },
     });
 
-  } catch (error: any) {
-    console.error("Error en chat-coach:", error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error processing request";
+    console.error("Error en chat-coach:", message);
     return new Response(
-      JSON.stringify({ error: error.message || "Error processing request" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ error: message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });
