@@ -16,9 +16,13 @@ import {
 const db = supabase as any;
 
 const AI_MODELS = [
-    { value: "claude-sonnet-4-6", label: "Claude Sonnet 4.6 — Coach principal (activo)", badge: "🎯 Activo" },
-    { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — Resúmenes y tareas rápidas", badge: "⚡ Rápido" },
-    { value: "claude-opus-4-6", label: "Claude Opus 4.6 — Máxima capacidad (alto costo)", badge: "🧠 Máximo" },
+    // Anthropic — Claude
+    { value: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", badge: "🎯 Recomendado", provider: "Anthropic" },
+    { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — Rápido y económico", badge: "⚡ Económico", provider: "Anthropic" },
+    { value: "claude-opus-4-6", label: "Claude Opus 4.6 — Máxima capacidad", badge: "🧠 Máximo", provider: "Anthropic" },
+    // OpenAI — GPT (fallback si Anthropic sin créditos)
+    { value: "gpt-4o-mini", label: "GPT-4o Mini — Rápido y económico", badge: "⚡ Fallback", provider: "OpenAI" },
+    { value: "gpt-4o", label: "GPT-4o — Máxima inteligencia OpenAI", badge: "🧠 Fallback", provider: "OpenAI" },
 ];
 
 interface SystemPrompt {
@@ -273,21 +277,30 @@ export function AdminAITab() {
                                 <Label className="text-sm text-muted-foreground font-sans flex items-center gap-1.5">
                                     <Cpu className="h-3.5 w-3.5" /> Modelo Claude (referencia)
                                 </Label>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    {AI_MODELS.map((m) => (
-                                        <button
-                                            key={m.value}
-                                            onClick={() => setEditedModel(m.value)}
-                                            className={`text-left p-4 rounded-xl border transition-all ${editedModel === m.value
-                                                ? "border-primary bg-primary/10"
-                                                : "border-border bg-secondary/30 hover:border-primary/40"
-                                                }`}
-                                        >
-                                            <div className="text-xs font-bold font-sans text-primary mb-1">{m.badge}</div>
-                                            <div className="text-xs font-sans text-foreground leading-snug">{m.label}</div>
-                                        </button>
-                                    ))}
-                                </div>
+                                {["Anthropic", "OpenAI"].map((provider) => (
+                                    <div key={provider} className="mb-3">
+                                        <p className="text-[10px] uppercase tracking-widest font-sans font-bold text-muted-foreground mb-2 px-1">
+                                            {provider === "OpenAI" ? "⚠️ OpenAI (fallback si Anthropic sin créditos)" : "✦ " + provider}
+                                        </p>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                            {AI_MODELS.filter(m => m.provider === provider).map((m) => (
+                                                <button
+                                                    key={m.value}
+                                                    onClick={() => setEditedModel(m.value)}
+                                                    className={`text-left p-3 rounded-xl border transition-all ${editedModel === m.value
+                                                        ? provider === "OpenAI"
+                                                            ? "border-amber-500/50 bg-amber-500/10"
+                                                            : "border-primary bg-primary/10"
+                                                        : "border-border bg-secondary/30 hover:border-primary/40"
+                                                        }`}
+                                                >
+                                                    <div className={`text-xs font-bold font-sans mb-1 ${provider === "OpenAI" ? "text-amber-400" : "text-primary"}`}>{m.badge}</div>
+                                                    <div className="text-xs font-sans text-foreground leading-snug">{m.label}</div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
 
                             {/* Prompt Content */}

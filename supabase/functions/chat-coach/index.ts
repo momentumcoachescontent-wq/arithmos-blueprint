@@ -1,17 +1,20 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import Anthropic from "npm:@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { getSafeCorsHeaders } from "../_shared/cors.ts";
 import { sanitizePromptInput } from "../_shared/sanitize.ts";
 import { logTokenUsage } from "../_shared/token-tracker.ts";
 import { buildCoachSystemPrompt, buildSummarizePrompt, type CoachContext } from "../_shared/prompts.ts";
 
-const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-if (!apiKey) console.error("FATAL: ANTHROPIC_API_KEY is not set in Supabase secrets");
-
-const anthropic = new Anthropic({ apiKey });
+const anthropic = new Anthropic({ apiKey: Deno.env.get("ANTHROPIC_API_KEY") });
+const openai = new OpenAI({ apiKey: Deno.env.get("OPENAI_API_KEY") });
 
 const FALLBACK_CHAT_MODEL = "claude-sonnet-4-6";
 const FALLBACK_SUMMARIZE_MODEL = "claude-haiku-4-5-20251001";
+
+function isOpenAIModel(model: string): boolean {
+  return model.startsWith("gpt-") || model.startsWith("o1") || model.startsWith("o3");
+}
 
 async function getModelConfig(feature: string, fallback: string): Promise<string> {
   try {
@@ -46,7 +49,6 @@ Deno.serve(async (req: Request) => {
     try {
       body = JSON.parse(bodyText);
     } catch (_e) {
-      console.error("No se pudo parsear JSON:", bodyText);
       throw new Error("Invalid JSON body");
     }
 
@@ -55,7 +57,6 @@ Deno.serve(async (req: Request) => {
     // --- AUTH & USER_ID ---
     const authHeader = req.headers.get("Authorization");
     let userId: string | null = null;
-
     if (authHeader) {
       try {
         const supabase = createClient(
@@ -66,36 +67,51 @@ Deno.serve(async (req: Request) => {
         const { data: { user } } = await supabase.auth.getUser(token);
         if (user) userId = user.id;
       } catch (e) {
-        console.warn("No se pudo extraer userId del token:", (e as Error).message);
+        console.warn("No se pudo extraer userId:", (e as Error).message);
       }
     }
+
+    const cleanMessages = (Array.isArray(messages) ? messages : [])
+      .filter((m) => (m.role === "user" || m.role === "assistant") && m.content?.trim())
+      .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
 
     // --- SUMMARIZE ---
     if (action === "summarize") {
       const model = await getModelConfig("coach_summarize", FALLBACK_SUMMARIZE_MODEL);
-
       const conversationText = (Array.isArray(messages) ? messages : [])
         .map((m) => `${m.role === "user" ? "Usuario" : "Coach"}: ${m.content}`)
         .join("\n\n");
 
-      const summaryReq = await anthropic.messages.create({
-        model,
-        max_tokens: 300,
-        system: buildSummarizePrompt(),
-        messages: [{ role: "user", content: conversationText }],
-      });
+      let summary = "";
+      let inputTokens = 0;
+      let outputTokens = 0;
 
-      await logTokenUsage(
-        userId,
-        "coach_summarize",
-        model,
-        summaryReq.usage.input_tokens,
-        summaryReq.usage.output_tokens,
-      );
+      if (isOpenAIModel(model)) {
+        const res = await openai.chat.completions.create({
+          model,
+          max_tokens: 300,
+          messages: [
+            { role: "system", content: buildSummarizePrompt() },
+            { role: "user", content: conversationText },
+          ],
+        });
+        summary = res.choices[0]?.message?.content || "";
+        inputTokens = res.usage?.prompt_tokens || 0;
+        outputTokens = res.usage?.completion_tokens || 0;
+      } else {
+        const res = await anthropic.messages.create({
+          model,
+          max_tokens: 300,
+          system: buildSummarizePrompt(),
+          messages: [{ role: "user", content: conversationText }],
+        });
+        const block = res.content[0];
+        summary = block.type === "text" ? block.text : "";
+        inputTokens = res.usage.input_tokens;
+        outputTokens = res.usage.output_tokens;
+      }
 
-      const block = summaryReq.content[0];
-      const summary = block.type === "text" ? block.text : "";
-
+      await logTokenUsage(userId, "coach_summarize", model, inputTokens, outputTokens);
       return new Response(
         JSON.stringify({ summary }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -103,8 +119,14 @@ Deno.serve(async (req: Request) => {
     }
 
     // --- CHAT (STREAMING) ---
-    const model = await getModelConfig("coach_chat", FALLBACK_CHAT_MODEL);
+    if (cleanMessages.length === 0 || cleanMessages[cleanMessages.length - 1].role !== "user") {
+      return new Response(
+        JSON.stringify({ error: "No valid messages to process" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
+    const model = await getModelConfig("coach_chat", FALLBACK_CHAT_MODEL);
     const safeContext: CoachContext = {
       name: sanitizePromptInput(context.name || "Usuario"),
       lifePathNumber: typeof context.lifePathNumber === "number" ? context.lifePathNumber : 1,
@@ -113,59 +135,76 @@ Deno.serve(async (req: Request) => {
       archetypeShadow: context.archetypeShadow || "",
       archetypeCoachingNote: context.archetypeCoachingNote || "",
     };
-
-    // Filter out system messages and empty content — Claude only accepts user/assistant
-    const chatMessages = (Array.isArray(messages) ? messages : [])
-      .filter((m) => (m.role === "user" || m.role === "assistant") && m.content?.trim())
-      .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
-
-    if (chatMessages.length === 0 || chatMessages[chatMessages.length - 1].role !== "user") {
-      return new Response(
-        JSON.stringify({ error: "No valid messages to process" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    const claudeStream = anthropic.messages.stream({
-      model,
-      max_tokens: 1024,
-      system: buildCoachSystemPrompt(safeContext),
-      messages: chatMessages,
-    });
-
+    const systemPrompt = buildCoachSystemPrompt(safeContext);
     const encoder = new TextEncoder();
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        try {
-          claudeStream.on("text", (text) => {
-            controller.enqueue(encoder.encode(text));
-          });
 
-          const finalMsg = await claudeStream.finalMessage();
-          await logTokenUsage(
-            userId,
-            "coach_chat_stream",
-            model,
-            finalMsg.usage.input_tokens,
-            finalMsg.usage.output_tokens,
-          );
+    if (isOpenAIModel(model)) {
+      // OpenAI streaming
+      const stream = await openai.chat.completions.create({
+        model,
+        max_tokens: 1024,
+        stream: true,
+        stream_options: { include_usage: true },
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...cleanMessages,
+        ],
+      });
 
-          controller.close();
-        } catch (err) {
-          console.error("Stream error:", err);
-          controller.error(err);
-        }
-      },
-    });
+      const readableStream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of stream) {
+              const content = chunk.choices[0]?.delta?.content || "";
+              if (content) controller.enqueue(encoder.encode(content));
+              if (chunk.usage) {
+                await logTokenUsage(
+                  userId, "coach_chat_stream", model,
+                  chunk.usage.prompt_tokens, chunk.usage.completion_tokens,
+                );
+              }
+            }
+            controller.close();
+          } catch (err) {
+            console.error("OpenAI stream error:", err);
+            controller.error(err);
+          }
+        },
+      });
 
-    return new Response(readableStream, {
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
-      },
-    });
+      return new Response(readableStream, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive" },
+      });
+    } else {
+      // Anthropic streaming
+      const claudeStream = anthropic.messages.stream({
+        model,
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: cleanMessages,
+      });
+
+      const readableStream = new ReadableStream({
+        async start(controller) {
+          try {
+            claudeStream.on("text", (text) => controller.enqueue(encoder.encode(text)));
+            const finalMsg = await claudeStream.finalMessage();
+            await logTokenUsage(
+              userId, "coach_chat_stream", model,
+              finalMsg.usage.input_tokens, finalMsg.usage.output_tokens,
+            );
+            controller.close();
+          } catch (err) {
+            console.error("Anthropic stream error:", err);
+            controller.error(err);
+          }
+        },
+      });
+
+      return new Response(readableStream, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive" },
+      });
+    }
 
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Error processing request";
