@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Scale } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Scale, Calendar, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -221,6 +221,8 @@ const Dashboard = () => {
               <p className="text-[10px] font-sans text-muted-foreground uppercase tracking-[0.2em] mb-3 px-1">Herramientas</p>
               <div className="grid grid-cols-2 gap-3">
                 {[
+                  { label: "Calendario", icon: Calendar, color: "text-primary", path: "/calendario" },
+                  { label: "Horas del Día", icon: Clock, color: "text-amber-400", path: "/horas" },
                   { label: "Radar de Fricción", icon: Scale, color: "text-indigo-400", path: "/radar-friccion" },
                   { label: "Sincronicidad", icon: Sparkles, color: "text-primary", path: "/synchronicity" },
                   { label: "Misiones", icon: Target, color: "text-primary", path: "/missions" },

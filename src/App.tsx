@@ -19,6 +19,8 @@ import TribunalPoder from "./pages/TribunalPoder";
 import Evolucion from "./pages/Evolucion";
 import CoachChat from "./pages/CoachChat";
 import FrictionRadar from "./pages/FrictionRadar";
+import CalendarioNumerico from "./pages/CalendarioNumerico";
+import HorasDelDia from "./pages/HorasDelDia";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import DataDeletion from "./pages/DataDeletion";
 import NotFound from "./pages/NotFound";
@@ -48,6 +50,8 @@ const App = () => (
           <Route path="/evolucion" element={<Evolucion />} />
           <Route path="/coach" element={<CoachChat />} />
           <Route path="/radar-friccion" element={<FrictionRadar />} />
+          <Route path="/calendario" element={<CalendarioNumerico />} />
+          <Route path="/horas" element={<HorasDelDia />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/privacidad" element={<PrivacyPolicy />} />
           <Route path="/privasidad" element={<PrivacyPolicy />} />
