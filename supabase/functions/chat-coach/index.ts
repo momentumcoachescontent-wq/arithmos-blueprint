@@ -5,9 +5,10 @@ import { sanitizePromptInput } from "../_shared/sanitize.ts";
 import { logTokenUsage } from "../_shared/token-tracker.ts";
 import { buildCoachSystemPrompt, buildSummarizePrompt, type CoachContext } from "../_shared/prompts.ts";
 
-const anthropic = new Anthropic({
-  apiKey: Deno.env.get("ANTHROPIC_API_KEY"),
-});
+const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+if (!apiKey) console.error("FATAL: ANTHROPIC_API_KEY is not set in Supabase secrets");
+
+const anthropic = new Anthropic({ apiKey });
 
 const FALLBACK_CHAT_MODEL = "claude-sonnet-4-6";
 const FALLBACK_SUMMARIZE_MODEL = "claude-haiku-4-5-20251001";
@@ -113,10 +114,17 @@ Deno.serve(async (req: Request) => {
       archetypeCoachingNote: context.archetypeCoachingNote || "",
     };
 
-    const chatMessages = (Array.isArray(messages) ? messages : []) as Array<{
-      role: "user" | "assistant";
-      content: string;
-    }>;
+    // Filter out system messages and empty content — Claude only accepts user/assistant
+    const chatMessages = (Array.isArray(messages) ? messages : [])
+      .filter((m) => (m.role === "user" || m.role === "assistant") && m.content?.trim())
+      .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+
+    if (chatMessages.length === 0 || chatMessages[chatMessages.length - 1].role !== "user") {
+      return new Response(
+        JSON.stringify({ error: "No valid messages to process" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const claudeStream = anthropic.messages.stream({
       model,
