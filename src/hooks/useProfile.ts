@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export interface Profile {
@@ -144,105 +144,73 @@ export function useProfile() {
   }, []);
 
   const createProfile = useCallback(async (name: string, birthDate: string, userId?: string, phone?: string) => {
-    // 1. Cálculos Deterministas Locales (Respaldo Inmediato)
-    const lifePathNumber = calculateLifePath(birthDate);
-    const expressionNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'all'));
-    const soulUrgeNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'vowels'));
-    const personalityNumber = reduceToSingleDigitOrMaster(calculateNameValue(name, 'consonants'));
+    const { data: { session } } = await supabase.auth.getSession();
+    const authToken = session?.access_token || SUPABASE_PUBLISHABLE_KEY;
 
-    const arch = ARCHETYPES[lifePathNumber] || ARCHETYPES[1];
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/calculate-blueprint`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({ name, birthDate }),
+    });
 
-    let newProfile: Profile = {
-      userId: profile?.userId || "",
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({})) as { error?: string };
+      throw new Error(err.error || `calculate-blueprint failed: ${response.status}`);
+    }
+
+    const result = await response.json() as {
+      lifePathNumber: number;
+      expressionNumber: number;
+      soulUrgeNumber: number;
+      personalityNumber: number;
+      archetype: string;
+      archetypeDescription: string;
+    };
+
+    const newProfile: Profile = {
+      userId: userId || "",
       name,
       birthDate,
-      lifePathNumber,
-      expressionNumber,
-      soulUrgeNumber,
-      personalityNumber,
-      archetype: arch.name,
-      description: arch.description,
+      lifePathNumber: result.lifePathNumber,
+      expressionNumber: result.expressionNumber,
+      soulUrgeNumber: result.soulUrgeNumber,
+      personalityNumber: result.personalityNumber,
+      archetype: result.archetype,
+      description: result.archetypeDescription,
       createdAt: new Date().toISOString(),
       phone: phone,
     };
 
-    try {
-      // 2. Intentar obtener interpretación IA de n8n con lógica de reintento simple
-      let attempts = 0;
-      const maxAttempts = 2;
-      let success = false;
-
-      while (attempts < maxAttempts && !success) {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
-
-          const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook/arithmos-calculate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ full_name: name, birth_date: birthDate }),
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeoutId);
-
-          if (response.ok) {
-            let data = await response.json();
-            if (Array.isArray(data)) data = data[0];
-
-            if (data && data.success && data.interpretation) {
-              newProfile.narrative = data.interpretation.narrative;
-              newProfile.powerStrategy = data.interpretation.power_strategy;
-              newProfile.shadowWork = data.interpretation.shadow_work;
-              newProfile.audioUrl = data.interpretation.audio_url;
-              success = true;
-            }
-          } else {
-            console.warn(`Intento ${attempts + 1} fallido con status: ${response.status}`);
-          }
-        } catch (e) {
-          console.warn(`Error en intento ${attempts + 1}:`, e);
-        }
-        attempts++;
-        if (!success && attempts < maxAttempts) {
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempts)); // Backoff simple
-        }
-      }
-    } catch (error) {
-      console.warn("Fallo persistente en motor IA (n8n), operando en modo matemático:", error);
-    }
-
-    // 3. Persistencia en SessionStorage y actualización de ESTADO reactivo
     sessionStorage.setItem("arithmos_profile", JSON.stringify(newProfile));
-    setProfile({ ...newProfile }); // Clonar para forzar re-render
+    setProfile({ ...newProfile });
 
-    if (userId) {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { error: upsertError } = await supabase
-          .from('profiles')
-          .upsert({
+    if (userId && session) {
+      const { error: upsertError } = await supabase
+        .from('profiles')
+        .upsert(
+          {
             user_id: userId,
-            name: name,
+            name,
             birth_date: birthDate,
-            life_path_number: lifePathNumber,
-            expression_number: expressionNumber,
-            soul_urge_number: soulUrgeNumber,
-            personality_number: personalityNumber,
-            archetype: arch.name,
-            archetype_description: arch.description,
-            narrative: newProfile.narrative ?? null,
-            power_strategy: newProfile.powerStrategy ?? null,
-            shadow_work: newProfile.shadowWork ?? null,
-            audio_url: newProfile.audioUrl ?? null,
+            life_path_number: result.lifePathNumber,
+            expression_number: result.expressionNumber,
+            soul_urge_number: result.soulUrgeNumber,
+            personality_number: result.personalityNumber,
+            archetype: result.archetype,
+            archetype_description: result.archetypeDescription,
             phone: phone ?? null,
-          }, { onConflict: 'user_id' });
+          },
+          { onConflict: 'user_id' },
+        );
 
-        if (upsertError) {
-          console.warn("Error upserting profile:", upsertError.message);
-        }
+      if (upsertError) {
+        console.warn("Error upserting profile:", upsertError.message);
       }
     }
+
     return newProfile;
   }, []);
 
