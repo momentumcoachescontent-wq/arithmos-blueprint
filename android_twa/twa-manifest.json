@@ -13,8 +13,8 @@
   "backgroundColor": "#0A0A1A",
   "enableNotifications": true,
   "startUrl": "/",
-  "iconUrl": "http://localhost:8080/icon-512x512.png",
-  "maskableIconUrl": "http://localhost:8080/icon-maskable-512x512.png",
+  "iconUrl": "https://app.arithmos.mx/icon-512x512.png",
+  "maskableIconUrl": "https://app.arithmos.mx/icon-maskable-512x512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android.keystore",
@@ -24,7 +24,7 @@
   "appVersionCode": 1,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "http://localhost:8080/manifest.webmanifest",
+  "webManifestUrl": "https://app.arithmos.mx/manifest.webmanifest",
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": {
@@ -33,7 +33,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "http://localhost:8080/",
+  "fullScopeUrl": "https://app.arithmos.mx/",
   "minSdkVersion": 21,
   "orientation": "portrait",
   "fingerprints": [],
