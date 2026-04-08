@@ -57,6 +57,10 @@ export default function Register() {
       setError("Por favor ingresa tu email.");
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("Ingresa un email válido.");
+      return;
+    }
     if (password.length < 8) {
       setError("La contraseña debe tener al menos 8 caracteres.");
       return;
@@ -69,7 +73,7 @@ export default function Register() {
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name } },
+        options: { data: { full_name: name.trim() } },
       });
 
       if (signUpError) {
@@ -106,12 +110,15 @@ export default function Register() {
       const trialEndsAt = new Date(now);
       trialEndsAt.setDate(trialEndsAt.getDate() + 30);
 
-      await supabase.from("subscriptions").insert({
+      const { error: subError } = await supabase.from("subscriptions").insert({
         user_id: userId,
         plan: "trial",
         trial_started_at: now.toISOString(),
         trial_ends_at: trialEndsAt.toISOString(),
       });
+      if (subError) {
+        console.error("Subscription insert failed:", subError.message);
+      }
 
       // 4. Transition to aha moment
       setAhaData({
