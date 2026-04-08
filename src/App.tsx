@@ -21,6 +21,7 @@ import CoachChat from "./pages/CoachChat";
 import FrictionRadar from "./pages/FrictionRadar";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import DataDeletion from "./pages/DataDeletion";
+import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/privacidad" element={<PrivacyPolicy />} />
           <Route path="/privasidad" element={<PrivacyPolicy />} />
           <Route path="/delete-account" element={<DataDeletion />} />
+          <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
