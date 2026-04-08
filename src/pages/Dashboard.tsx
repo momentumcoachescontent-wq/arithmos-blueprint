@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Scale, WifiOff } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Scale } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,12 +15,12 @@ import { CycleChart } from "@/components/CycleChart";
 import { DailyPulseCard } from "@/components/DailyPulseCard";
 import { TacticalRecommendations } from "@/components/TacticalRecommendations";
 import { HistorySection } from "@/components/HistorySection";
-import { XPBar } from "@/components/XPBar";
 import { BlueprintIndicator } from "@/components/BlueprintIndicator";
 import { DailyProtectionShield } from "@/components/DailyProtectionShield";
 import { StreakWidget } from "@/components/StreakWidget";
 import { TrialBanner } from "@/components/TrialBanner";
 import { ArchetypeCard } from "@/components/ArchetypeCard";
+import { XPBar } from "@/components/XPBar";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -30,38 +30,28 @@ const Dashboard = () => {
   const { stats, fetchStats } = useStats(user?.id);
   const { isPremium, isTrialExpired, subscription, daysLeftInTrial, redirectToCheckout } = useSubscription(user?.id);
   const { streak } = useStreak(user?.id);
-  const hasAccess = profile?.role === 'admin' || (isPremium && !isTrialExpired);
+  const hasAccess = profile?.role === "admin" || (isPremium && !isTrialExpired);
   const initialized = useRef(false);
 
   useEffect(() => {
     const paymentStatus = searchParams.get("payment");
     if (paymentStatus === "success") {
-      toast.success("¡Pago exitoso!", {
-        description: "Tu plan Premium se ha activado. ¡Bienvenido a un nuevo nivel!",
-      });
+      toast.success("¡Pago exitoso!", { description: "Tu plan Pro se ha activado." });
       searchParams.delete("payment");
       setSearchParams(searchParams, { replace: true });
     } else if (paymentStatus === "cancelled") {
-      toast.error("Pago cancelado", {
-        description: "El proceso de pago no fue completado.",
-      });
+      toast.error("Pago cancelado", { description: "El proceso no fue completado." });
       searchParams.delete("payment");
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
 
   useEffect(() => {
-    if (!user) {
-      navigate("/");
-      return;
-    }
-
+    if (!user) { navigate("/"); return; }
     if (!initialized.current) {
       const syncData = async () => {
         const p = await fetchProfile(user.id);
-        if (!p) {
-          navigate("/onboarding");
-        }
+        if (!p) navigate("/onboarding");
         await fetchStats(user.id);
       };
       syncData();
@@ -70,58 +60,81 @@ const Dashboard = () => {
   }, [user, navigate, fetchProfile, fetchStats]);
 
   if (!user || !profile || !stats) {
-    return <div className="min-h-screen bg-background flex items-center justify-center font-serif text-2xl animate-pulse">Sintonizando tu frecuencia...</div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="font-serif text-2xl text-muted-foreground animate-pulse">Sintonizando tu frecuencia...</p>
+      </div>
+    );
   }
 
-  return (
-    <div className="min-h-screen bg-background px-6 py-12">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
-              <span className="text-xl font-serif font-bold text-primary">{profile.name[0]}</span>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <p className="text-xs text-muted-foreground font-sans lowercase">hola, {profile.name.split(' ')[0]}</p>
-                {profile && <DailyProtectionShield birthDate={profile.birthDate} />}
-              </div>
-              <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground tracking-tight">
-                Tu <span className="text-primary italic">Blueprint</span> Estratégico
-              </h1>
-              {!profile.narrative && (
-                <div className="flex items-center gap-2 mt-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 w-fit">
-                  <WifiOff className="h-3 w-3 text-amber-500" />
-                  <span className="text-[10px] text-amber-500 font-sans font-bold uppercase tracking-wider">Modo Resiliencia: Matemática Pura</span>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <StreakWidget streak={streak} />
-            <XPBar xp={stats.xp} level={stats.level} nextLevelXp={stats.nextLevelXp} progressPercent={stats.progressPercent} />
-            <div className="h-10 w-[1px] bg-border mx-2 hidden md:block" />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/settings")}
-              className="rounded-full hover:bg-secondary"
-            >
-              <Settings className="h-5 w-5 text-muted-foreground" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => logout()}
-              className="rounded-full hover:bg-rose-500/10 text-rose-500"
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
+  const firstName = profile.name.split(" ")[0];
 
-        {subscription && subscription.plan === "trial" && (
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+
+        {/* ── HERO ─────────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          {/* Top bar: actions */}
+          <div className="flex items-center justify-end gap-2 mb-6">
+            <DailyProtectionShield birthDate={profile.birthDate} />
+            <Button variant="ghost" size="icon" onClick={() => navigate("/settings")} className="rounded-full hover:bg-secondary">
+              <Settings className="h-4 w-4 text-muted-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => logout()} className="rounded-full hover:bg-rose-500/10 text-rose-500">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Hero content */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+            <div className="flex items-center gap-5">
+              {/* Big life path number */}
+              <div className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <span className="font-serif font-bold text-primary" style={{ fontSize: "2.75rem", lineHeight: 1 }}>
+                  {profile.lifePathNumber}
+                </span>
+              </div>
+
+              <div>
+                <p className="text-sm font-sans text-muted-foreground mb-0.5 lowercase tracking-wide">
+                  hola, {firstName}
+                </p>
+                <h1 className="font-serif font-bold text-foreground tracking-tight leading-none mb-2" style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)" }}>
+                  {profile.archetype}
+                </h1>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-sans text-muted-foreground uppercase tracking-[0.2em]">
+                    Camino de Vida · {profile.lifePathNumber}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate("/onboarding")}
+                    className="h-6 px-2 text-muted-foreground hover:text-primary text-[10px] font-sans gap-1"
+                  >
+                    <RotateCcw className="h-2.5 w-2.5" />
+                    Recalcular
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats strip */}
+            <div className="flex items-center gap-3 shrink-0">
+              <StreakWidget streak={streak} />
+              <div className="h-8 w-[1px] bg-border" />
+              <XPBar xp={stats.xp} level={stats.level} nextLevelXp={stats.nextLevelXp} progressPercent={stats.progressPercent} compact />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── TRIAL BANNER ─────────────────────────────────────── */}
+        {subscription?.plan === "trial" && (
           <TrialBanner
             subscription={subscription}
             daysLeft={daysLeftInTrial}
@@ -129,50 +142,42 @@ const Dashboard = () => {
           />
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
+        {/* ── MAIN GRID ────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* ── COLUMNA PRINCIPAL (2/3) ── */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Daily Pulse y Recomendaciones */}
+
+            {/* Pulso del Día — full width, centerpiece */}
+            <DailyPulseCard birthDate={profile.birthDate} />
+
+            {/* Acciones + Arquetipo */}
             <div className="grid md:grid-cols-2 gap-6">
-              <DailyPulseCard birthDate={profile.birthDate} />
               <TacticalRecommendations birthDate={profile.birthDate} lifePathNumber={profile.lifePathNumber} />
+              <ArchetypeCard lifePathNumber={profile.lifePathNumber} archetypeName={profile.archetype} />
             </div>
 
-            {/* Life Path Card */}
+            {/* Números del Blueprint */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass rounded-xl p-8 glow-indigo"
+              transition={{ delay: 0.1 }}
+              className="grid grid-cols-2 sm:grid-cols-4 gap-3"
             >
-              <p className="text-sm uppercase tracking-[0.3em] text-bronze mb-4 font-sans">Tu Camino de Vida</p>
-              <div className="flex items-start gap-6">
-                <div className="w-20 h-20 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-4xl font-serif font-bold text-primary">{profile.lifePathNumber}</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <h1 className="text-2xl md:text-3xl font-serif font-semibold text-gradient-silver">
-                      {profile.archetype}
-                    </h1>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate("/onboarding")}
-                        className="text-muted-foreground hover:text-primary h-8 gap-2 font-sans text-xs"
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                        Recalcular
-                      </Button>
-                    </div>
-                  </div>
-                  <p className="text-muted-foreground font-sans text-sm leading-relaxed">
-                    {profile.description}
-                  </p>
-                </div>
-              </div>
+              {[
+                { label: "Expresión", value: profile.expressionNumber, icon: Target },
+                { label: "Deseo del Alma", value: profile.soulUrgeNumber, icon: Sparkles },
+                { label: "Personalidad", value: profile.personalityNumber, icon: BookOpen },
+                { label: "Madurez", value: profile.maturityNumber, icon: Activity },
+              ].map((item, idx) => (
+                <BlueprintIndicator key={idx} label={item.label} value={item.value} icon={item.icon} />
+              ))}
             </motion.div>
 
+            {/* Ciclos */}
+            <CycleChart birthDate={profile.birthDate} />
+
+            {/* Narrativa IA — debajo del fold */}
             <NarrativeSection
               narrative={profile.narrative}
               powerStrategy={profile.powerStrategy}
@@ -180,207 +185,112 @@ const Dashboard = () => {
               archetypeName={profile.archetype}
               onSync={syncBlueprintIA}
             />
-
-            {/* Extended Blueprint */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-4"
-            >
-              {[
-                { label: "Expresión", value: profile.expressionNumber, icon: Target },
-                { label: "Deseo Alma", value: profile.soulUrgeNumber, icon: Sparkles },
-                { label: "Personalidad", value: profile.personalityNumber, icon: BookOpen },
-                { label: "Madurez", value: profile.maturityNumber, icon: Activity },
-              ].map((item, idx) => (
-                <BlueprintIndicator
-                  key={idx}
-                  label={item.label}
-                  value={item.value}
-                  icon={item.icon}
-                />
-              ))}
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <CycleChart birthDate={profile.birthDate} />
-              <ArchetypeCard lifePathNumber={profile.lifePathNumber} archetypeName={profile.archetype} />
-            </div>
-            {/*
-            <div className="mt-8">
-              <AudioPlayer url={profile.audioUrl || ""} />
-            </div>
-            */}
           </div>
 
-          {/* Sidebar */}
+          {/* ── SIDEBAR (1/3) ── */}
           <div className="space-y-4">
-            {/* Historial Evolutivo */}
-            <HistorySection userId={user.id} />
 
-            {/* Coach AI (Premium) */}
-            <ProFeatureGate
-              isPremium={hasAccess}
-              userId={user.id}
-              featureName="Coach de Sombras"
-              mode="click"
-            >
+            {/* Coach — CTA principal */}
+            <ProFeatureGate isPremium={hasAccess} userId={user.id} featureName="Coach de Sombras" mode="click">
               <motion.button
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
                 onClick={() => navigate("/coach")}
-                className="w-full glass rounded-xl p-6 border-primary/20 bg-gradient-to-br from-primary/10 to-transparent text-left group hover:border-primary/50 transition-all shadow-lg shadow-primary/5"
+                className="w-full bg-card border border-primary/25 rounded-xl p-6 text-left group hover:border-primary/50 transition-all"
               >
-                <div className="flex items-center gap-3 mb-2 w-full">
-                  <MessageCircle className="h-5 w-5 text-primary shrink-0" />
-                  <h3 className="font-serif text-foreground font-semibold">Coach de Sombras</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-primary/20 text-[10px] text-primary font-bold uppercase ml-auto shrink-0">Premium</span>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5 text-primary" />
+                    <span className="font-serif text-foreground font-semibold">Coach de Sombras</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-primary/15 text-[10px] text-primary font-bold uppercase tracking-wider">Pro</span>
                 </div>
-                <p className="text-xs text-muted-foreground font-sans leading-relaxed">
+                <p className="text-xs text-muted-foreground font-sans leading-relaxed mb-4">
                   Conversaciones honestas para transformar tus patrones de sombra en claridad estratégica.
                 </p>
-                <span className="text-[10px] text-primary font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">
-                  Iniciar Sesión →
-                </span>
-              </motion.button>
-            </ProFeatureGate>
-
-            {/* Radar de Fricción (Nuevo - Free) */}
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.18 }}
-              onClick={() => navigate("/radar-friccion")}
-              className="w-full glass rounded-xl p-6 border-indigo-500/20 bg-gradient-to-br from-indigo-500/10 to-transparent text-left group hover:border-indigo-500/50 transition-all shadow-lg shadow-indigo-500/5"
-            >
-              <div className="flex items-center gap-3 mb-2 w-full">
-                <Scale className="h-5 w-5 text-indigo-400 shrink-0" />
-                <h3 className="font-serif text-foreground font-semibold">Radar de Fricción</h3>
-              </div>
-
-              <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-                ¿Sientes inercia? Descubre qué te está frenando hoy y obtén un protocolo de desbloqueo inmediato.
-              </p>
-              <span className="text-[10px] text-indigo-400 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">
-                Iniciar Radar →
-              </span>
-            </motion.button>
-
-            {/* Acceso a Sincronicidad */}
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              onClick={() => navigate("/synchronicity")}
-              className="w-full glass rounded-xl p-6 border-border bg-primary/5 text-left group hover:border-primary/40 transition-all shadow-lg shadow-primary/5"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <h3 className="font-serif text-foreground font-semibold">Consultar Sincronicidad</h3>
-              </div>
-              <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-                ¿Has visto un número repetido o una coincidencia hoy? Descifra el mensaje del universo.
-              </p>
-              <span className="text-[10px] text-primary font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">
-                Iniciar Consulta →
-              </span>
-            </motion.button>
-
-            {/* Misiones del Día */}
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              onClick={() => navigate("/missions")}
-              className="w-full glass rounded-xl p-5 border-border bg-secondary/50 text-left group hover:border-primary/30 transition-all"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Target className="h-5 w-5 text-primary" />
-                <h3 className="font-serif text-foreground font-semibold">Misiones Diarias</h3>
-              </div>
-              <p className="text-xs text-muted-foreground font-sans leading-relaxed">Completa tareas para ganar XP y elevar tu frecuencia personal.</p>
-            </motion.button>
-
-            {/* Tribunal de Poder */}
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              onClick={() => navigate("/tribunal-poder")}
-              className="w-full glass rounded-xl p-5 border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-transparent text-left group hover:border-amber-500/40 transition-all shadow-lg shadow-amber-500/5"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Trophy className="h-5 w-5 text-amber-500" />
-                <h3 className="font-serif text-foreground font-semibold">Tribunal de Poder</h3>
-              </div>
-              <p className="text-xs text-muted-foreground font-sans leading-relaxed">Simulador de Sinergia Numerológica. Descubre cómo tu frecuencia se combina con otras.</p>
-              <span className="text-[10px] text-amber-500 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">
-                Iniciar Simulador →
-              </span>
-            </motion.button>
-
-            {/* Teaser Pro Features */}
-            <ProFeatureGate
-              isPremium={hasAccess}
-              userId={user.id}
-              featureName="Radar de Equipo"
-              mode="click"
-            >
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={() => navigate("/radar-equipo")}
-                className="w-full glass rounded-xl p-5 border-border bg-indigo-500/5 text-left group hover:border-indigo-500/30 transition-all"
-              >
-                <div className="flex items-center gap-3 mb-2 w-full">
-                  <Users className="h-5 w-5 text-indigo-400 shrink-0" />
-                  <h3 className="font-serif text-foreground font-semibold">Radar de Equipo</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-[10px] text-indigo-400 font-bold uppercase ml-auto shrink-0">Premium</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-primary font-sans font-bold uppercase tracking-wider group-hover:underline">
+                    Iniciar sesión →
+                  </span>
                 </div>
-
-                <p className="text-xs text-muted-foreground font-sans leading-relaxed">Analiza la compatibilidad numérica de tu equipo. Identifica fortalezas y tensiones.</p>
-                <span className="text-[10px] text-indigo-400 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">Abrir Radar →</span>
               </motion.button>
             </ProFeatureGate>
 
-            <ProFeatureGate
-              isPremium={hasAccess}
-              userId={user.id}
-              featureName="Reporte Deep Dive Anual"
-              mode="click"
-            >
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={() => navigate("/deep-dive")}
-                className="w-full glass rounded-xl p-5 border-border bg-emerald-500/5 text-left group hover:border-emerald-500/30 transition-all"
-              >
-                <div className="flex items-center gap-3 mb-2 w-full">
-                  <FileText className="h-5 w-5 text-emerald-400 shrink-0" />
-                  <h3 className="font-serif text-foreground font-semibold">Reporte Deep Dive Anual</h3>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-[10px] text-emerald-400 font-bold uppercase ml-auto shrink-0">Premium</span>
-                </div>
+            {/* Herramientas gratuitas — grid 2×2 */}
+            <div>
+              <p className="text-[10px] font-sans text-muted-foreground uppercase tracking-[0.2em] mb-3 px-1">Herramientas</p>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Radar de Fricción", icon: Scale, color: "text-indigo-400", path: "/radar-friccion" },
+                  { label: "Sincronicidad", icon: Sparkles, color: "text-primary", path: "/synchronicity" },
+                  { label: "Misiones", icon: Target, color: "text-primary", path: "/missions" },
+                  { label: "Tribunal de Poder", icon: Trophy, color: "text-amber-400", path: "/tribunal-poder" },
+                ].map(({ label, icon: Icon, color, path }) => (
+                  <motion.button
+                    key={path}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={() => navigate(path)}
+                    className="bg-card border border-border rounded-xl p-4 text-left hover:border-border/80 hover:bg-secondary/50 transition-all group"
+                  >
+                    <Icon className={`h-4 w-4 ${color} mb-2`} />
+                    <p className="text-xs font-sans text-foreground/80 font-medium leading-tight">{label}</p>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
 
-                <p className="text-xs text-muted-foreground font-sans leading-relaxed">Tu hoja de ruta estratégica para los próximos 12 meses, generada por IA en 15+ páginas.</p>
-                <span className="text-[10px] text-emerald-400 font-sans mt-3 block group-hover:underline uppercase tracking-wider font-bold">Solicitar Reporte →</span>
-              </motion.button>
-            </ProFeatureGate>
+            {/* Historial */}
+            <HistorySection userId={user.id} />
 
-            {/* Portal del Arquitecto (Solo Admin) */}
-            {profile.role === 'admin' && (
+            {/* Pro features */}
+            <div>
+              <p className="text-[10px] font-sans text-muted-foreground uppercase tracking-[0.2em] mb-3 px-1">Exclusivo Pro</p>
+              <div className="space-y-3">
+                <ProFeatureGate isPremium={hasAccess} userId={user.id} featureName="Radar de Equipo" mode="click">
+                  <button
+                    onClick={() => navigate("/radar-equipo")}
+                    className="w-full bg-card border border-border rounded-xl p-4 text-left hover:border-indigo-500/30 transition-all group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-indigo-400" />
+                        <span className="text-sm font-sans text-foreground/80">Radar de Equipo</span>
+                      </div>
+                      <span className="text-[10px] text-indigo-400 font-sans font-bold uppercase">Pro →</span>
+                    </div>
+                  </button>
+                </ProFeatureGate>
+
+                <ProFeatureGate isPremium={hasAccess} userId={user.id} featureName="Reporte Deep Dive" mode="click">
+                  <button
+                    onClick={() => navigate("/deep-dive")}
+                    className="w-full bg-card border border-border rounded-xl p-4 text-left hover:border-emerald-500/30 transition-all group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-emerald-400" />
+                        <span className="text-sm font-sans text-foreground/80">Deep Dive Anual</span>
+                      </div>
+                      <span className="text-[10px] text-emerald-400 font-sans font-bold uppercase">Pro →</span>
+                    </div>
+                  </button>
+                </ProFeatureGate>
+              </div>
+            </div>
+
+            {/* Admin */}
+            {profile.role === "admin" && (
               <motion.button
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 onClick={() => navigate("/admin")}
-                className="w-full glass rounded-xl p-5 border-primary/30 bg-primary/10 text-left group hover:border-primary/60 transition-all shadow-lg shadow-primary/10 mt-4"
+                className="w-full bg-primary/10 border border-primary/25 rounded-xl p-4 text-left hover:border-primary/50 transition-all"
               >
-                <div className="flex items-center gap-3 mb-1">
-                  <Shield className="h-5 w-5 text-primary" />
-                  <h3 className="font-serif text-foreground font-semibold">Portal del Arquitecto</h3>
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-sans text-foreground font-medium">Portal del Arquitecto</span>
                 </div>
-                <p className="text-[10px] text-primary font-sans uppercase tracking-[0.2em] font-bold">Diagnóstico y Control Central</p>
               </motion.button>
             )}
 
