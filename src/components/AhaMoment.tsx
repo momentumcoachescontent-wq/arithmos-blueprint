@@ -1,20 +1,16 @@
-import { useNavigate } from "react-router-dom";
-
 interface AhaMomentProps {
   lifePathNumber: number;
   archetype: string;
   archetypeDescription: string;
+  onContinue: () => void;
 }
 
-export function AhaMoment({ lifePathNumber, archetype, archetypeDescription }: AhaMomentProps) {
-  const navigate = useNavigate();
-
+export function AhaMoment({ lifePathNumber, archetype, archetypeDescription, onContinue }: AhaMomentProps) {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative"
       style={{ background: "#0D0C14" }}
     >
-      {/* Subtle gold glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -72,7 +68,7 @@ export function AhaMoment({ lifePathNumber, archetype, archetypeDescription }: A
         </p>
 
         <button
-          onClick={() => navigate("/dashboard")}
+          onClick={onContinue}
           className="font-sans font-bold mt-4"
           style={{
             padding: "11px 32px",
