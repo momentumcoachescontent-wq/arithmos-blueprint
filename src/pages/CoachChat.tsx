@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useCoachSession } from "@/hooks/useCoachSession";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { Button } from "@/components/ui/button";
@@ -103,8 +104,9 @@ const ShadowGate = ({ onUpgrade }: { onUpgrade: () => void }) => (
 
 const CoachChat = () => {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const { profile } = useProfile();
+    const { isPremium, isTrialExpired } = useSubscription(user?.id);
     const {
         messages,
         sendMessage,
@@ -147,9 +149,10 @@ const CoachChat = () => {
 
     // El usuario decide cuándo terminar la sesión manualmente
 
-    // Paywall premium — muestra Shadow Gate a usuarios freemium
-    const isPremium = profile?.role === 'premium' || profile?.role === 'admin';
-    if (profile && !isPremium) {
+    // Paywall premium — muestra Shadow Gate a usuarios freemium o trial expirado
+    const isAdminOverride = profile?.role === 'admin';
+    const hasAccess = isAdminOverride || (isPremium && !isTrialExpired);
+    if (profile && !hasAccess) {
         return <ShadowGate onUpgrade={() => navigate('/dashboard')} />;
     }
 
