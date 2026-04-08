@@ -3,6 +3,7 @@ import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations
 import { useAuth } from "./useAuth";
 import { useProfile } from "./useProfile";
 import { toast } from "sonner";
+import { ARCHETYPE_CONTEXT } from "@/lib/archetypes";
 
 export interface CoachMessage {
     id: string;
@@ -140,10 +141,18 @@ export function useCoachSession() {
                 body: JSON.stringify({
                     messages: history,
                     action: "chat",
-                    context: {
-                        name: profile?.name,
-                        lifePath: profile?.lifePathNumber
-                    }
+                    context: (() => {
+                        const lpn = profile?.lifePathNumber ?? 1;
+                        const ctx = ARCHETYPE_CONTEXT[lpn] ?? ARCHETYPE_CONTEXT[1];
+                        return {
+                            name: profile?.name,
+                            lifePathNumber: lpn,
+                            archetype: profile?.archetype,
+                            archetypePowers: ctx.powers,
+                            archetypeShadow: ctx.shadow,
+                            archetypeCoachingNote: ctx.coachingNote,
+                        };
+                    })()
                 })
             });
 
