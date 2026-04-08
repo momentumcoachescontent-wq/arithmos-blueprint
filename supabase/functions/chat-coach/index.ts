@@ -9,6 +9,26 @@ const anthropic = new Anthropic({
   apiKey: Deno.env.get("ANTHROPIC_API_KEY"),
 });
 
+const FALLBACK_CHAT_MODEL = "claude-sonnet-4-6";
+const FALLBACK_SUMMARIZE_MODEL = "claude-haiku-4-5-20251001";
+
+async function getModelConfig(feature: string, fallback: string): Promise<string> {
+  try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const { data } = await supabase
+      .from("system_prompts")
+      .select("model_id")
+      .eq("feature", feature)
+      .single();
+    return data?.model_id || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 Deno.serve(async (req: Request) => {
   const corsHeaders = getSafeCorsHeaders(req);
   if (req.method === "OPTIONS") {
@@ -51,12 +71,14 @@ Deno.serve(async (req: Request) => {
 
     // --- SUMMARIZE ---
     if (action === "summarize") {
+      const model = await getModelConfig("coach_summarize", FALLBACK_SUMMARIZE_MODEL);
+
       const conversationText = (Array.isArray(messages) ? messages : [])
         .map((m) => `${m.role === "user" ? "Usuario" : "Coach"}: ${m.content}`)
         .join("\n\n");
 
       const summaryReq = await anthropic.messages.create({
-        model: "claude-haiku-4-5-20251001",
+        model,
         max_tokens: 300,
         system: buildSummarizePrompt(),
         messages: [{ role: "user", content: conversationText }],
@@ -65,7 +87,7 @@ Deno.serve(async (req: Request) => {
       await logTokenUsage(
         userId,
         "coach_summarize",
-        "claude-haiku-4-5-20251001",
+        model,
         summaryReq.usage.input_tokens,
         summaryReq.usage.output_tokens,
       );
@@ -80,6 +102,8 @@ Deno.serve(async (req: Request) => {
     }
 
     // --- CHAT (STREAMING) ---
+    const model = await getModelConfig("coach_chat", FALLBACK_CHAT_MODEL);
+
     const safeContext: CoachContext = {
       name: sanitizePromptInput(context.name || "Usuario"),
       lifePathNumber: typeof context.lifePathNumber === "number" ? context.lifePathNumber : 1,
@@ -95,7 +119,7 @@ Deno.serve(async (req: Request) => {
     }>;
 
     const claudeStream = anthropic.messages.stream({
-      model: "claude-sonnet-4-6",
+      model,
       max_tokens: 1024,
       system: buildCoachSystemPrompt(safeContext),
       messages: chatMessages,
@@ -113,7 +137,7 @@ Deno.serve(async (req: Request) => {
           await logTokenUsage(
             userId,
             "coach_chat_stream",
-            "claude-sonnet-4-6",
+            model,
             finalMsg.usage.input_tokens,
             finalMsg.usage.output_tokens,
           );
