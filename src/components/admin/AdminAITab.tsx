@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Cpu, Save, CheckCircle2, AlertCircle, Loader2, RotateCcw, Brain, Activity, Target } from "lucide-react";
+import { Cpu, Save, CheckCircle2, AlertCircle, Loader2, RotateCcw, Brain, Activity, Target, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,6 +43,7 @@ export function AdminAITab() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [status, setStatus] = useState<{ message: string; type: "ok" | "err" } | null>(null);
+    const [connTest, setConnTest] = useState<{ status: "idle" | "testing" | "ok" | "err"; message: string }>({ status: "idle", message: "" });
 
     // AI Stats Hook
     const { summary, trendData, topUsers, isLoading: isLoadingStats, fetchStats } = useAITokenStats();
@@ -142,7 +143,55 @@ export function AdminAITab() {
         const found = prompts.find((p) => p.feature === activeFeature);
         if (found) {
             setEditedContent(found.content || "");
-            setEditedModel(found.model_id || "gpt-4o-mini");
+            setEditedModel(found.model_id || "claude-sonnet-4-6");
+        }
+    };
+
+    const handleTestConnection = async () => {
+        setConnTest({ status: "testing", message: "Enviando ping a Claude..." });
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = await import("@/integrations/supabase/client");
+            const res = await fetch(`${SUPABASE_URL}/functions/v1/chat-coach`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session?.access_token || SUPABASE_PUBLISHABLE_KEY}`,
+                    "apikey": SUPABASE_PUBLISHABLE_KEY,
+                },
+                body: JSON.stringify({
+                    action: "chat",
+                    messages: [{ role: "user", content: "ping" }],
+                    context: { name: "Admin", lifePathNumber: 1, archetype: "El Pionero", archetypePowers: [], archetypeShadow: "", archetypeCoachingNote: "" },
+                }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({})) as { error?: string };
+                setConnTest({ status: "err", message: `Error ${res.status}: ${err.error || "respuesta inválida"}` });
+                return;
+            }
+
+            const reader = res.body?.getReader();
+            if (!reader) { setConnTest({ status: "err", message: "No se pudo leer el stream" }); return; }
+
+            const decoder = new TextDecoder();
+            let reply = "";
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                reply += decoder.decode(value, { stream: true });
+                if (reply.length > 0) break; // basta con el primer chunk
+            }
+            reader.cancel();
+
+            if (reply.trim()) {
+                setConnTest({ status: "ok", message: `Conectado. Modelo activo responde correctamente.` });
+            } else {
+                setConnTest({ status: "err", message: "Stream vacío — verifica ANTHROPIC_API_KEY en Supabase Secrets" });
+            }
+        } catch (e: unknown) {
+            setConnTest({ status: "err", message: (e as Error).message || "Error de red" });
         }
     };
 
@@ -303,6 +352,39 @@ export function AdminAITab() {
                         </>
                     )}
                 </motion.div>
+            </div>
+
+            {/* TEST DE CONEXIÓN */}
+            <div className="glass rounded-2xl p-5 border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <p className="text-sm font-sans font-bold text-foreground flex items-center gap-2">
+                        {connTest.status === "ok" ? <Wifi className="h-4 w-4 text-emerald-400" /> :
+                         connTest.status === "err" ? <WifiOff className="h-4 w-4 text-rose-400" /> :
+                         <Wifi className="h-4 w-4 text-muted-foreground" />}
+                        Test de Conexión Claude
+                    </p>
+                    <p className="text-xs text-muted-foreground font-sans mt-0.5">
+                        {connTest.status === "idle" ? "Verifica que el modelo activo responde correctamente." : connTest.message}
+                    </p>
+                </div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleTestConnection}
+                    disabled={connTest.status === "testing"}
+                    className={`flex-shrink-0 gap-2 text-xs ${
+                        connTest.status === "ok" ? "border-emerald-500/30 text-emerald-400" :
+                        connTest.status === "err" ? "border-rose-500/30 text-rose-400" : ""
+                    }`}
+                >
+                    {connTest.status === "testing" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> :
+                     connTest.status === "ok" ? <CheckCircle2 className="h-3.5 w-3.5" /> :
+                     connTest.status === "err" ? <AlertCircle className="h-3.5 w-3.5" /> :
+                     <Wifi className="h-3.5 w-3.5" />}
+                    {connTest.status === "testing" ? "Probando..." :
+                     connTest.status === "ok" ? "Reconectar" :
+                     connTest.status === "err" ? "Reintentar" : "Probar conexión"}
+                </Button>
             </div>
 
             {/* SECCIÓN NUEVA: MÉTRICAS DE CONSUMO Y COSTOS IA */}
