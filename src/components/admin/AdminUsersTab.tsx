@@ -19,6 +19,9 @@ interface UserProfile {
     role: string;
     subscription_status: string | null;
     created_at: string;
+    // enriched from subscriptions table
+    subscription_plan?: string;
+    trial_ends_at?: string;
 }
 
 interface UserActivity {
@@ -44,13 +47,17 @@ export function AdminUsersTab() {
     const fetchUsers = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(200);
+            const [{ data: profiles, error }, { data: subs }] = await Promise.all([
+                supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(200),
+                supabase.from('subscriptions').select('user_id, plan, trial_ends_at'),
+            ]);
             if (error) throw error;
-            if (data) setUsers(data as any[]);
+            const subMap = new Map((subs || []).map((s: any) => [s.user_id, s]));
+            const enriched = (profiles || []).map((p: any) => {
+                const sub = subMap.get(p.user_id);
+                return { ...p, subscription_plan: sub?.plan ?? null, trial_ends_at: sub?.trial_ends_at ?? null };
+            });
+            setUsers(enriched as any[]);
         } catch (err) {
             console.error("Error fetching users:", err);
             toast.error("Error al cargar la lista de usuarios.");
@@ -242,6 +249,15 @@ export function AdminUsersTab() {
                                                 <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold border capitalize ${getRoleBadge(user.role)}`}>
                                                     {user.role}
                                                 </div>
+                                                {user.subscription_plan && (
+                                                    <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold border capitalize ml-1 ${
+                                                        user.subscription_plan === 'pro' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                                        user.subscription_plan === 'trial' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                                        'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                                                    }`}>
+                                                        {user.subscription_plan}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="px-4 py-3 text-muted-foreground text-xs hidden lg:table-cell">
                                                 {format(new Date(user.created_at), "d MMM, yyyy", { locale: es })}
@@ -316,9 +332,18 @@ export function AdminUsersTab() {
                                     {selectedUser.role === 'admin' && <ShieldAlert className="h-3 w-3 mr-1" />}
                                     {selectedUser.role}
                                 </div>
-                                {selectedUser.subscription_status && (
-                                    <div className="text-xs text-muted-foreground uppercase font-bold tracking-widest border border-border px-2 py-1 rounded-full">
-                                        {selectedUser.subscription_status}
+                                {selectedUser.subscription_plan && (
+                                    <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border capitalize ${
+                                        selectedUser.subscription_plan === 'pro' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                        selectedUser.subscription_plan === 'trial' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                        'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                                    }`}>
+                                        {selectedUser.subscription_plan === 'trial' ? 'Trial 30d' : selectedUser.subscription_plan}
+                                    </div>
+                                )}
+                                {selectedUser.trial_ends_at && selectedUser.subscription_plan === 'trial' && (
+                                    <div className="text-xs text-muted-foreground font-sans">
+                                        Vence {format(new Date(selectedUser.trial_ends_at), "d MMM", { locale: es })}
                                     </div>
                                 )}
                             </div>

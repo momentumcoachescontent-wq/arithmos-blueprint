@@ -16,9 +16,9 @@ import {
 const db = supabase as any;
 
 const AI_MODELS = [
-    { value: "gpt-4o-mini", label: "GPT-4o Mini — Rápido y económico (recomendado)", badge: "⚡ Default" },
-    { value: "gpt-4o", label: "GPT-4o — Máxima inteligencia conversacional", badge: "🧠 Premium" },
-    { value: "gpt-4-turbo", label: "GPT-4 Turbo — Balance potencia/costo", badge: "⚖️ Balance" },
+    { value: "claude-sonnet-4-6", label: "Claude Sonnet 4.6 — Coach principal (activo)", badge: "🎯 Activo" },
+    { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — Resúmenes y tareas rápidas", badge: "⚡ Rápido" },
+    { value: "claude-opus-4-6", label: "Claude Opus 4.6 — Máxima capacidad (alto costo)", badge: "🧠 Máximo" },
 ];
 
 interface SystemPrompt {
@@ -175,7 +175,7 @@ export function AdminAITab() {
                     IA & Configuración
                 </h2>
                 <p className="text-muted-foreground font-sans text-sm">
-                    Configura el modelo de OpenAI y los System Prompts que moldean la personalidad de cada bot.
+                    Configura modelos Claude y los System Prompts base. El Coach AI usa un prompt dinámico por arquetipo — edita el tono y las reglas aquí.
                 </p>
             </div>
 
@@ -222,7 +222,7 @@ export function AdminAITab() {
                             {/* Model Selector */}
                             <div className="space-y-2">
                                 <Label className="text-sm text-muted-foreground font-sans flex items-center gap-1.5">
-                                    <Cpu className="h-3.5 w-3.5" /> Modelo de OpenAI
+                                    <Cpu className="h-3.5 w-3.5" /> Modelo Claude (referencia)
                                 </Label>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                     {AI_MODELS.map((m) => (
