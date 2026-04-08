@@ -1,13 +1,14 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogOut, MessageCircle, Sparkles, ExternalLink, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Lock, Scale, WifiOff, Cloud } from "lucide-react";
+import { LogOut, MessageCircle, Sparkles, Target, BookOpen, Trophy, Settings, RotateCcw, Shield, Activity, Users, FileText, Scale, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useStats } from "@/hooks/useStats";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useStreak } from "@/hooks/useStreak";
 import { ProFeatureGate } from "@/components/ProFeatureGate";
 import { NarrativeSection } from "@/components/NarrativeSection";
 import { CycleChart } from "@/components/CycleChart";
@@ -15,10 +16,11 @@ import { DailyPulseCard } from "@/components/DailyPulseCard";
 import { TacticalRecommendations } from "@/components/TacticalRecommendations";
 import { HistorySection } from "@/components/HistorySection";
 import { XPBar } from "@/components/XPBar";
-import { AudioPlayer } from "@/components/AudioPlayer";
 import { BlueprintIndicator } from "@/components/BlueprintIndicator";
 import { DailyProtectionShield } from "@/components/DailyProtectionShield";
-import { GrabovoiMantraWidget } from "@/components/GrabovoiMantraWidget";
+import { StreakWidget } from "@/components/StreakWidget";
+import { TrialBanner } from "@/components/TrialBanner";
+import { ArchetypeCard } from "@/components/ArchetypeCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -26,7 +28,8 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const { profile, fetchProfile, syncBlueprintIA } = useProfile();
   const { stats, fetchStats } = useStats(user?.id);
-  const { isPremium, isTrialExpired } = useSubscription(user?.id);
+  const { isPremium, isTrialExpired, subscription, daysLeftInTrial, redirectToCheckout } = useSubscription(user?.id);
+  const { streak } = useStreak(user?.id);
   const hasAccess = profile?.role === 'admin' || (isPremium && !isTrialExpired);
   const initialized = useRef(false);
 
@@ -96,6 +99,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <StreakWidget streak={streak} />
             <XPBar xp={stats.xp} level={stats.level} nextLevelXp={stats.nextLevelXp} progressPercent={stats.progressPercent} />
             <div className="h-10 w-[1px] bg-border mx-2 hidden md:block" />
             <Button
@@ -116,6 +120,14 @@ const Dashboard = () => {
             </Button>
           </div>
         </div>
+
+        {subscription && subscription.plan === "trial" && (
+          <TrialBanner
+            subscription={subscription}
+            daysLeft={daysLeftInTrial}
+            onUpgrade={redirectToCheckout}
+          />
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -193,7 +205,7 @@ const Dashboard = () => {
 
             <div className="grid md:grid-cols-2 gap-6">
               <CycleChart birthDate={profile.birthDate} />
-              <GrabovoiMantraWidget birthDate={profile.birthDate} />
+              <ArchetypeCard lifePathNumber={profile.lifePathNumber} archetypeName={profile.archetype} />
             </div>
             {/*
             <div className="mt-8">
