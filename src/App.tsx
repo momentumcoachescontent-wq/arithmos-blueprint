@@ -3,9 +3,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 // Arithmos AI Strategist - Production Build v1.2.7
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
-import Onboarding from "./pages/Onboarding";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Missions from "./pages/Missions";
 import Journal from "./pages/Journal";
@@ -21,7 +21,6 @@ import CoachChat from "./pages/CoachChat";
 import FrictionRadar from "./pages/FrictionRadar";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import DataDeletion from "./pages/DataDeletion";
-import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,7 +33,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/onboarding" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/missions" element={<Missions />} />
           <Route path="/journal" element={<Journal />} />
@@ -52,7 +52,6 @@ const App = () => (
           <Route path="/privacidad" element={<PrivacyPolicy />} />
           <Route path="/privasidad" element={<PrivacyPolicy />} />
           <Route path="/delete-account" element={<DataDeletion />} />
-          <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
