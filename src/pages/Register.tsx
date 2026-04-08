@@ -37,12 +37,14 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const today = new Date().toISOString().split("T")[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
 
     // Validation
     if (!name.trim()) {
@@ -51,6 +53,13 @@ export default function Register() {
     }
     if (!birthDate) {
       setError("Por favor ingresa tu fecha de nacimiento.");
+      return;
+    }
+    const birthDateObj = new Date(birthDate);
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    if (birthDateObj > todayDate || birthDateObj < new Date("1920-01-01")) {
+      setError("Ingresa una fecha de nacimiento válida.");
       return;
     }
     if (!email.trim()) {
@@ -91,10 +100,18 @@ export default function Register() {
         return;
       }
 
-      const userId = authData?.user?.id;
-      const session = authData?.session;
+      const newUser = authData?.user;
+      const userId = newUser?.id;
+      const data = authData;
 
-      if (!userId || !session) {
+      // Email confirmation required (Supabase default)
+      if (newUser && (!data.session || newUser.identities?.length === 0)) {
+        setSuccess("✅ ¡Revisa tu email! Te enviamos un enlace de confirmación. Inicia sesión después de confirmar.");
+        setLoading(false);
+        return;
+      }
+
+      if (!userId || !data.session) {
         setError(
           "No se pudo crear la cuenta. Verifica que el email sea válido."
         );
@@ -257,6 +274,7 @@ export default function Register() {
 
           <input
             type="date"
+            aria-label="Fecha de nacimiento"
             value={birthDate}
             onChange={(e) => setBirthDate(e.target.value)}
             max={today}
@@ -292,6 +310,21 @@ export default function Register() {
               }}
             >
               {error}
+            </p>
+          )}
+
+          {success && (
+            <p
+              className="font-sans mt-3"
+              style={{
+                fontSize: "12px",
+                color: "#4ade80",
+                background: "rgba(74,222,128,0.1)",
+                padding: "8px 12px",
+                borderRadius: "4px",
+              }}
+            >
+              {success}
             </p>
           )}
 
@@ -331,7 +364,6 @@ export default function Register() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        defaultTab="login"
       />
     </div>
   );
