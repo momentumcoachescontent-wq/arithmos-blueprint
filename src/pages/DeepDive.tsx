@@ -36,7 +36,7 @@ const DeepDive = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { profile } = useProfile();
-    const { redirectToCheckout, isLoading: isLoadingCheckout } = useSubscription(user?.id);
+    const { redirectToCheckout, isLoading: isLoadingCheckout, isPremium, isTrialExpired } = useSubscription(user?.id);
     const [isRequestingReport, setIsRequestingReport] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
     const [reportRequested, setReportRequested] = useState(() => sessionStorage.getItem('deepDiveRequested') === 'true');
@@ -154,7 +154,7 @@ const DeepDive = () => {
 
     if (!profile) return null;
 
-    const isPremium = profile.role === "premium" || profile.role === "admin";
+    const hasAccess = profile.role === "admin" || (isPremium && !isTrialExpired);
 
     return (
         <div className="min-h-screen bg-background px-6 py-12">
@@ -169,7 +169,7 @@ const DeepDive = () => {
                     </div>
                 </div>
 
-                <ProFeatureGate userRole={profile.role} userId={user?.id || ""} featureName="Reporte Deep Dive Anual">
+                <ProFeatureGate isPremium={hasAccess} userId={user?.id || ""} featureName="Reporte Deep Dive Anual">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
                         {/* Hero */}
                         <div>

@@ -5,7 +5,9 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 interface ProFeatureGateProps {
     /** Contenido visible para el usuario Premium */
     children: ReactNode;
-    /** Rol actual del usuario */
+    /** Override directo — si se pasa, ignora userRole */
+    isPremium?: boolean;
+    /** Rol actual del usuario (fallback si no se pasa isPremium) */
     userRole?: string;
     /** Nombre de la feature bloqueada (para el modal) */
     featureName?: string;
@@ -17,18 +19,20 @@ interface ProFeatureGateProps {
 
 /**
  * Envuelve features Pro con una pantalla de bloqueo elegante.
- * Si `userRole` es "premium" o "admin", renderiza children directamente.
- * Si no, muestra un modal de upgrade y previene la navegación.
+ * Usa `isPremium` si se pasa, si no evalúa `userRole === "premium" | "admin"`.
  */
 export function ProFeatureGate({
     children,
+    isPremium: isPremiumProp,
     userRole,
     featureName = "Esta función",
     userId,
     mode = "overlay",
 }: ProFeatureGateProps) {
     const [modalOpen, setModalOpen] = useState(false);
-    const isPremium = userRole === "premium" || userRole === "admin";
+    const isPremium = isPremiumProp !== undefined
+        ? isPremiumProp
+        : userRole === "premium" || userRole === "admin";
 
     if (isPremium) {
         return <>{children}</>;

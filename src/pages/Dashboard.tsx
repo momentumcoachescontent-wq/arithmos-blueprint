@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useStats } from "@/hooks/useStats";
+import { useSubscription } from "@/hooks/useSubscription";
 import { ProFeatureGate } from "@/components/ProFeatureGate";
 import { NarrativeSection } from "@/components/NarrativeSection";
 import { CycleChart } from "@/components/CycleChart";
@@ -25,6 +26,8 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const { profile, fetchProfile, syncBlueprintIA } = useProfile();
   const { stats, fetchStats } = useStats(user?.id);
+  const { isPremium, isTrialExpired } = useSubscription(user?.id);
+  const hasAccess = profile?.role === 'admin' || (isPremium && !isTrialExpired);
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -206,7 +209,7 @@ const Dashboard = () => {
 
             {/* Coach AI (Premium) */}
             <ProFeatureGate
-              userRole={profile.role}
+              isPremium={hasAccess}
               userId={user.id}
               featureName="Coach de Sombras"
               mode="click"
@@ -308,7 +311,7 @@ const Dashboard = () => {
 
             {/* Teaser Pro Features */}
             <ProFeatureGate
-              userRole={profile.role}
+              isPremium={hasAccess}
               userId={user.id}
               featureName="Radar de Equipo"
               mode="click"
@@ -331,7 +334,7 @@ const Dashboard = () => {
             </ProFeatureGate>
 
             <ProFeatureGate
-              userRole={profile.role}
+              isPremium={hasAccess}
               userId={user.id}
               featureName="Reporte Deep Dive Anual"
               mode="click"

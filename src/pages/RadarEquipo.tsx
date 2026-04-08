@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -85,6 +86,8 @@ const RadarEquipo = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { profile } = useProfile();
+    const { isPremium, isTrialExpired } = useSubscription(user?.id);
+    const hasAccess = profile?.role === 'admin' || (isPremium && !isTrialExpired);
 
     // Estado de edición actual
     const [title, setTitle] = useState("Mi Equipo");
@@ -245,7 +248,7 @@ const RadarEquipo = () => {
                     </div>
                 </div>
 
-                <ProFeatureGate userRole={profile.role} userId={user?.id || ""} featureName="Radar de Equipo">
+                <ProFeatureGate isPremium={hasAccess} userId={user?.id || ""} featureName="Radar de Equipo">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
                         <div>
                             <h1 className="text-4xl font-serif font-semibold text-gradient-silver mb-2">Radar de Equipo</h1>

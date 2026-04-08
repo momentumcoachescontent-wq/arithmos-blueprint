@@ -76,8 +76,8 @@ const Settings = () => {
     const { user, isAuthenticated, logout } = useAuth();
     const { profile, createProfile } = useProfile();
     const { stats, fetchStats, toggleRanking } = useStats(user?.id);
-    const { redirectToCheckout, redirectToPortal, isLoading: stripeLoading } = useSubscription(user?.id);
-    const isPremium = profile?.role === 'premium' || profile?.role === 'admin';
+    const { redirectToCheckout, redirectToPortal, isLoading: stripeLoading, isPremium: subIsPremium, isTrialExpired } = useSubscription(user?.id);
+    const isPremium = profile?.role === 'admin' || (subIsPremium && !isTrialExpired);
 
     // ── Perfil Editable ──
     const [name, setName] = useState("");
