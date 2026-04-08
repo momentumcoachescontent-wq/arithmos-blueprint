@@ -10,13 +10,21 @@ ALTER TABLE public.readings
   ADD COLUMN IF NOT EXISTS is_read BOOLEAN NOT NULL DEFAULT false,
   ADD COLUMN IF NOT EXISTS scheduled_for TIMESTAMPTZ;
 
--- Remove the duplicate reading_type column
+-- Remove the duplicate reading_type column (if it exists)
 -- First copy any distinct data from reading_type to type if type is missing
-UPDATE public.readings
-SET type = reading_type
-WHERE type IS NULL AND reading_type IS NOT NULL;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'readings' AND column_name = 'reading_type'
+  ) THEN
+    UPDATE public.readings
+    SET type = reading_type
+    WHERE type IS NULL AND reading_type IS NOT NULL;
 
-ALTER TABLE public.readings DROP COLUMN IF EXISTS reading_type;
+    ALTER TABLE public.readings DROP COLUMN reading_type;
+  END IF;
+END $$;
 
 -- Add updated_at if missing
 ALTER TABLE public.readings

@@ -49,59 +49,88 @@ $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 
 -- 3. Asegurar Función de Registro (SECURITY DEFINER safety)
-ALTER FUNCTION IF EXISTS public.handle_new_user() SET search_path = public;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.routines
+    WHERE routine_schema = 'public' AND routine_name = 'handle_new_user'
+  ) THEN
+    ALTER FUNCTION public.handle_new_user() SET search_path = public;
+  END IF;
+END $$;
 
 
 -- 4. Blindaje de PROFILES (Evitar que el usuario se asigne 'admin')
 -- Primero habilitamos RLS por seguridad redundante
 ALTER TABLE IF EXISTS public.profiles ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
--- Esta política permite editar todo EXCEPTO el campo 'role'
-CREATE POLICY "Users can update own profile" ON public.profiles 
-  FOR UPDATE TO authenticated 
-  USING (auth.uid() = user_id)
-  WITH CHECK (
-    auth.uid() = user_id 
-    AND (CASE WHEN role IS DISTINCT FROM (SELECT role FROM public.profiles WHERE user_id = auth.uid()) THEN public.check_is_admin() ELSE TRUE END)
-  );
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'profiles'
+  ) THEN
+    DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+    DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
+    DROP POLICY IF EXISTS "Admin sees all profiles" ON public.profiles;
 
--- O más simple: El usuario común NO puede tocar el role, solo el admin.
--- Pero para no romper el flujo, lo dejamos así:
-DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
-CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT TO authenticated USING (auth.uid() = user_id);
+    -- If role column exists, apply policy that prevents role changes
+    IF EXISTS (
+      SELECT FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'role'
+    ) THEN
+      CREATE POLICY "Users can update own profile" ON public.profiles
+        FOR UPDATE TO authenticated
+        USING (auth.uid() = user_id)
+        WITH CHECK (
+          auth.uid() = user_id
+          AND (CASE WHEN role IS DISTINCT FROM (SELECT role FROM public.profiles WHERE user_id = auth.uid()) THEN public.check_is_admin() ELSE TRUE END)
+        );
+    ELSE
+      -- Simple policy if role column doesn't exist yet
+      CREATE POLICY "Users can update own profile" ON public.profiles
+        FOR UPDATE TO authenticated
+        USING (auth.uid() = user_id);
+    END IF;
 
-DROP POLICY IF EXISTS "Admin sees all profiles" ON public.profiles;
-CREATE POLICY "Admin sees all profiles" ON public.profiles FOR ALL TO authenticated USING (public.check_is_admin());
+    CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT TO authenticated USING (auth.uid() = user_id);
+
+    IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'check_is_admin' AND pronamespace = 'public'::regnamespace) THEN
+      CREATE POLICY "Admin sees all profiles" ON public.profiles FOR ALL TO authenticated USING (public.check_is_admin());
+    END IF;
+  END IF;
+END $$;
 
 
--- 5. Otras Tablas (Eliminar acceso anónimo y duplicados)
+-- 5. Otras Tablas (Eliminar acceso anónimo y duplicados) - Only for tables that exist in v2
 
--- MISSIONS
-ALTER TABLE IF EXISTS public.missions ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Users can view missions" ON public.missions;
-CREATE POLICY "Users can view missions" ON public.missions FOR SELECT TO authenticated USING (true);
+-- MISSIONS (does NOT exist in v2 - skip entirely)
+-- Old code: ALTER TABLE IF EXISTS public.missions ENABLE ROW LEVEL SECURITY;
 
--- JOURNAL_ENTRIES
-ALTER TABLE IF EXISTS public.journal_entries ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Users manage own journal" ON public.journal_entries;
-CREATE POLICY "Users manage own journal" ON public.journal_entries FOR ALL TO authenticated USING (auth.uid() = user_id);
+-- JOURNAL_ENTRIES (renamed to diary_entries in v2 - skip)
+-- Old code: ALTER TABLE IF EXISTS public.journal_entries ENABLE ROW LEVEL SECURITY;
 
--- READINGS
-ALTER TABLE IF EXISTS public.readings ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Users can view own readings" ON public.readings;
-CREATE POLICY "Users can view own readings" ON public.readings FOR SELECT TO authenticated USING (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Admin sees all readings" ON public.readings;
-CREATE POLICY "Admin sees all readings" ON public.readings FOR ALL TO authenticated USING (public.check_is_admin());
+-- READINGS (exists in v2)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'readings'
+  ) THEN
+    ALTER TABLE IF EXISTS public.readings ENABLE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS "Users can view own readings" ON public.readings;
+    DROP POLICY IF EXISTS "Admin sees all readings" ON public.readings;
 
--- USER_STATS
-ALTER TABLE IF EXISTS public.user_stats ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Users can view own stats" ON public.user_stats;
-CREATE POLICY "Users can view own stats" ON public.user_stats FOR SELECT TO authenticated USING (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Admin sees all stats" ON public.user_stats;
-CREATE POLICY "Admin sees all stats" ON public.user_stats FOR ALL TO authenticated USING (public.check_is_admin());
-DROP POLICY IF EXISTS "Public can view ranking" ON public.user_stats;
-CREATE POLICY "Public can view ranking" ON public.user_stats FOR SELECT TO authenticated USING (show_in_ranking = true);
+    CREATE POLICY "Users can view own readings" ON public.readings FOR SELECT TO authenticated USING (auth.uid() = user_id);
+
+    IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'check_is_admin') THEN
+      CREATE POLICY "Admin sees all readings" ON public.readings FOR ALL TO authenticated USING (public.check_is_admin());
+    END IF;
+  END IF;
+END $$;
+
+-- USER_STATS (does NOT exist in v2 - skip entirely)
+-- Old code: ALTER TABLE IF EXISTS public.user_stats ENABLE ROW LEVEL SECURITY;
 
 -- SYNC_LOGS
 ALTER TABLE IF EXISTS public.sync_logs ENABLE ROW LEVEL SECURITY;
