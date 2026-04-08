@@ -1,369 +1,181 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, Eye, EyeOff, User, ArrowRight, Sparkles, Phone, CalendarIcon } from "lucide-react";
+import { X, Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
-import { supabase } from "@/integrations/supabase/client";
-
-export type PlanType = "freemium" | "premium";
 
 interface AuthModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    defaultTab?: "login" | "register";
-    selectedPlan?: PlanType;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-// ── Plan labels ──
-const planLabels: Record<PlanType, string> = {
-    freemium: "Freemium",
-    premium: "The Empowered Path",
-};
+export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const navigate = useNavigate();
+  const { loginWithEmail } = useAuth();
 
-export function AuthModal({ isOpen, onClose, defaultTab = "register", selectedPlan }: AuthModalProps) {
-    const navigate = useNavigate();
-    const { loginWithEmail, registerWithEmail } = useAuth();
-    const { createProfile } = useProfile();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const [tab, setTab] = useState<"login" | "register">(defaultTab);
-    const [fullName, setFullName] = useState("");
-    const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
-    const [birthDate, setBirthDate] = useState<Date>();
-    const [password, setPassword] = useState("");
-    const [showPwd, setShowPwd] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
+  const handleLogin = async () => {
+    setError(null);
+    if (!email.trim() || !password) {
+      setError("Completa tu email y contraseña.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await loginWithEmail(email, password);
+      onClose();
+      navigate("/dashboard");
+    } catch (err: any) {
+      if (err.message?.includes("Invalid login")) {
+        setError("Email o contraseña incorrectos.");
+      } else {
+        setError(err.message || "Error iniciando sesión.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const roleFromPlan = (plan?: PlanType): string => {
-        if (plan === "premium") return "premium";
-        return "freemium";
-    };
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleLogin();
+  };
 
-    const handleRegister = async () => {
-        setError(null);
-        if (!fullName.trim()) { setError("Ingresa tu nombre completo."); return; }
-        if (!email.trim()) { setError("Ingresa tu email."); return; }
-        if (!birthDate) { setError("Selecciona tu fecha de nacimiento."); return; }
-        if (password.length < 8) { setError("La contraseña debe tener al menos 8 caracteres."); return; }
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
+            onClick={onClose}
+          />
 
-        setLoading(true);
-        try {
-            const { data, error: signUpError } = await supabase.auth.signUp({
-                email,
-                password,
-                options: { data: { full_name: fullName.trim() } },
-            });
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 16 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+          >
+            <div
+              className="glass rounded-2xl p-8 w-full max-w-md shadow-2xl pointer-events-auto relative border border-border"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
 
-            if (signUpError) {
-                // "User already registered" (error 422)
-                if (signUpError.message?.includes("already registered") || signUpError.status === 422) {
-                    setError("Este email ya tiene una cuenta. Usa la pestaña Iniciar Sesión.");
-                } else {
-                    setError(signUpError.message || "Error al crear la cuenta.");
-                }
-                return;
-            }
+              <div className="flex items-center gap-2 mb-6">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="text-xs font-sans uppercase tracking-widest text-primary">
+                  Arithmos
+                </span>
+              </div>
 
-            const newUser = data?.user;
+              <h2 className="text-2xl font-serif font-semibold text-foreground mb-1">
+                Bienvenido de vuelta
+              </h2>
+              <p className="text-sm text-muted-foreground font-sans mb-6">
+                Accede a tu blueprint y continúa tu progreso.
+              </p>
 
-            // Caso: email confirmation requerida (identities = [], user existe pero sin confirmar)
-            const needsConfirmation = newUser && (!data.session || newUser.identities?.length === 0);
-
-            if (needsConfirmation) {
-                setSuccess("✅ ¡Revisa tu email! Te enviamos un enlace de confirmación. Tras confirmar, inicia sesión.");
-                return;
-            }
-
-            if (newUser && data.session) {
-                // Guardamos el usuario en auth local
-                localStorage.setItem("arithmos_user", JSON.stringify({
-                    id: newUser.id,
-                    name: fullName.trim(),
-                    email: email,
-                    isAnonymous: false,
-                }));
-
-                // --- Onboarding 2.0: Create Profile immediately ---
-                const birthDateStr = format(birthDate, "yyyy-MM-dd");
-                await createProfile(fullName.trim(), birthDateStr, newUser.id, phone.trim());
-
-                setSuccess("¡Cuenta creada! Tu blueprint está listo.");
-                setTimeout(() => {
-                    onClose();
-                    navigate("/dashboard");
-                }, 1800);
-            } else {
-                setError("No se pudo crear la cuenta. Verifica que el email sea válido.");
-            }
-        } catch (err: any) {
-            console.error("Register error:", err);
-            setError(err.message || "Error inesperado al crear la cuenta.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-
-    const handleLogin = async () => {
-        setError(null);
-        if (!email.trim() || !password) { setError("Completa tu email y contraseña."); return; }
-        setLoading(true);
-        try {
-            await loginWithEmail(email, password);
-            onClose();
-            navigate("/dashboard");
-        } catch (err: any) {
-            if (err.message?.includes("Invalid login")) {
-                setError("Email o contraseña incorrectos.");
-            } else {
-                setError(err.message || "Error iniciando sesión.");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleKey = (e: React.KeyboardEvent) => {
-        if (e.key === "Enter") tab === "login" ? handleLogin() : handleRegister();
-    };
-
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <>
-                    {/* Backdrop */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50"
-                        onClick={onClose}
+              <div className="space-y-4" onKeyDown={handleKey}>
+                <div className="space-y-2">
+                  <Label className="text-sm font-sans text-muted-foreground">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="tu@email.com"
+                      className="pl-10"
+                      autoFocus
                     />
+                  </div>
+                </div>
 
-                    {/* Modal */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.96, y: 16 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.96, y: 16 }}
-                        transition={{ duration: 0.25 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+                <div className="space-y-2">
+                  <Label className="text-sm font-sans text-muted-foreground">
+                    Contraseña
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type={showPwd ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Tu contraseña"
+                      className="pl-10 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPwd(!showPwd)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
-                        <div
-                            className="glass rounded-2xl p-8 w-full max-w-md shadow-2xl pointer-events-auto relative border border-border"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {/* Close */}
-                            <button
-                                onClick={onClose}
-                                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
+                      {showPwd ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
 
-                            {/* Header */}
-                            <div className="flex items-center gap-2 mb-6">
-                                <Sparkles className="h-4 w-4 text-primary" />
-                                <span className="text-xs font-sans uppercase tracking-widest text-primary">Arithmos</span>
-                            </div>
+                <AnimatePresence>
+                  {error && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="text-sm text-red-400 font-sans bg-red-500/10 px-4 py-2 rounded-lg"
+                    >
+                      {error}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
 
-                            {/* Plan badge */}
-                            {selectedPlan && tab === "register" && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="mb-4 px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-xs font-sans text-primary inline-block"
-                                >
-                                    Plan: <span className="font-semibold">{planLabels[selectedPlan]}</span>
-                                </motion.div>
-                            )}
+                <Button
+                  onClick={handleLogin}
+                  disabled={loading}
+                  className="w-full glow-indigo group"
+                >
+                  {loading ? "Procesando..." : "Entrar"}
+                  {!loading && (
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  )}
+                </Button>
 
-                            <h2 className="text-2xl font-serif font-semibold text-foreground mb-1">
-                                {tab === "login" ? "Bienvenido de vuelta" : "Crea tu cuenta"}
-                            </h2>
-                            <p className="text-sm text-muted-foreground font-sans mb-6">
-                                {tab === "login"
-                                    ? "Accede a tu blueprint y continúa tu progreso."
-                                    : "Comienza tu viaje de inteligencia estratégica."}
-                            </p>
-
-                            {/* Tabs */}
-                            <div className="flex bg-secondary rounded-xl p-1 mb-6">
-                                {(["register", "login"] as const).map((t) => (
-                                    <button
-                                        key={t}
-                                        onClick={() => { setTab(t); setError(null); setSuccess(null); }}
-                                        className={`flex-1 py-2 text-sm font-sans rounded-lg transition-all ${tab === t
-                                            ? "bg-card text-foreground shadow-sm font-medium"
-                                            : "text-muted-foreground hover:text-foreground"
-                                            }`}
-                                    >
-                                        {t === "login" ? "Iniciar Sesión" : "Crear Cuenta"}
-                                    </button>
-                                ))}
-                            </div>
-
-                            {/* Form */}
-                            <div className="space-y-4" onKeyDown={handleKey}>
-                                {tab === "register" && (
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-sans text-muted-foreground">Nombre completo</Label>
-                                            <div className="relative">
-                                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                <Input
-                                                    value={fullName}
-                                                    onChange={(e) => setFullName(e.target.value)}
-                                                    placeholder="Tu nombre"
-                                                    className="pl-10"
-                                                    autoFocus
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-sans text-muted-foreground">Teléfono (WhatsApp)</Label>
-                                            <div className="relative">
-                                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                <Input
-                                                    type="tel"
-                                                    value={phone}
-                                                    onChange={(e) => setPhone(e.target.value)}
-                                                    placeholder="+52 1 234..."
-                                                    className="pl-10"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-sans text-muted-foreground">Fecha de Nacimiento</Label>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        className={cn(
-                                                            "w-full justify-start text-left font-normal bg-secondary/50 border-border h-10",
-                                                            !birthDate && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                                        {birthDate ? format(birthDate, "PPP", { locale: es }) : "Selecciona tu fecha"}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0 z-[60]" align="start">
-                                                    <Calendar
-                                                        mode="single"
-                                                        selected={birthDate}
-                                                        onSelect={setBirthDate}
-                                                        disabled={(date) => date > new Date() || date < new Date("1920-01-01")}
-                                                        initialFocus
-                                                        locale={es}
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="space-y-2">
-                                    <Label className="text-sm font-sans text-muted-foreground">Email</Label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="tu@email.com"
-                                            className="pl-10"
-                                            autoFocus={tab === "login"}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label className="text-sm font-sans text-muted-foreground">Contraseña</Label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            type={showPwd ? "text" : "password"}
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            placeholder={tab === "register" ? "Mínimo 8 caracteres" : "Tu contraseña"}
-                                            className="pl-10 pr-10"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPwd(!showPwd)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                        >
-                                            {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Error / Success */}
-                                <AnimatePresence>
-                                    {error && (
-                                        <motion.p
-                                            initial={{ opacity: 0, y: -4 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0 }}
-                                            className="text-sm text-red-400 font-sans bg-red-500/10 px-4 py-2 rounded-lg"
-                                        >
-                                            {error}
-                                        </motion.p>
-                                    )}
-                                    {success && (
-                                        <motion.p
-                                            initial={{ opacity: 0, y: -4 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            className="text-sm text-emerald-400 font-sans bg-emerald-500/10 px-4 py-2 rounded-lg"
-                                        >
-                                            {success}
-                                        </motion.p>
-                                    )}
-                                </AnimatePresence>
-
-                                <Button
-                                    onClick={tab === "login" ? handleLogin : handleRegister}
-                                    disabled={loading}
-                                    className="w-full glow-indigo group"
-                                >
-                                    {loading
-                                        ? "Procesando..."
-                                        : tab === "login"
-                                            ? "Entrar"
-                                            : "Crear Cuenta"}
-                                    {!loading && <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />}
-                                </Button>
-
-                                {/* Quick access — free trial */}
-                                {tab === "register" && (
-                                    <p className="text-center text-xs text-muted-foreground font-sans pt-1">
-                                        ¿Solo quieres explorar?{" "}
-                                        <button
-                                            className="text-primary hover:underline"
-                                            onClick={() => { onClose(); navigate("/onboarding"); }}
-                                        >
-                                            Consulta sin registrarte →
-                                        </button>
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </motion.div>
-                </>
-            )}
-        </AnimatePresence>
-    );
+                <p className="text-center text-xs text-muted-foreground font-sans pt-1">
+                  ¿No tienes cuenta?{" "}
+                  <button
+                    className="text-primary hover:underline"
+                    onClick={() => {
+                      onClose();
+                      navigate("/register");
+                    }}
+                  >
+                    Crear una gratis →
+                  </button>
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
 }
