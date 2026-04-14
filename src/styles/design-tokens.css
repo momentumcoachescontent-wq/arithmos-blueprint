@@ -1,0 +1,94 @@
+/* ============================================
+   ARITHMOS V3 — CELESTIAL CYBERPUNK DESIGN SYSTEM
+   ============================================
+   Palette: Deep space black, electric violet, 
+   neon purple, cosmic gold, nebula teal
+   Target: Gen Z — immersive, alive, premium
+   ============================================ */
+
+:root {
+  /* ---- COSMIC CORE PALETTE ---- */
+  --cosm-void: 260 20% 4%;           /* #0B0A10 — deepest space */
+  --cosm-surface: 260 15% 8%;        /* #141220 — card/surface */
+  --cosm-surface-raised: 260 12% 12%; /* #1D1B28 — elevated surface */
+  --cosm-surface-glow: 260 10% 16%;  /* #272535 — hover/active */
+
+  /* ---- NEON ACCENTS ---- */
+  --cosm-violet: 270 80% 65%;        /* #A855F7-ish — primary electric violet */
+  --cosm-purple: 280 70% 55%;        /* #9333EA-ish — deep purple */
+  --cosm-magenta: 310 80% 60%;       /* #EC4899-ish — hot pink accent */
+  --cosm-gold: 45 90% 60%;           /* #F59E0B-ish — cosmic gold */
+  --cosm-teal: 175 70% 50%;          /* #14B8A6-ish — nebula teal */
+  --cosm-cyan: 190 90% 60%;          /* #22D3EE-ish — electric cyan */
+
+  /* ---- TEXT HIERARCHY ---- */
+  --cosm-text-primary: 0 0% 95%;     /* near-white */
+  --cosm-text-secondary: 260 10% 65%; /* muted lavender */
+  --cosm-text-muted: 260 8% 45%;     /* dim */
+  --cosm-text-ghost: 260 5% 30%;     /* barely visible */
+
+  /* ---- GLASS / TRANSPARENCY ---- */
+  --cosm-glass: 260 20% 100% / 0.04;
+  --cosm-glass-border: 260 20% 100% / 0.08;
+  --cosm-glass-hover: 260 20% 100% / 0.12;
+  --cosm-glass-active: 260 20% 100% / 0.16;
+
+  /* ---- GLOW INTENSITIES ---- */
+  --cosm-glow-violet: 270 80% 65% / 0.3;
+  --cosm-glow-purple: 280 70% 55% / 0.25;
+  --cosm-glow-gold: 45 90% 60% / 0.25;
+  --cosm-glow-teal: 175 70% 50% / 0.25;
+  --cosm-glow-magenta: 310 80% 60% / 0.2;
+
+  /* ---- GRADIENTS (as named tokens) ---- */
+  --cosm-grad-aurora: linear-gradient(135deg, hsl(270 80% 65%), hsl(310 80% 60%), hsl(45 90% 60%));
+  --cosm-grad-nebula: linear-gradient(135deg, hsl(280 70% 55%), hsl(190 90% 60%));
+  --cosm-grad-twilight: linear-gradient(180deg, hsl(260 20% 4%), hsl(280 30% 10%));
+  --cosm-grad-stardust: linear-gradient(135deg, hsl(260 15% 8%), hsl(270 20% 14%));
+
+  /* ---- BORDERS & RADIUS ---- */
+  --cosm-border-subtle: 260 15% 18%;
+  --cosm-border-glow: 270 60% 50% / 0.3;
+  --cosm-radius-sm: 0.5rem;
+  --cosm-radius-md: 0.875rem;
+  --cosm-radius-lg: 1.25rem;
+  --cosm-radius-xl: 1.75rem;
+  --cosm-radius-full: 9999px;
+
+  /* ---- SPACING SCALE ---- */
+  --cosm-space-xs: 0.25rem;
+  --cosm-space-sm: 0.5rem;
+  --cosm-space-md: 1rem;
+  --cosm-space-lg: 1.5rem;
+  --cosm-space-xl: 2rem;
+  --cosm-space-2xl: 3rem;
+  --cosm-space-3xl: 4rem;
+
+  /* ---- TYPOGRAPHY ---- */
+  --cosm-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --cosm-font-body: 'Outfit', 'Inter', system-ui, sans-serif;
+  --cosm-font-accent: 'Playfair Display', Georgia, serif;
+
+  /* ---- Z-INDEX SCALE ---- */
+  --cosm-z-base: 0;
+  --cosm-z-card: 10;
+  --cosm-z-sticky: 50;
+  --cosm-z-modal: 100;
+  --cosm-z-toast: 200;
+  --cosm-z-max: 999;
+
+  /* ---- ANIMATION DURATIONS ---- */
+  --cosm-dur-instant: 100ms;
+  --cosm-dur-fast: 200ms;
+  --cosm-dur-normal: 350ms;
+  --cosm-dur-slow: 600ms;
+  --cosm-dur-dramatic: 1200ms;
+
+  /* ---- SHADOWS ---- */
+  --cosm-shadow-sm: 0 2px 8px -2px hsl(0 0% 0% / 0.5);
+  --cosm-shadow-md: 0 4px 16px -4px hsl(0 0% 0% / 0.5);
+  --cosm-shadow-lg: 0 8px 32px -8px hsl(0 0% 0% / 0.6);
+  --cosm-shadow-glow-violet: 0 0 30px -5px hsl(var(--cosm-glow-violet));
+  --cosm-shadow-glow-gold: 0 0 30px -5px hsl(var(--cosm-glow-gold));
+  --cosm-shadow-glow-teal: 0 0 30px -5px hsl(var(--cosm-glow-teal));
+}

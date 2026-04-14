@@ -1,0 +1,279 @@
+/* ============================================
+   ARITHMOS V3 — COSMIC UTILITY CLASSES
+   Animations, glass effects, glows, gradients
+   ============================================ */
+
+/* ---- GLASS MORPHISM ---- */
+.cosmic-glass {
+  background: hsl(var(--cosm-glass));
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid hsl(var(--cosm-glass-border));
+}
+
+.cosmic-glass-hover:hover {
+  background: hsl(var(--cosm-glass-hover));
+  transition: background var(--cosm-dur-normal) ease;
+}
+
+.cosmic-glass-active {
+  background: hsl(var(--cosm-glass-active));
+  border-color: hsl(var(--cosm-border-glow));
+}
+
+/* ---- GLOW EFFECTS ---- */
+.glow-violet {
+  box-shadow: var(--cosm-shadow-glow-violet);
+}
+
+.glow-gold {
+  box-shadow: var(--cosm-shadow-glow-gold);
+}
+
+.glow-teal {
+  box-shadow: var(--cosm-shadow-glow-teal);
+}
+
+.glow-violet-border {
+  border: 1px solid hsl(var(--cosm-glow-violet));
+  box-shadow: 
+    var(--cosm-shadow-glow-violet),
+    inset 0 0 20px -10px hsl(var(--cosm-glow-violet));
+}
+
+.glow-gold-border {
+  border: 1px solid hsl(var(--cosm-glow-gold));
+  box-shadow: 
+    var(--cosm-shadow-glow-gold),
+    inset 0 0 20px -10px hsl(var(--cosm-glow-gold));
+}
+
+/* ---- TEXT GRADIENTS ---- */
+.text-aurora {
+  background: var(--cosm-grad-aurora);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-nebula {
+  background: var(--cosm-grad-nebula);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(45 80% 50%),
+    hsl(45 95% 70%),
+    hsl(45 80% 50%)
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* ---- BACKGROUND GRADIENTS ---- */
+.bg-twilight {
+  background: var(--cosm-grad-twilight);
+}
+
+.bg-stardust {
+  background: var(--cosm-grad-stardust);
+}
+
+/* ---- KEYFRAME ANIMATIONS ---- */
+@keyframes shimmer {
+  0%, 100% { background-position: -200% center; }
+  50% { background-position: 200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade-in-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes fade-in-scale {
+  from { 
+    opacity: 0; 
+    transform: scale(0.9); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+@keyframes card-flip {
+  0% { transform: perspective(800px) rotateY(0); }
+  50% { transform: perspective(800px) rotateY(90deg); }
+  100% { transform: perspective(800px) rotateY(0); }
+}
+
+@keyframes particle-drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--drift-x, 50px), var(--drift-y, -100px)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(var(--orbit-radius, 40px)) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(var(--orbit-radius, 40px)) rotate(-360deg);
+  }
+}
+
+@keyframes border-glow-pulse {
+  0%, 100% {
+    border-color: hsl(270 80% 65% / 0.2);
+    box-shadow: 0 0 15px -5px hsl(270 80% 65% / 0.1);
+  }
+  50% {
+    border-color: hsl(270 80% 65% / 0.5);
+    box-shadow: 0 0 25px -5px hsl(270 80% 65% / 0.3);
+  }
+}
+
+/* ---- ANIMATION UTILITIES ---- */
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 20s linear infinite; }
+.animate-fade-in-up { animation: fade-in-up var(--cosm-dur-slow) ease-out forwards; }
+.animate-fade-in-scale { animation: fade-in-scale var(--cosm-dur-normal) ease-out forwards; }
+.animate-card-flip { animation: card-flip 0.8s ease-in-out; }
+.animate-border-glow { animation: border-glow-pulse 3s ease-in-out infinite; }
+
+/* Staggered animation delays for lists */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* ---- COSMIC CARD ---- */
+.cosmic-card {
+  background: hsl(var(--cosm-surface));
+  border: 1px solid hsl(var(--cosm-border-subtle));
+  border-radius: var(--cosm-radius-lg);
+  transition: 
+    border-color var(--cosm-dur-normal) ease,
+    box-shadow var(--cosm-dur-normal) ease,
+    transform var(--cosm-dur-fast) ease;
+}
+
+.cosmic-card:hover {
+  border-color: hsl(var(--cosm-border-glow));
+  box-shadow: var(--cosm-shadow-glow-violet);
+  transform: translateY(-2px);
+}
+
+/* ---- COSMIC BUTTON ---- */
+.cosmic-btn-primary {
+  background: hsl(var(--cosm-violet));
+  color: hsl(var(--cosm-text-primary));
+  border: none;
+  border-radius: var(--cosm-radius-full);
+  padding: 0.75rem 1.5rem;
+  font-family: var(--cosm-font-display);
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: 
+    transform var(--cosm-dur-fast) ease,
+    box-shadow var(--cosm-dur-normal) ease;
+}
+
+.cosmic-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--cosm-shadow-glow-violet);
+}
+
+.cosmic-btn-primary:active {
+  transform: translateY(0);
+}
+
+.cosmic-btn-ghost {
+  background: transparent;
+  color: hsl(var(--cosm-text-secondary));
+  border: 1px solid hsl(var(--cosm-glass-border));
+  border-radius: var(--cosm-radius-full);
+  padding: 0.75rem 1.5rem;
+  font-family: var(--cosm-font-display);
+  font-weight: 500;
+  cursor: pointer;
+  transition: 
+    color var(--cosm-dur-fast) ease,
+    border-color var(--cosm-dur-fast) ease,
+    background var(--cosm-dur-fast) ease;
+}
+
+.cosmic-btn-ghost:hover {
+  color: hsl(var(--cosm-text-primary));
+  border-color: hsl(var(--cosm-border-glow));
+  background: hsl(var(--cosm-glass));
+}
+
+/* ---- SCROLLBAR STYLING ---- */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--cosm-surface-glow));
+  border-radius: var(--cosm-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--cosm-violet));
+}
+
+/* ---- SAFE AREA (MOBILE) ---- */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+  }
+}
