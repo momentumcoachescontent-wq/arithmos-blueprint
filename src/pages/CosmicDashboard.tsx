@@ -11,6 +11,8 @@ import { CosmicShell, CosmicBottomNav, type CosmicNavItem } from "@/ui/CosmicShe
 import { CosmicFeed } from "@/features/cosmic-feed/CosmicFeedView";
 import { TarotSpreadsView } from "@/features/tarot/TarotSpreadsView";
 import { generateCosmicDay } from "@/engines/cosmic-feed";
+import { CosmicNotifications } from "@/features/match/CosmicNotifications";
+import { ARCHETYPES } from "@/hooks/useProfile";
 
 import { calculateNatalProfile } from "@/engines/astrology/natal-chart";
 
@@ -218,6 +220,11 @@ function CosmicYoTab({
             </span>
           </button>
         ))}
+      </div>
+
+      {/* Activity Feed (Cosmic Notifications) */}
+      <div className="mt-8">
+        <CosmicNotifications userId={profile.userId} />
       </div>
 
       {/* Logout */}

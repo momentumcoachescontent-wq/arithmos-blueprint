@@ -10,6 +10,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { calculateCompatibility, type CompatibilityResult } from "@/engines/compatibility/sinastry";
 import { useProfile, ARCHETYPES } from "@/hooks/useProfile";
 import { CosmicCard } from "@/ui/CosmicCard";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface MatchProfile {
   user_id: string;
@@ -33,7 +35,34 @@ export function CosmicMatchExplorer({ matches }: Props) {
     result: CompatibilityResult;
   } | null>(null);
 
+  const [sendingVibe, setSendingVibe] = useState(false);
+  const [matchResult, setMatchResult] = useState<boolean | null>(null);
+
   if (!myProfile) return null;
+
+  const handleSendVibe = async () => {
+    if (!selectedMatch || sendingVibe) return;
+    setSendingVibe(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("handle-interaction", {
+        body: { targetUserId: selectedMatch.profile.user_id }
+      });
+
+      if (error) throw error;
+      
+      if (data.match) {
+        setMatchResult(true);
+      } else {
+        toast.success(`Vibración enviada a ${selectedMatch.profile.name} ✨`);
+        setSelectedMatch(null);
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Error al enviar vibración");
+    } finally {
+      setSendingVibe(false);
+    }
+  };
 
   const handleSelect = (m: MatchProfile) => {
     // Calculamos la sinastría usando el engine real
@@ -171,9 +200,82 @@ export function CosmicMatchExplorer({ matches }: Props) {
                 </div>
               </div>
 
+              <div className="flex gap-3 mb-6">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleSendVibe}
+                  disabled={sendingVibe}
+                  className="flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2"
+                  style={{ background: "linear-gradient(135deg, hsl(310 80% 55%), hsl(15 90% 60%))", color: "white", fontFamily: "var(--cosm-font-display)" }}
+                >
+                  {sendingVibe ? "Sintonizando..." : "Enviar Vibe 💖"}
+                </motion.button>
+              </div>
+
               <div className="p-4 rounded-xl text-xs leading-relaxed" style={{ background: "hsla(260 40% 8% / 0.8)", border: "1px solid hsla(270 40% 40% / 0.3)", color: "hsl(0 0% 90%)" }}>
                 {selectedMatch.result.advice}
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL DISRUPTIVO DE MATCH */}
+      <AnimatePresence>
+        {matchResult && selectedMatch && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.5, rotate: -10 }}
+              animate={{ scale: 1, rotate: 0 }}
+              className="text-center"
+            >
+              <motion.div 
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="text-8xl mb-8"
+              >
+                💞
+              </motion.div>
+              <h2 
+                className="text-4xl font-black italic mb-2 tracking-tighter"
+                style={{ fontFamily: "var(--cosm-font-display)", color: "white" }}
+              >
+                COSMIC MATCH
+              </h2>
+              <p className="text-pink-400 font-bold uppercase tracking-widest text-sm mb-10">
+                Tus astros han colisionado
+              </p>
+
+              <div className="flex justify-center gap-6 mb-12">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-full border-2 border-white/20 overflow-hidden bg-white/10 flex items-center justify-center text-3xl font-black">
+                    {myProfile.name.charAt(0)}
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 bg-pink-500 text-[10px] px-2 py-0.5 rounded-full text-white font-bold">TÚ</div>
+                </div>
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-full border-2 border-pink-500 overflow-hidden bg-pink-500/20 flex items-center justify-center text-3xl font-black">
+                    {selectedMatch.profile.name.charAt(0)}
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 bg-pink-500 text-[10px] px-2 py-0.5 rounded-full text-white font-bold">{selectedMatch.raw?.score || selectedMatch.result.score}%</div>
+                </div>
+              </div>
+
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setMatchResult(null);
+                  setSelectedMatch(null);
+                }}
+                className="px-10 py-4 rounded-full font-black text-black bg-white uppercase tracking-widest text-xs"
+              >
+                Seguir Explorando
+              </motion.button>
             </motion.div>
           </motion.div>
         )}
