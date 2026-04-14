@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, calculateLifePath, ARCHETYPES } from "@/hooks/useProfile";
 import { calculateNatalProfile } from "@/engines/astrology/natal-chart";
+import { calculateCompatibility, type CompatibilityResult } from "@/engines/compatibility/sinastry";
 import { CosmicShell } from "@/ui/CosmicShell";
 
 export default function CosmicCompatibility() {
@@ -21,7 +22,25 @@ export default function CosmicCompatibility() {
   const [partnerName, setPartnerName] = useState("");
   const [partnerDate, setPartnerDate] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{ raw: CompatibilityResult; partner: any } | null>(null);
+
+  const shareResult = async () => {
+    if (!result) return;
+    const text = `🌌 Mi sinastría con ${result.partner.name} es ${result.raw.score}% (${result.raw.vibe}) según Arithmos.\n\nNuestra misión cósmica:\n${result.raw.advice.substring(0, 80)}...\n\nCalcula la tuya en app.arithmos.mx ✨`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Sinastría Arithmos",
+          text,
+        });
+      } else {
+        await navigator.clipboard.writeText(text);
+        alert("¡Copiado al portapapeles!");
+      }
+    } catch (e) {
+      console.log("Share cancelled or failed", e);
+    }
+  };
 
   const calculateCompatibility = () => {
     if (!partnerName.trim() || partnerDate.length !== 10) return;
@@ -32,8 +51,12 @@ export default function CosmicCompatibility() {
       const partnerArchetype = ARCHETYPES[partnerLifePath] || ARCHETYPES[1];
       const partnerNatal = calculateNatalProfile({ date: partnerDate });
 
-      // MVP dummy math for alignment
-      const score = Math.floor(Math.random() * 30 + 65); // 65-95%
+      const personANatal = calculateNatalProfile({ date: profile.birthDate });
+
+      const compData = calculateCompatibility(
+        { lifePath: profile.lifePathNumber, sunSign: personANatal.sunSign.nameEs, name: profile.name },
+        { lifePath: partnerLifePath, sunSign: partnerNatal.sunSign.nameEs, name: partnerName }
+      );
 
       setResult({
         partner: {
@@ -44,9 +67,7 @@ export default function CosmicCompatibility() {
           moon: partnerNatal.moonSign.nameEs,
           rising: partnerNatal.risingSign.nameEs,
         },
-        score,
-        vibe: score > 85 ? "Llama Gemela 🔥" : score > 75 ? "Alineación Fluida 🌊" : "Conexión Kármica 🔄",
-        advice: "Esta conexión tiene un propósito. Tu energía y la de esta persona forman un espejo para que ambos crezcan. Mantengan su luz encendida, bb.",
+        raw: compData,
       });
 
       setAnalyzing(false);
@@ -189,7 +210,7 @@ export default function CosmicCompatibility() {
                   className="text-4xl font-bold"
                   style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(0 0% 98%)" }}
                 >
-                  {result.score}%
+                  {result.raw.score}%
                 </span>
                 <span className="text-[10px] uppercase tracking-widest mt-1" style={{ color: "hsl(310 50% 60%)" }}>
                   Alineación
@@ -198,14 +219,30 @@ export default function CosmicCompatibility() {
 
               {/* Vibe label */}
               <div
-                className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-2"
+                className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-6"
                 style={{
                   background: "hsla(15 90% 20% / 0.4)",
                   color: "hsl(15 90% 65%)",
                   border: "1px solid hsla(15 90% 40% / 0.4)",
                 }}
               >
-                {result.vibe}
+                {result.raw.vibe}
+              </div>
+
+              {/* Strengths & Challenges */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="text-left p-3 rounded-xl" style={{ background: "hsla(145 60% 10% / 0.5)", border: "1px solid hsla(145 60% 40% / 0.2)" }}>
+                  <h4 className="text-[10px] uppercase font-bold text-green-400 mb-2">Fluidez</h4>
+                  <ul className="text-xs space-y-1.5" style={{ color: "hsl(145 30% 70%)" }}>
+                    {result.raw.strengths.map((s: string, i: number) => <li key={i}>• {s}</li>)}
+                  </ul>
+                </div>
+                <div className="text-left p-3 rounded-xl" style={{ background: "hsla(310 60% 10% / 0.5)", border: "1px solid hsla(310 60% 40% / 0.2)" }}>
+                  <h4 className="text-[10px] uppercase font-bold text-pink-400 mb-2">Fricción</h4>
+                  <ul className="text-xs space-y-1.5" style={{ color: "hsl(310 30% 70%)" }}>
+                    {result.raw.challenges.map((s: string, i: number) => <li key={i}>• {s}</li>)}
+                  </ul>
+                </div>
               </div>
 
               {/* Coach message */}
@@ -217,13 +254,25 @@ export default function CosmicCompatibility() {
                 }}
               >
                 <p className="text-sm leading-relaxed" style={{ color: "hsl(0 0% 90%)", fontFamily: "var(--cosm-font-body)" }}>
-                  {result.advice}
+                  {result.raw.advice}
                 </p>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex gap-3 mt-6">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={shareResult}
+                  className="flex-1 py-3 rounded-xl font-bold"
+                  style={{ background: "hsl(270 80% 65%)", color: "white", fontFamily: "var(--cosm-font-display)" }}
+                >
+                  Compartir 💌
+                </motion.button>
               </div>
 
               <button
                 onClick={() => setResult(null)}
-                className="text-xs decoration-white underline mt-6"
+                className="text-xs decoration-white underline mt-4 block mx-auto"
                 style={{ color: "hsl(260 10% 60%)" }}
               >
                 Analizar otra conexión
