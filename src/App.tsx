@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const CosmicDashboard = lazy(() => import("./pages/CosmicDashboard"));
+const CosmicOnboarding = lazy(() => import("./pages/CosmicOnboarding"));
 const Missions = lazy(() => import("./pages/Missions"));
 const Journal = lazy(() => import("./pages/Journal"));
 const Ranking = lazy(() => import("./pages/Ranking"));
@@ -40,7 +41,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/onboarding" element={<Navigate to="/cosmic" replace />} />
+            <Route path="/onboarding" element={<CosmicOnboarding />} />
             <Route path="/cosmic" element={<CosmicDashboard />} />
             <Route path="/dashboard" element={<CosmicDashboard />} />
             <Route path="/missions" element={<Missions />} />

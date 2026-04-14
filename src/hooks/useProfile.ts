@@ -3,9 +3,11 @@ import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations
 import { toast } from "sonner";
 
 export interface Profile {
-  userId: string;          // was: id (profiles.user_id is now the PK)
+  userId: string;
   name: string;
   birthDate: string;
+  birthTime?: string;
+  birthPlace?: string;
   lifePathNumber: number;
   expressionNumber?: number;
   soulUrgeNumber?: number;
@@ -21,21 +23,61 @@ export interface Profile {
   role?: "user" | "admin";
   onboardingCompletedAt?: string;
   createdAt: string;
+  // Cosmic V3 fields
+  sunSign?: string;
+  moonSign?: string;
+  risingSign?: string;
 }
 
 export const ARCHETYPES: Record<number, { name: string; description: string }> = {
-  1: { name: "El Pionero", description: "Líder nato con una voluntad inquebrantable. Tu energía es la de quien abre caminos donde nadie ve posibilidad." },
-  2: { name: "El Diplomático", description: "Maestro de la cooperación y la intuición sutil. Tu poder reside en la capacidad de ver lo que otros ignoran en las relaciones." },
-  3: { name: "El Comunicador", description: "Catalizador creativo que transforma ideas abstractas en realidades tangibles. Tu expresión es tu arma estratégica." },
-  4: { name: "El Arquitecto de Sistemas", description: "Constructor metódico de estructuras duraderas. Tu disciplina y visión a largo plazo son tu ventaja competitiva definitiva." },
-  5: { name: "El Agente de Cambio", description: "Adaptable y magnético. Prosperas en el caos y conviertes la incertidumbre en oportunidad donde otros ven riesgo." },
-  6: { name: "El Estratega del Equilibrio", description: "Armonizador nato que entiende que el verdadero poder está en la responsabilidad consciente y el servicio estratégico." },
-  7: { name: "El Analista Profundo", description: "Pensador penetrante que opera en un nivel de percepción que otros no pueden alcanzar. Tu introspección es tu superpoder." },
-  8: { name: "El Ejecutor de Poder", description: "Manifestador de abundancia y autoridad. Entiendes las leyes del poder material y las usas con precisión quirúrgica." },
-  9: { name: "El Visionario Global", description: "Conciencia expandida que ve el panorama completo. Tu misión trasciende lo personal y toca lo colectivo." },
-  11: { name: "El Iluminador Maestro", description: "Potencial magnético con una visión altamente intuitiva. Eres un puente entre lo visible y lo invisible." },
-  22: { name: "El Constructor Maestro", description: "Capacidad pragmática suprema para convertir visiones en imperios. Tu legado es tangible y transformador." },
-  33: { name: "El Maestro Sanador", description: "Vibración compasiva extrema. Influencia transformadora pura. Naces para elevar la conciencia de otros." },
+  1: {
+    name: "La Pionera",
+    description: "Eres de las que crea sus propios caminos, bb. Ninguna regla te fue dada — las escribes tú. Tu energía es tan fuerte que la gente lo siente antes de que abras la boca.",
+  },
+  2: {
+    name: "La Intérprete",
+    description: "Captas lo que nadie más nota. Eres el tipo de persona que hace sentir a alguien profundamente entendida con solo escuchar. Eso es rareza, no debilidad.",
+  },
+  3: {
+    name: "La Manifestadora",
+    description: "Todo lo que dices tiene un peso especial. Tu creatividad no es hobby — es tu superpoder real. El universo te escucha cuando hablas desde el corazón.",
+  },
+  4: {
+    name: "La Arquitecta",
+    description: "Construyes cosas que duran. Mientras otros improvisan, tú ya planificaste 3 pasos adelante. Eres la base sobre la que otros se apoyan sin saberlo.",
+  },
+  5: {
+    name: "La Nómada Cósmica",
+    description: "La libertad no es tu deseo — es tu necesidad. Cambias de forma como el agua y eso te hace imposible de atrapar. Prosperas donde otros se asustan.",
+  },
+  6: {
+    name: "La Armónica",
+    description: "Tienes el don de hacer que todo encaje. Cuidas sin agotarte cuando estás en tu centro, y tu amor es del tipo que transforma sin pedirlo.",
+  },
+  7: {
+    name: "La Mística",
+    description: "Tu mente va a profundidades que la mayoría ni sabe que existen. La soledad no te asusta — la necesitas para reconectarte con lo que sabes sin haberlo aprendido.",
+  },
+  8: {
+    name: "La Poderosa",
+    description: "Núcleo puro de manifestación. Cuando decides algo, el universo mueve piezas para que pase. Tu reto no es conseguir poder — es no tenerle miedo a tenerlo.",
+  },
+  9: {
+    name: "La Humanitaria",
+    description: "Viniste a dejar el mundo diferente a como lo encontraste. Tu corazón siente cosas que van más allá de lo personal. Eso a veces duele, pero es tu don más grande.",
+  },
+  11: {
+    name: "La Portadora de Luz",
+    description: "Número maestro. Antena entre dimensiones. Sientes cosas que no puedes explicar y eso puede ser agotador, pero es porque vibras en una frecuencia que pocos comprenden.",
+  },
+  22: {
+    name: "La Constructora Maestra",
+    description: "Número maestro. Tienes la capacidad de hacer real lo que otros solo sueñan. No pienses pequeño — literalmente no puedes. Tu escala natural es el impacto colectivo.",
+  },
+  33: {
+    name: "La Sanadora Maestra",
+    description: "Número maestro. Tu sola presencia cambia la energía de un lugar. No necesitas explicarte — se siente. Naciste para elevar, y eso empieza por no minimizarte a ti misma.",
+  },
 };
 
 const PYTHAGOREAN_TABLE: Record<string, number> = {
@@ -104,6 +146,8 @@ export function useProfile() {
         userId: data.user_id,
         name: data.name,
         birthDate: data.birth_date,
+        birthTime: data.birth_time ?? undefined,
+        birthPlace: data.birth_place ?? undefined,
         lifePathNumber: data.life_path_number,
         expressionNumber: data.expression_number ?? undefined,
         soulUrgeNumber: data.soul_urge_number ?? undefined,
@@ -119,6 +163,10 @@ export function useProfile() {
         phone: data.phone ?? undefined,
         onboardingCompletedAt: data.onboarding_completed_at ?? undefined,
         createdAt: data.created_at,
+        // Cosmic V3
+        sunSign: data.sun_sign ?? undefined,
+        moonSign: data.moon_sign ?? undefined,
+        risingSign: data.rising_sign ?? undefined,
       };
 
       // Auto-repair missing computed numbers
