@@ -1,6 +1,6 @@
 {
   "packageId": "com.arithmos.app",
-  "host": "app.arithmos.mx",
+  "host": "arithmos-blueprint.lovable.app",
   "name": "Arithmos AI Strategist",
   "launcherName": "Arithmos",
   "display": "standalone",
@@ -13,18 +13,18 @@
   "backgroundColor": "#0A0A1A",
   "enableNotifications": true,
   "startUrl": "/",
-  "iconUrl": "https://app.arithmos.mx/icon-512x512.png",
-  "maskableIconUrl": "https://app.arithmos.mx/icon-maskable-512x512.png",
+  "iconUrl": "https://arithmos-blueprint.lovable.app/icon-512x512.png",
+  "maskableIconUrl": "https://arithmos-blueprint.lovable.app/icon-maskable-512x512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android.keystore",
     "alias": "arithmos"
   },
-  "appVersionName": "1",
-  "appVersionCode": 1,
+  "appVersionName": "3",
+  "appVersionCode": 3,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://app.arithmos.mx/manifest.webmanifest",
+  "webManifestUrl": "https://arithmos-blueprint.lovable.app/manifest.webmanifest",
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": {
@@ -33,7 +33,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://app.arithmos.mx/",
+  "fullScopeUrl": "https://arithmos-blueprint.lovable.app/",
   "minSdkVersion": 21,
   "orientation": "portrait",
   "fingerprints": [],
@@ -43,5 +43,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "1"
+  "appVersion": "3"
 }

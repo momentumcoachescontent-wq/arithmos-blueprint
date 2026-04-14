@@ -113,6 +113,15 @@ arithmos-blueprint/
 │   ├── android.keystore        # Release keystore (keep secret)
 │   └── app/
 │
+├── .agents/                    # Agent Brain & Skills
+│   ├── skills/                 # Pre-installed standard skills
+│   ├── skills-library/         # New high-performance skills (V2.5)
+│   │   ├── development-core.md
+│   │   ├── infrastructure-security.md
+│   │   ├── ux-design-patterns.md
+│   │   └── memory-intelligence.md
+│   └── superpowers/            # Advanced agent capabilities
+│
 └── public/                     # Static assets (PWA icons, manifest)
 ```
 
@@ -121,6 +130,11 @@ arithmos-blueprint/
 ---
 
 ## Key Conventions
+
+### Skills Usage
+- Always check `/.agents/skills-library/` before starting a new complex task.
+- Use `gsd-planner` for planning mode and `vibe-kanban` for execution tracking.
+- Use `ux-authority` for frontend edits and `cyber-safety` for Edge Function edits.
 
 ### Premium Access
 Access is gated by `useSubscription` (reads `subscriptions` table), **not** `profile.role`.

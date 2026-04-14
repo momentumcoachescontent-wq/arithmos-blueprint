@@ -1,9 +1,20 @@
 import type { Config } from "tailwindcss";
 import tailwindAnimate from "tailwindcss-animate";
+import {
+  cosmicColors,
+  cosmicFontFamily,
+  cosmicKeyframes,
+  cosmicAnimation,
+} from "./src/styles/cosmic-tailwind-extend";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -15,10 +26,18 @@ export default {
     },
     extend: {
       fontFamily: {
+        /* V3 Cosmic fonts */
+        display: cosmicFontFamily.display,
+        body: cosmicFontFamily.body,
+        accent: cosmicFontFamily.accent,
+        /* Legacy (backward compat) */
         sans: ["Inter", "system-ui", "sans-serif"],
         serif: ["Playfair Display", "Georgia", "serif"],
       },
       colors: {
+        /* V3 Cosmic palette */
+        ...cosmicColors,
+        /* Legacy shadcn tokens (backward compat) */
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -77,6 +96,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        /* V3 Cosmic animations */
+        ...cosmicKeyframes,
+        /* Legacy */
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -95,6 +117,9 @@ export default {
         },
       },
       animation: {
+        /* V3 Cosmic animations */
+        ...cosmicAnimation,
+        /* Legacy */
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.6s ease-out forwards",

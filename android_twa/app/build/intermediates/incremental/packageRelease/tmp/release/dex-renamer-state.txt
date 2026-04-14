@@ -1,4 +1,0 @@
-#Fri Mar 06 07:48:02 CST 2026
-base.0=/Users/neto_alvarez/.gemini/antigravity/scratch/arithmos_project/arithmos-blueprint/android_twa/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-renamed.0=classes.dex
-path.0=classes.dex
