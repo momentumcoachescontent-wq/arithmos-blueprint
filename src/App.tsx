@@ -34,8 +34,15 @@ const DataDeletion = lazy(() => import("./pages/DataDeletion"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 import { SubscriptionBoundary } from "@/ui/SubscriptionBoundary";
+import { useHeartbeat } from "@/hooks/useTracking";
 
 const queryClient = new QueryClient();
+
+// Tracker global component
+function AppTelemetry() {
+  useHeartbeat('app_global');
+  return null;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -43,6 +50,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AppTelemetry />
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Index />} />

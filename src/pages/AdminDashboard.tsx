@@ -18,6 +18,7 @@ import {
     Brain,
     Tag,
     Loader2,
+    LineChart
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,6 +30,7 @@ import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 import { AdminAITab } from "@/components/admin/AdminAITab";
 import { AdminPricingTab } from "@/components/admin/AdminPricingTab";
 import { AdminOverviewTab } from "@/components/admin/AdminOverviewTab";
+import { AdminTrackingTab } from "@/components/admin/AdminTrackingTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
@@ -234,6 +236,13 @@ const AdminDashboard = () => {
                                 IA & Config
                             </TabsTrigger>
                             <TabsTrigger
+                                value="tracking"
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-sans text-sm rounded-md py-2 px-6"
+                            >
+                                <LineChart className="h-4 w-4 mr-2 inline-block" />
+                                Rastreo Plg
+                            </TabsTrigger>
+                            <TabsTrigger
                                 value="pricing"
                                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-sans text-sm rounded-md py-2 px-6"
                             >
@@ -339,6 +348,16 @@ const AdminDashboard = () => {
                     </TabsContent>
                     <TabsContent value="ai" className="m-0 focus-visible:outline-none">
                         <AdminAITab />
+                    </TabsContent>
+
+                    <TabsContent value="tracking" className="m-0 focus-visible:outline-none">
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-transparent border-none p-0"
+                        >
+                            <AdminTrackingTab />
+                        </motion.div>
                     </TabsContent>
 
                     <TabsContent value="pricing" className="m-0 focus-visible:outline-none">

@@ -16,6 +16,7 @@ import { useJournal } from "@/hooks/useJournal";
 import { CosmicShell } from "@/ui/CosmicShell";
 import { generateCosmicDay } from "@/engines/cosmic-feed";
 import { useProfile } from "@/hooks/useProfile";
+import { useHeartbeat, useTracking } from "@/hooks/useTracking";
 
 /* ============================================================
    MOOD CONFIG
@@ -161,6 +162,8 @@ const CosmicJournal = () => {
   const { user, isAuthenticated } = useAuth();
   const { profile, fetchProfile } = useProfile();
   const { entries, isLoading, fetchEntries, createEntry, deleteEntry } = useJournal(user?.id);
+  const { trackEvent } = useTracking();
+  useHeartbeat('cosmic_journal');
 
   const [isWriting, setIsWriting] = useState(false);
   const [viewing, setViewing] = useState<string | null>(null);
@@ -203,6 +206,7 @@ const CosmicJournal = () => {
         alignment_score: cosmicDay?.alignmentScore,
       }
     );
+    trackEvent('journal_entry_created', 'cosmic_journal', { mood: selectedMood, tagsCount: selectedTags.length });
     setTitle(""); setContent(""); setSelectedMood(null); setSelectedTags([]);
     setIsWriting(false);
     setIsSaving(false);

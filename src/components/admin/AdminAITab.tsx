@@ -503,7 +503,7 @@ export function AdminAITab() {
                         animate={{ opacity: 1, y: 0 }}
                         className="lg:col-span-1 glass rounded-2xl p-6 border-border flex flex-col"
                     >
-                        <h4 className="text-sm font-sans font-bold text-foreground mb-6">Top 5 Creyentes (Consumo)</h4>
+                        <h4 className="text-sm font-sans font-bold text-foreground mb-6">Top 10 Creyentes (Consumo)</h4>
                         {isLoadingStats ? (
                              <div className="w-full h-full bg-secondary/20 rounded-xl animate-pulse" />
                         ) : topUsers.length === 0 ? (

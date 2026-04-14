@@ -147,6 +147,50 @@ export function AdminUsersTab() {
         }
     };
 
+    const handleUpdateTrial = async (userId: string, days: number) => {
+        setIsUpdating(userId);
+        try {
+            // Get current trial end date
+            const { data: existingSub } = await supabase
+                .from('subscriptions')
+                .select('trial_ends_at, plan')
+                .eq('user_id', userId)
+                .maybeSingle();
+
+            let baseDate = new Date();
+            if (existingSub?.trial_ends_at) {
+                const currentEnd = new Date(existingSub.trial_ends_at);
+                // If trial is still active, extend from there, otherwise from today
+                baseDate = currentEnd > new Date() ? currentEnd : new Date();
+            }
+
+            const newEndsAt = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
+
+            const { error } = await supabase
+                .from('subscriptions')
+                .upsert({
+                    user_id: userId,
+                    plan: existingSub?.plan || 'trial',
+                    trial_ends_at: newEndsAt,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'user_id' });
+
+            if (error) throw error;
+
+            toast.success(`Periodo de prueba actualizado (+${days} días)`);
+            
+            // Update local state
+            setUsers(users.map(u => u.user_id === userId ? { ...u, trial_ends_at: newEndsAt, subscription_plan: 'trial' } : u));
+            if (selectedUser?.user_id === userId) {
+                setSelectedUser(prev => prev ? { ...prev, trial_ends_at: newEndsAt, subscription_plan: 'trial' } : null);
+            }
+        } catch (err: any) {
+            toast.error("Error al actualizar periodo de prueba.");
+        } finally {
+            setIsUpdating(null);
+        }
+    };
+
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -342,9 +386,42 @@ export function AdminUsersTab() {
                                     </div>
                                 )}
                                 {selectedUser.trial_ends_at && selectedUser.subscription_plan === 'trial' && (
-                                    <div className="text-xs text-muted-foreground font-sans">
-                                        Vence {format(new Date(selectedUser.trial_ends_at), "d MMM", { locale: es })}
+                                    <div className="flex flex-col gap-1">
+                                        <div className="text-xs text-muted-foreground font-sans">
+                                            Vence {format(new Date(selectedUser.trial_ends_at), "d MMM", { locale: es })}
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <Button 
+                                                size="xs" 
+                                                variant="outline" 
+                                                className="h-6 text-[10px] px-2 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                                                onClick={() => handleUpdateTrial(selectedUser.user_id, 15)}
+                                                disabled={isUpdating === selectedUser.user_id}
+                                            >
+                                                +15 d
+                                            </Button>
+                                            <Button 
+                                                size="xs" 
+                                                variant="outline" 
+                                                className="h-6 text-[10px] px-2 border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+                                                onClick={() => handleUpdateTrial(selectedUser.user_id, -selectedUser.trial_ends_at ? 365 : 0)} // Cutting trial
+                                                disabled={isUpdating === selectedUser.user_id}
+                                            >
+                                                Cortar
+                                            </Button>
+                                        </div>
                                     </div>
+                                )}
+                                {!selectedUser.trial_ends_at && selectedUser.role === 'freemium' && (
+                                    <Button 
+                                        size="xs" 
+                                        variant="outline" 
+                                        className="h-6 text-[10px] px-2"
+                                        onClick={() => handleUpdateTrial(selectedUser.user_id, 45)}
+                                        disabled={isUpdating === selectedUser.user_id}
+                                    >
+                                        Activar Trial 45d
+                                    </Button>
                                 )}
                             </div>
 

@@ -128,7 +128,7 @@ export function useAITokenStats() {
             // 4. Resolve Top 5 Users
             const topUserIds = Object.entries(userAggregations)
                 .sort((a, b) => b[1].cost - a[1].cost)
-                .slice(0, 5)
+                .slice(0, 10)
                 .map(entry => entry[0]);
 
             if (topUserIds.length > 0) {

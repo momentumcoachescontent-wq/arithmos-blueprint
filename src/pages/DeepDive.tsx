@@ -12,6 +12,7 @@ import { ProFeatureGate } from "@/components/ProFeatureGate";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useHeartbeat, useTracking } from "@/hooks/useTracking";
 
 // Secciones del Deep Dive — informativas
 const DEEP_DIVE_SECTIONS = [
@@ -43,6 +44,9 @@ const DeepDive = () => {
     const [downloadUrl, setDownloadUrl] = useState<string | null>(() => sessionStorage.getItem('deepDiveUrl'));
     const [hasRecentReport, setHasRecentReport] = useState(false);
     const [isCheckingReport, setIsCheckingReport] = useState(true);
+
+    const { trackEvent } = useTracking();
+    useHeartbeat('deep_dive');
 
     useEffect(() => {
         const checkRecentReport = async () => {
@@ -118,6 +122,7 @@ const DeepDive = () => {
                 setHasRecentReport(true);
                 sessionStorage.setItem('deepDiveUrl', data.url);
                 sessionStorage.setItem('deepDiveRequested', 'true');
+                trackEvent('deep_dive_generated', 'blueprint', { hasUrl: true });
                 toast.success("¡Reporte generado!", {
                     description: "Tu Blueprint Anual se ha materializado en una nueva ventana. Presiona Ctrl+P → Guardar como PDF.",
                     duration: 8000,
@@ -132,6 +137,8 @@ const DeepDive = () => {
                 setHasRecentReport(true);
                 sessionStorage.setItem('deepDiveUrl', blobUrl);
                 sessionStorage.setItem('deepDiveRequested', 'true');
+                trackEvent('deep_dive_generated', 'blueprint', { hasHtmlUrl: true });
+
                 // Limpiar el blob URL después de 5 minutos
                 setTimeout(() => URL.revokeObjectURL(blobUrl), 300000);
                 toast.success("¡Reporte generado!", {
