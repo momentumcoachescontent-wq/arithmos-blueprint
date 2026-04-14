@@ -100,122 +100,139 @@ const Ranking = () => {
     }, [entries, region, timeframe, userCity, user?.id]);
 
     return (
-        <div className="min-h-screen bg-[#0a0512]">
-            <header className="px-6 py-4">
-                <div className="max-w-2xl mx-auto flex items-center justify-between opacity-80">
-                    <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 text-white hover:text-white/70 text-sm font-sans transition-colors">
-                        <ArrowLeft className="h-4 w-4" /> Retroceder
-                    </button>
-                    <span className="text-[10px] tracking-widest uppercase text-white/50 font-bold">Gamificación Local</span>
-                </div>
-            </header>
-
-            <div className="max-w-2xl mx-auto px-6 pb-20">
-                <div className="mb-8 text-center pt-4">
-                    <h1 className="text-3xl font-black text-white italic mb-2 tracking-tighter" style={{ fontFamily: "var(--cosm-font-display)" }}>
-                        El más alineado.
-                    </h1>
-                    <p className="text-sm text-white/60 font-sans max-w-[280px] mx-auto">
-                        Compite por la máxima frecuencia vibracional en tu zona.
-                    </p>
-                </div>
-
-                {/* Filters */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-1 mb-8 flex flex-col gap-1 backdrop-blur-xl">
-                   {/* Region Toggle */}
-                   <div className="flex w-full">
-                     <button 
-                       onClick={() => setRegion("local")}
-                       className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all ${region === 'local' ? 'bg-white/10 text-white' : 'text-white/40'}`}
-                     >
-                       <MapPin className="w-3 h-3" /> {userCity}
-                     </button>
-                     <button 
-                       onClick={() => setRegion("global")}
-                       className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all ${region === 'global' ? 'bg-white/10 text-white' : 'text-white/40'}`}
-                     >
-                       <Globe className="w-3 h-3" /> Global
-                     </button>
-                   </div>
-                   {/* Timeframe Toggle */}
-                   <div className="flex w-full">
-                     <button 
-                       onClick={() => setTimeframe("weekly")}
-                       className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all ${timeframe === 'weekly' ? 'bg-white/10 text-emerald-400' : 'text-white/40'}`}
-                     >
-                       <Calendar className="w-3 h-3" /> Semana
-                     </button>
-                     <button 
-                       onClick={() => setTimeframe("all-time")}
-                       className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all ${timeframe === 'all-time' ? 'bg-white/10 text-white' : 'text-white/40'}`}
-                     >
-                       <Clock className="w-3 h-3" /> Histórico
-                     </button>
-                   </div>
-                </div>
-
-                {isLoading ? (
-                    <div className="flex justify-center py-20">
-                      <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin"></div>
+        <CosmicShell particles particlePalette="violet">
+            <div className="min-h-screen pb-32 overflow-y-auto no-scrollbar">
+                <header className="px-6 py-4">
+                    <div className="max-w-2xl mx-auto flex items-center justify-between opacity-80">
+                        <button 
+                            onClick={() => navigate("/dashboard")} 
+                            className="flex items-center gap-2 text-white/50 hover:text-white text-sm font-sans transition-colors"
+                        >
+                            <ArrowLeft className="h-4 w-4" /> Volver al Blueprint
+                        </button>
+                        <span className="text-[10px] tracking-[0.3em] uppercase text-white/30 font-black">Escalafón de Poder</span>
                     </div>
-                ) : filteredEntries.length === 0 ? (
-                    <div className="text-center py-16 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-xl">
-                        <Trophy className="h-10 w-10 text-white/20 mx-auto mb-4" />
-                        <p className="text-white/80 font-sans text-sm mb-2 font-bold">Aún no hay nadie en tu región.</p>
-                        <p className="text-xs text-white/50 font-sans max-w-[200px] mx-auto">Invita a tus amigos con el Radar Cósmico para empezar la competencia local.</p>
+                </header>
+
+                <div className="max-w-2xl mx-auto px-6 pb-20">
+                    <div className="mb-8 text-center pt-4">
+                        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+                            <h1 className="text-4xl font-bold text-white italic mb-2 tracking-tighter" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                                El más <span className="text-violet-500">alineado</span>.
+                            </h1>
+                            <p className="text-sm text-white/40 font-sans max-w-[280px] mx-auto uppercase tracking-wide">
+                                Compite por la máxima frecuencia vibracional en tu zona.
+                            </p>
+                        </motion.div>
                     </div>
-                ) : (
-                    <div className="space-y-3">
-                        <AnimatePresence mode="popLayout">
-                        {filteredEntries.map((entry, idx) => {
-                            const isMe = entry.user_id === user?.id;
-                            const levelName = LEVEL_NAMES[entry.level] || `Nivel ${entry.level}`;
-                            return (
-                                <motion.div
-                                    layout
-                                    key={entry.user_id}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.9 }}
-                                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                                    className={`relative rounded-2xl p-4 flex items-center gap-4 border overflow-hidden ${isMe ? "border-purple-500/50 bg-purple-500/10" : "border-white/10 bg-white/5"} backdrop-blur-md`}
-                                >
-                                    {isMe && <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent pointer-events-none" />}
 
-                                    {/* Position */}
-                                    <div className="w-8 flex items-center justify-center shrink-0">
-                                        {idx < 3 ? POSITION_ICONS[idx] : (
-                                            <span className="text-sm font-sans font-black text-white/40">{idx + 1}</span>
-                                        )}
-                                    </div>
-
-                                    {/* Avatar */}
-                                    <div className="w-12 h-12 rounded-full border border-white/20 bg-black flex items-center justify-center shrink-0 shadow-inner">
-                                        <span className="text-xl font-serif font-bold text-white opacity-80">{entry.life_path_number}</span>
-                                    </div>
-
-                                    {/* Info */}
-                                    <div className="flex-1 min-w-0 z-10">
-                                        <div className="flex items-center gap-2">
-                                            <p className="text-sm font-sans font-black text-white truncate uppercase tracking-tight">{entry.name}</p>
-                                            {isMe && <span className="text-[9px] uppercase tracking-widest font-black bg-purple-500 text-white px-2 py-0.5 rounded-full">Tú</span>}
-                                        </div>
-                                        <p className="text-[11px] text-white/50 font-sans truncate font-medium uppercase tracking-widest mt-0.5">{entry.archetype}</p>
-                                    </div>
-
-                                    {/* XP */}
-                                    <div className="text-right shrink-0 z-10">
-                                        <p className={`text-base font-sans font-black ${isMe ? 'text-purple-300' : 'text-white'}`}>{entry.xp.toLocaleString()}</p>
-                                        <p className="text-[10px] uppercase font-bold tracking-widest text-white/40">XP</p>
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
-                        </AnimatePresence>
+                    {/* Filters */}
+                    <div className="cosmic-card p-2 mb-10 flex flex-col gap-2 bg-white/5 border-white/10">
+                        {/* Region Toggle */}
+                        <div className="flex w-full bg-black/40 rounded-2xl p-1 border border-white/5">
+                            <button 
+                                onClick={() => setRegion("local")}
+                                className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all ${region === 'local' ? 'bg-white/10 text-white shadow-lg' : 'text-white/20 hover:text-white/40'}`}
+                            >
+                                <MapPin className="w-3.5 h-3.5" /> {userCity}
+                            </button>
+                            <button 
+                                onClick={() => setRegion("global")}
+                                className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all ${region === 'global' ? 'bg-white/10 text-white shadow-lg' : 'text-white/20 hover:text-white/40'}`}
+                            >
+                                <Globe className="w-3.5 h-3.5" /> Global
+                            </button>
+                        </div>
+                        {/* Timeframe Toggle */}
+                        <div className="flex w-full bg-black/40 rounded-2xl p-1 border border-white/5">
+                            <button 
+                                onClick={() => setTimeframe("weekly")}
+                                className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all ${timeframe === 'weekly' ? 'bg-white/10 text-emerald-400 shadow-[0_0_15px_-5px_hsla(142,70%,45%,0.3)]' : 'text-white/20 hover:text-white/40'}`}
+                            >
+                                <Calendar className="w-3.5 h-3.5" /> Semana
+                            </button>
+                            <button 
+                                onClick={() => setTimeframe("all-time")}
+                                className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all ${timeframe === 'all-time' ? 'bg-white/10 text-white shadow-lg' : 'text-white/20 hover:text-white/40'}`}
+                            >
+                                <Clock className="w-3.5 h-3.5" /> Histórico
+                            </button>
+                        </div>
                     </div>
-                )}
+
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center py-20 gap-4">
+                            <div className="w-10 h-10 rounded-full border-2 border-white/10 border-t-violet-500 animate-spin"></div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">Sincronizando Frecuencias...</span>
+                        </div>
+                    ) : filteredEntries.length === 0 ? (
+                        <div className="text-center py-20 cosmic-card border-dashed border-white/10">
+                            <Trophy className="h-12 w-12 text-white/10 mx-auto mb-6" />
+                            <p className="text-white font-bold text-sm mb-2 uppercase tracking-widest">Territorio Virgen</p>
+                            <p className="text-[11px] text-white/40 font-sans max-w-[220px] mx-auto leading-relaxed">
+                                No hay registros en tu zona. Invita a otros con el <span className="text-violet-400">Radar Cósmico</span> para dominar esta región.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <AnimatePresence mode="popLayout">
+                                {filteredEntries.map((entry, idx) => {
+                                    const isMe = entry.user_id === user?.id;
+                                    const isTop3 = idx < 3;
+                                    return (
+                                        <motion.div
+                                            layout
+                                            key={entry.user_id}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            className={`relative rounded-[2.5rem] p-5 flex items-center gap-5 border transition-all ${isMe ? "border-violet-500/40 bg-violet-600/10 shadow-[0_0_30px_-5px_rgba(139,92,246,0.15)]" : "border-white/5 bg-white/[0.03] hover:bg-white/[0.05] hover:border-white/10"} backdrop-blur-xl relative overflow-hidden`}
+                                        >
+                                            {/* Position Label */}
+                                            <div className="w-10 flex items-center justify-center shrink-0">
+                                                {isTop3 ? POSITION_ICONS[idx] : (
+                                                    <span className="text-xs font-black text-white/20">#{idx + 1}</span>
+                                                )}
+                                            </div>
+
+                                            {/* User Bio Wrapper */}
+                                            <div className="flex flex-1 items-center gap-4 min-w-0">
+                                                {/* Archetype Badge */}
+                                                <div className="w-14 h-14 rounded-[1.25rem] bg-black/40 border border-white/10 flex items-center justify-center shrink-0 relative group">
+                                                    <span className="text-2xl font-bold text-white/90" style={{ fontFamily: "var(--cosm-font-display)" }}>{entry.life_path_number}</span>
+                                                    {isMe && <div className="absolute -top-1 -right-1 w-3 h-3 bg-violet-500 rounded-full border border-black animate-pulse" />}
+                                                </div>
+
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-0.5">
+                                                        <p className="text-sm font-black text-white truncate uppercase tracking-tight">{entry.name}</p>
+                                                        {isMe && <span className="text-[8px] uppercase tracking-widest font-black bg-violet-500 text-white px-2 py-0.5 rounded-full shadow-lg">YO</span>}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-[10px] text-white/30 font-black truncate uppercase tracking-widest">{entry.archetype}</p>
+                                                        <span className="w-1 h-1 rounded-full bg-white/10" />
+                                                        <span className="text-[9px] text-violet-400 font-bold uppercase tracking-tighter truncate">{entry.birth_place?.split(',')[0]}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* XP Score */}
+                                            <div className="text-right shrink-0 pr-2">
+                                                <p className={`text-xl font-bold tracking-tighter transition-colors ${isMe ? 'text-violet-300' : 'text-white'}`} style={{ fontFamily: "var(--cosm-font-display)" }}>
+                                                    {entry.xp.toLocaleString()}
+                                                </p>
+                                                <p className="text-[8px] uppercase font-black tracking-[0.2em] text-white/20">XP Freq</p>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </AnimatePresence>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+        </CosmicShell>
+    );
     );
 };
 

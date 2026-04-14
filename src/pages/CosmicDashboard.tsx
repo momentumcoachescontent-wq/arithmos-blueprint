@@ -15,18 +15,104 @@ import { getDailyTransits } from "@/engines/astrology/transits";
 import { CosmicNotifications } from "@/features/match/CosmicNotifications";
 import { ZenAudioPlayer } from "@/features/zen-player/ZenAudioPlayer";
 import { ARCHETYPES } from "@/hooks/useProfile";
-
 import { calculateNatalProfile } from "@/engines/astrology/natal-chart";
 
 /* ============================================
-   TAB: MAPA — Profile + Natal Chart
+   TAB: COSMOS — Día cósmico + Clima astral + Tarot Reels
    ============================================ */
 
-function CosmicMapaTab({ profile }: { profile: NonNullable<ReturnType<typeof useProfile>["profile"]> }) {
-  const natal = useMemo(() => calculateNatalProfile(profile.birthDate), [profile.birthDate]);
+function CosmosTab({
+  cosmicReading,
+  dailyTransits,
+  navigate,
+}: {
+  cosmicReading: ReturnType<typeof generateCosmicDay>;
+  dailyTransits: ReturnType<typeof getDailyTransits>;
+  navigate: ReturnType<typeof useNavigate>;
+}) {
+  return (
+    <div className="px-4 py-6 space-y-6">
+
+      {/* 1. DÍA CÓSMICO — primero porque es el insight personal */}
+      {cosmicReading && <CosmicFeed reading={cosmicReading} />}
+
+      {/* 2. CLIMA ASTRAL DEL DÍA */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold tracking-widest uppercase text-white/50 px-2">
+          Clima Astral de Hoy
+        </h3>
+        <div className="grid gap-3">
+          {dailyTransits.map((transit, idx) => (
+            <div
+              key={idx}
+              className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-4 items-start"
+            >
+              <div className="text-2xl mt-1">{transit.emoji}</div>
+              <div>
+                <h4
+                  className="text-sm font-bold text-white mb-1"
+                  style={{ fontFamily: "var(--cosm-font-display)" }}
+                >
+                  {transit.planet} en {transit.sign}
+                </h4>
+                <p className="text-xs text-white/70 leading-relaxed font-sans">
+                  {transit.message}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. HERO CARD: TAROT REELS — CTA viral al final */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => navigate("/reels")}
+        className="w-full h-36 rounded-[28px] p-6 relative overflow-hidden text-left"
+        style={{
+          background: "linear-gradient(135deg, hsl(270 80% 25%), hsl(310 80% 20%))",
+          border: "1px solid hsla(270 80% 50% / 0.4)",
+          boxShadow: "0 20px 40px -10px hsla(270 80% 50% / 0.3)",
+        }}
+      >
+        <div className="absolute top-0 right-0 p-4 text-4xl opacity-20">🎞️</div>
+        <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl bg-pink-500/20" />
+        <div className="relative z-10 flex flex-col h-full">
+          <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-pink-300 mb-1">
+            Nuevo · Viral
+          </span>
+          <h3
+            className="text-xl font-bold mb-1 leading-tight"
+            style={{ fontFamily: "var(--cosm-font-display)", color: "white" }}
+          >
+            Tu Destino en 15"
+          </h3>
+          <p className="text-xs text-white/60 mb-auto">Tarot interactivo en formato Reel.</p>
+          <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-white tracking-widest">
+            Ver ahora <span>✨</span>
+          </div>
+        </div>
+      </motion.button>
+    </div>
+  );
+}
+
+/* ============================================
+   TAB: MAPA → renombrado "Frecuencias"
+   Muestra: Perfil numerológico + Sanación + Audio
+   ============================================ */
+
+function CosmicFrecuenciasTab({
+  profile,
+}: {
+  profile: NonNullable<ReturnType<typeof useProfile>["profile"]>;
+}) {
+  const navigate = useNavigate();
+  const natal = useMemo(() => calculateNatalProfile({ date: profile.birthDate }), [profile.birthDate]);
 
   return (
-    <div className="px-4 py-8 space-y-10">
+    <div className="px-4 py-8 space-y-8">
       {/* Header Profile */}
       <div className="text-center">
         <h1
@@ -40,13 +126,10 @@ function CosmicMapaTab({ profile }: { profile: NonNullable<ReturnType<typeof use
         </div>
       </div>
 
-      {/* Astro Summary Card */}
+      {/* Astro Summary */}
       <div
         className="text-center italic text-sm leading-relaxed px-4"
-        style={{
-          fontFamily: "var(--cosm-font-body)",
-          color: "hsl(260 10% 65%)",
-        }}
+        style={{ fontFamily: "var(--cosm-font-body)", color: "hsl(260 10% 65%)" }}
       >
         {natal.cosmicSummary}
       </div>
@@ -66,29 +149,89 @@ function CosmicMapaTab({ profile }: { profile: NonNullable<ReturnType<typeof use
             { label: "Impulso del Alma", value: profile.soulUrgeNumber, emoji: "💫" },
             { label: "Personalidad", value: profile.personalityNumber, emoji: "🎭" },
           ].map((num) => (
-            <div
-              key={num.label}
-              className="cosmic-card flex items-center gap-3 p-3"
-            >
+            <div key={num.label} className="cosmic-card flex items-center gap-3 p-3">
               <span className="text-lg">{num.emoji}</span>
               <div>
                 <span
                   className="text-lg font-bold"
-                  style={{
-                    fontFamily: "var(--cosm-font-display)",
-                    color: "hsl(45 90% 65%)",
-                  }}
+                  style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(45 90% 65%)" }}
                 >
                   {num.value || "—"}
                 </span>
-                <p
-                  className="text-[10px]"
-                  style={{ color: "hsl(260 8% 50%)" }}
-                >
+                <p className="text-[10px]" style={{ color: "hsl(260 8% 50%)" }}>
                   {num.label}
                 </p>
               </div>
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Divisor */}
+      <div
+        className="h-px w-full"
+        style={{ background: "linear-gradient(90deg, transparent, hsla(270 60% 40% / 0.4), transparent)" }}
+      />
+
+      {/* FRECUENCIAS DE SANACIÓN — ZenAudioPlayer aquí */}
+      <div>
+        <h2
+          className="text-sm font-semibold mb-1"
+          style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(0 0% 90%)" }}
+        >
+          🎵 Frecuencias de Sanación
+        </h2>
+        <p className="text-[11px] mb-4" style={{ color: "hsl(260 8% 50%)", fontFamily: "var(--cosm-font-body)" }}>
+          Audios binaurales y frecuencias solfeggio para tu trabajo interior.
+        </p>
+        <ZenAudioPlayer />
+      </div>
+
+      {/* Divisor */}
+      <div
+        className="h-px w-full"
+        style={{ background: "linear-gradient(90deg, transparent, hsla(270 60% 40% / 0.4), transparent)" }}
+      />
+
+      {/* HERRAMIENTAS DE PROFUNDIDAD */}
+      <div>
+        <h2
+          className="text-sm font-semibold mb-3"
+          style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(0 0% 90%)" }}
+        >
+          🧰 Herramientas de Profundidad
+        </h2>
+        <div className="space-y-2">
+          {[
+            { label: "Calendario Numérico", icon: "📅", route: "/calendario", desc: "Tu energía día a día" },
+            { label: "Horas del Día", icon: "⏰", route: "/horas", desc: "Momentos de poder y sombra" },
+            { label: "Radar de Fricción", icon: "⚡", route: "/radar-friccion", desc: "Diagnóstico de bloqueos" },
+            { label: "Tribunal de Poder", icon: "🏛️", route: "/tribunal-poder", desc: "Análisis estratégico 1:1" },
+            { label: "Radar de Equipo", icon: "👥", route: "/radar-equipo", desc: "Sinergia colectiva" },
+            { label: "Tu Evolución", icon: "📈", route: "/evolucion", desc: "Historial y progreso" },
+          ].map((link) => (
+            <button
+              key={link.route}
+              onClick={() => navigate(link.route)}
+              className="cosmic-card cosmic-glass-hover w-full flex items-center gap-3 p-3 text-left"
+            >
+              <span className="text-lg">{link.icon}</span>
+              <div className="flex-1 min-w-0">
+                <span
+                  className="text-sm font-medium block"
+                  style={{ fontFamily: "var(--cosm-font-body)", color: "hsl(0 0% 88%)" }}
+                >
+                  {link.label}
+                </span>
+                <span
+                  className="text-[11px]"
+                  style={{ color: "hsl(260 8% 50%)", fontFamily: "var(--cosm-font-body)" }}
+                >
+                  {link.desc}
+                </span>
+              </div>
+              <span className="text-white/20 text-sm">›</span>
+            </button>
           ))}
         </div>
       </div>
@@ -171,8 +314,9 @@ function CosmicYoTab({
           { label: "Diario Cósmico", icon: "📓", route: "/journal" },
           { label: "Compatibilidad (1 a 1)", icon: "💞", route: "/compatibility" },
           { label: "Radar Cósmico (Social)", icon: "📡", route: "/radar" },
-          { label: "Configuración", icon: "⚙️", route: "/settings" },
+          { label: "Sincronicidad", icon: "🌀", route: "/synchronicity" },
           { label: "Coach IA", icon: "🧠", route: "/coach" },
+          { label: "Configuración", icon: "⚙️", route: "/settings" },
         ].map((link) => (
           <button
             key={link.route}
@@ -190,7 +334,7 @@ function CosmicYoTab({
         ))}
       </div>
 
-      {/* Activity Feed (Cosmic Notifications) */}
+      {/* Activity Feed */}
       <div className="mt-8">
         <CosmicNotifications userId={profile.userId} />
       </div>
@@ -211,12 +355,12 @@ function CosmicYoTab({
    COSMIC DASHBOARD — Main page
    ============================================ */
 
-type CosmicTab = "cosmos" | "tarot" | "mapa" | "yo";
+type CosmicTab = "cosmos" | "tarot" | "frecuencias" | "yo";
 
 const NAV_ITEMS: CosmicNavItem[] = [
   { id: "cosmos", label: "Cosmos", icon: "✨" },
   { id: "tarot", label: "Tarot", icon: "🔮" },
-  { id: "mapa", label: "Mapa", icon: "🗺️", primary: true },
+  { id: "frecuencias", label: "Frecuencias", icon: "🌀", primary: true },
   { id: "yo", label: "Yo", icon: "👤" },
 ];
 
@@ -308,61 +452,15 @@ const CosmicDashboard = () => {
             transition={{ duration: 0.2 }}
           >
             {activeTab === "cosmos" && (
-              <div className="px-4 py-6 space-y-6">
-                {/* HERO CARD: TAROT REELS */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate("/reels")}
-                  className="w-full h-40 rounded-[32px] p-6 relative overflow-hidden text-left"
-                  style={{
-                    background: "linear-gradient(135deg, hsl(270 80% 25%), hsl(310 80% 20%))",
-                    border: "1px solid hsla(270 80% 50% / 0.4)",
-                    boxShadow: "0 20px 40px -10px hsla(270 80% 50% / 0.3)",
-                  }}
-                >
-                  <div className="absolute top-0 right-0 p-4 text-4xl opacity-20">🎞️</div>
-                  <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl bg-pink-500/20"></div>
-
-                  <div className="relative z-10 flex flex-col h-full">
-                    <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-pink-300 mb-1">Nuevo · Viral</span>
-                    <h3 className="text-xl font-bold mb-2 leading-tight" style={{ fontFamily: "var(--cosm-font-display)", color: "white" }}>
-                      Tu Destino en 15"
-                    </h3>
-                    <p className="text-xs text-white/60 mb-auto">Tarot interactivo en formato Reel.</p>
-                    <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-white tracking-widest">
-                      Ver ahora <span>✨</span>
-                    </div>
-                  </div>
-                </motion.button>
-
-                {/* ZEN AUDIO PLAYER */}
-                <ZenAudioPlayer />
-
-                {/* TRANSITOS DEL DÍA */}
-                <div className="space-y-3">
-                  <h3 className="text-sm font-bold tracking-widest uppercase text-white/50 px-2">Clima Astral de Hoy</h3>
-                  <div className="grid gap-3">
-                    {dailyTransits.map((transit, idx) => (
-                      <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-4 items-start">
-                        <div className="text-2xl mt-1">{transit.emoji}</div>
-                        <div>
-                          <h4 className="text-sm font-bold text-white mb-1" style={{ fontFamily: "var(--cosm-font-display)" }}>
-                            {transit.planet} en {transit.sign}
-                          </h4>
-                          <p className="text-xs text-white/70 leading-relaxed font-sans">{transit.message}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {cosmicReading && <CosmicFeed reading={cosmicReading} />}
-              </div>
+              <CosmosTab
+                cosmicReading={cosmicReading}
+                dailyTransits={dailyTransits}
+                navigate={navigate}
+              />
             )}
-            
+
             {activeTab === "tarot" && <TarotSpreadsView />}
-            {activeTab === "mapa" && <CosmicMapaTab profile={profile} />}
+            {activeTab === "frecuencias" && <CosmicFrecuenciasTab profile={profile} />}
             {activeTab === "yo" && (
               <CosmicYoTab
                 profile={profile}

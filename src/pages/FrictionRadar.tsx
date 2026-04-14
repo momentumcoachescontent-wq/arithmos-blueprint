@@ -331,210 +331,222 @@ export default function FrictionRadar() {
     };
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans pt-12 pb-24 px-6">
-            <div className="max-w-xl mx-auto space-y-8">
+        <CosmicShell particles particlePalette="violet">
+            <div className="min-h-screen pb-32 px-6 py-12 overflow-y-auto no-scrollbar">
+                <div className="max-w-xl mx-auto space-y-8">
 
-                {/* Header */}
-                <div className="text-center space-y-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold tracking-widest uppercase">
-                        <Scale className="h-3 w-3" /> Radar de Fricción
+                    {/* Header */}
+                    <div className="text-center space-y-2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-violet-500/10 text-violet-400 rounded-full text-[10px] font-bold tracking-widest uppercase border border-violet-500/20">
+                            <Scale className="h-3 w-3" /> Radar de Fricción
+                        </div>
+                        <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                            {step === 3 ? "Tu Perfil de Fricción" : "¿Qué te está frenando hoy?"}
+                        </h1>
+                        <p className="text-white/40 text-xs max-w-[300px] mx-auto font-sans">
+                            {step === 1 && "Descubre por qué no has empezado y cómo desbloquearte esta semana."}
+                            {step === 2 && "Sé honesto contigo mismo. No hay respuestas correctas, solo reales."}
+                            {step === 3 && "Este es tu diagnóstico y plan de acción inmediato."}
+                        </p>
                     </div>
-                    <h1 className="text-3xl font-serif font-bold text-foreground">
-                        {step === 3 ? "Tu Perfil de Fricción" : "¿Qué te está frenando hoy?"}
-                    </h1>
-                    <p className="text-muted-foreground text-sm max-w-[300px] mx-auto">
-                        {step === 1 && "Descubre por qué no has empezado y cómo desbloquearte esta semana."}
-                        {step === 2 && "Sé honesto contigo mismo. No hay respuestas correctas, solo reales."}
-                        {step === 3 && "Este es tu diagnóstico y plan de acción inmediato."}
-                    </p>
-                </div>
 
-                <AnimatePresence mode="wait">
-                    {/* Step 1: Goal */}
-                    {step === 1 && (
-                        <motion.div
-                            key="step1"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="space-y-6"
-                        >
-                            <div className="space-y-4">
-                                <Label className="text-base font-semibold">Define tu meta actual</Label>
-                                <Textarea
-                                    value={goal}
-                                    onChange={(e) => setGoal(e.target.value)}
-                                    placeholder="Ejemplo: Terminar mi propuesta de proyecto..."
-                                    className="text-lg py-4 px-5 rounded-2xl bg-secondary/30 border-border focus:ring-primary/20 min-h-[120px] resize-none"
-                                />
-                                <div className="flex flex-wrap gap-2 pt-2">
-                                    {SUGGESTED_GOALS.map(s => (
-                                        <button
-                                            key={s}
-                                            onClick={() => setGoal(s)}
-                                            className="text-[10px] px-3 py-1.5 rounded-full bg-secondary/50 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors border border-border"
-                                        >
-                                            {s}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <Button onClick={handleNext} className="w-full h-14 rounded-2xl text-lg font-bold gap-2">
-                                Continuar <ArrowRight className="h-5 w-5" />
-                            </Button>
-                        </motion.div>
-                    )}
-
-                    {/* Step 2: Sliders */}
-                    {step === 2 && (
-                        <motion.div
-                            key="step2"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="space-y-8"
-                        >
-                            <div className="space-y-10">
-                                {[
-                                    { id: "judgment" as const, label: QUESTION_BANK[goalCategory].judgment, left: "Nada", right: "Demasiado", icon: <Search className="h-4 w-4" /> },
-                                    { id: "certainty" as const, label: QUESTION_BANK[goalCategory].certainty, left: "No importa", right: "Imprescindible", icon: <Scale className="h-4 w-4" /> },
-                                    { id: "planning" as const, label: QUESTION_BANK[goalCategory].planning, left: "Solo actúo", right: "Hiper-planifico", icon: <Brain className="h-4 w-4" /> },
-                                    { id: "emotional" as const, label: QUESTION_BANK[goalCategory].emotional, left: "Paz total", right: "Tensión alta", icon: <AlertCircle className="h-4 w-4" /> },
-                                    { id: "clarity" as const, label: QUESTION_BANK[goalCategory].clarity, left: "Nulo", right: "Cristalino", icon: <Target className="h-4 w-4" /> },
-                                ].map((s) => (
-                                    <div key={s.id} className="space-y-4">
-                                        <div className="flex justify-between items-center">
-                                            <Label className="text-sm font-semibold flex items-center gap-2">
-                                                {s.icon} {s.label}
-                                            </Label>
-                                            <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded uppercase">
-                                                {scores[s.id] > 70 ? "Alto" : scores[s.id] > 30 ? "Medio" : "Bajo"}
-                                            </span>
-                                        </div>
-                                        <Slider
-                                            value={[scores[s.id]]}
-                                            onValueChange={([val]) => setScores({ ...scores, [s.id]: val })}
-                                            max={100}
-                                            step={5}
-                                            className="cursor-pointer"
-                                        />
-                                        <div className="flex justify-between text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                                            <span>{s.left}</span>
-                                            <span>{s.right}</span>
-                                        </div>
+                    <AnimatePresence mode="wait">
+                        {/* Step 1: Goal */}
+                        {step === 1 && (
+                            <motion.div
+                                key="step1"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-6"
+                            >
+                                <div className="space-y-4">
+                                    <Label className="text-sm font-bold text-white/70 uppercase tracking-widest text-center block">Define tu meta actual</Label>
+                                    <Textarea
+                                        value={goal}
+                                        onChange={(e) => setGoal(e.target.value)}
+                                        placeholder="Ejemplo: Terminar mi propuesta de proyecto..."
+                                        className="text-lg py-4 px-5 rounded-3xl bg-white/5 border-white/10 focus:ring-violet-500/20 text-white min-h-[140px] resize-none"
+                                    />
+                                    <div className="flex flex-wrap gap-2 pt-2 justify-center">
+                                        {SUGGESTED_GOALS.map(s => (
+                                            <button
+                                                key={s}
+                                                onClick={() => setGoal(s)}
+                                                className="text-[10px] px-3 py-1.5 rounded-full bg-white/5 text-white/40 hover:bg-violet-500/20 hover:text-violet-400 transition-colors border border-white/5 font-bold uppercase tracking-wider"
+                                            >
+                                                {s}
+                                            </button>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-
-                            <div className="flex gap-4 pt-4">
-                                <Button variant="ghost" onClick={handleBack} className="h-14 w-14 rounded-2xl border">
-                                    <ChevronLeft className="h-6 w-6" />
-                                </Button>
-                                <Button
-                                    onClick={calculateResult}
-                                    className="flex-1 h-14 rounded-2xl text-lg font-bold gap-2"
-                                    disabled={isCalculating}
+                                </div>
+                                <Button 
+                                    onClick={handleNext} 
+                                    className="w-full h-14 rounded-2xl text-lg font-bold gap-2"
+                                    style={{ background: "linear-gradient(135deg, hsl(270 80% 65%), hsl(310 80% 60%))", color: "white", fontFamily: "var(--cosm-font-display)" }}
                                 >
-                                    {isCalculating ? "Calculando..." : "Ver Resultados"}
-                                    {!isCalculating && <Zap className="h-5 w-5" />}
+                                    Continuar <ArrowRight className="h-5 w-5" />
                                 </Button>
-                            </div>
-                        </motion.div>
-                    )}
+                            </motion.div>
+                        )}
 
-                    {/* Step 3: Result */}
-                    {step === 3 && result && (
-                        <motion.div
-                            key="result"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="space-y-8"
-                        >
-                            {/* Archetype Card */}
-                            <div className="glass rounded-[32px] p-8 border-primary/20 bg-primary/5 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-8 opacity-10">
-                                    {result.icon}
-                                </div>
-                                <div className="space-y-4 relative z-10">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-3 bg-white/10 rounded-2xl shadow-xl backdrop-blur-xl">
-                                            {result.icon}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-2xl font-serif font-bold text-foreground">{result.title}</h3>
-                                            <div className="text-[10px] uppercase tracking-[0.2em] font-black text-primary">
-                                                Fricción {frictionLevel}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p className="text-foreground leading-relaxed">
-                                        {result.description}
-                                    </p>
-                                    <div className="p-4 bg-primary/10 border border-primary/20 rounded-2xl">
-                                        <p className="text-sm font-medium text-primary italic">
-                                            "{result.truth}"
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Protocol */}
-                            <div className="space-y-6">
-                                <h4 className="text-lg font-serif font-bold flex items-center gap-2">
-                                    <Rocket className="h-5 w-5 text-primary" /> Protocolo de Desbloqueo
-                                </h4>
-                                <div className="space-y-3">
-                                    {result.protocol.map((p, i) => (
-                                        <div key={i} className="flex gap-4 p-5 bg-secondary/20 rounded-2xl border border-border group hover:border-primary/30 transition-all">
-                                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
-                                                {i + 1}
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="text-sm text-foreground font-medium">{p}</p>
-                                                <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                                                    Acción enfocada
+                        {/* Step 2: Sliders */}
+                        {step === 2 && (
+                            <motion.div
+                                key="step2"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-8"
+                            >
+                                <div className="space-y-10">
+                                    {[
+                                        { id: "judgment" as const, label: QUESTION_BANK[goalCategory].judgment, left: "Nada", right: "Demasiado", icon: <Search className="h-4 w-4" /> },
+                                        { id: "certainty" as const, label: QUESTION_BANK[goalCategory].certainty, left: "No importa", right: "Imprescindible", icon: <Scale className="h-4 w-4" /> },
+                                        { id: "planning" as const, label: QUESTION_BANK[goalCategory].planning, left: "Solo actúo", right: "Hiper-planifico", icon: <Brain className="h-4 w-4" /> },
+                                        { id: "emotional" as const, label: QUESTION_BANK[goalCategory].emotional, left: "Paz total", right: "Tensión alta", icon: <AlertCircle className="h-4 w-4" /> },
+                                        { id: "clarity" as const, label: QUESTION_BANK[goalCategory].clarity, left: "Nulo", right: "Cristalino", icon: <Target className="h-4 w-4" /> },
+                                    ].map((s) => (
+                                        <div key={s.id} className="space-y-4">
+                                            <div className="flex justify-between items-start gap-4">
+                                                <Label className="text-xs font-bold flex items-start gap-2 text-white/70 leading-relaxed">
+                                                    <span className="text-violet-400 mt-0.5">{s.icon}</span> 
+                                                    {s.label}
+                                                </Label>
+                                                <span className="text-[10px] font-black text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded uppercase shrink-0">
+                                                    {scores[s.id] > 70 ? "Alto" : scores[s.id] > 30 ? "Medio" : "Bajo"}
                                                 </span>
                                             </div>
+                                            <Slider
+                                                value={[scores[s.id]]}
+                                                onValueChange={([val]) => setScores({ ...scores, [s.id]: val })}
+                                                max={100}
+                                                step={5}
+                                                className="cursor-pointer"
+                                            />
+                                            <div className="flex justify-between text-[10px] text-white/30 uppercase tracking-[0.2em] font-black">
+                                                <span>{s.left}</span>
+                                                <span>{s.right}</span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
-                            </div>
 
-                            {/* Final CTA */}
-                            <div className="p-8 bg-zinc-900 rounded-[32px] border border-white/5 text-center space-y-6 shadow-2xl">
-                                <div className="space-y-2">
-                                    <div className="text-[10px] text-primary font-bold uppercase tracking-widest">Frase Ancla</div>
-                                    <p className="text-xl font-serif font-medium text-white italic">
-                                        "{result.anchor}"
-                                    </p>
-                                </div>
-                                <div className="space-y-3 pt-4 border-t border-white/10">
-                                    <Button onClick={() => navigate("/dashboard")} className="w-full h-14 rounded-2xl text-lg font-bold gap-2">
-                                        Volver al Dashboard <ArrowRight className="h-5 w-5" />
+                                <div className="flex gap-4 pt-4">
+                                    <Button variant="ghost" onClick={handleBack} className="h-14 w-14 rounded-2xl border border-white/10 text-white/40">
+                                        <ChevronLeft className="h-6 w-6" />
                                     </Button>
-                                    <div className="flex items-center justify-center gap-4 pt-2">
-                                        <button
-                                            onClick={() => handleSave(false)}
-                                            className="text-xs text-muted-foreground hover:text-white transition-colors"
-                                        >
-                                            Hacer Registro Kármico
-                                        </button>
-                                        <div className="w-1 h-1 bg-muted-foreground/30 rounded-full" />
-                                        <button
-                                            onClick={() => {
-                                                toast.info("Función de compartir victoria se activará en la Fase B6 (Tribunal del Poder).");
-                                            }}
-                                            className="text-xs text-muted-foreground hover:text-white transition-colors"
-                                        >
-                                            Compartir Victoria
-                                        </button>
+                                    <Button
+                                        onClick={calculateResult}
+                                        className="flex-1 h-14 rounded-2xl text-lg font-bold gap-2"
+                                        disabled={isCalculating}
+                                        style={{ background: "linear-gradient(135deg, hsl(270 80% 65%), hsl(310 80% 60%))", color: "white", fontFamily: "var(--cosm-font-display)" }}
+                                    >
+                                        {isCalculating ? "Analizando..." : "Ver Resultados"}
+                                        {!isCalculating && <Zap className="h-5 w-5" />}
+                                    </Button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {/* Step 3: Result */}
+                        {step === 3 && result && (
+                            <motion.div
+                                key="result"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="space-y-8"
+                            >
+                                {/* Archetype Card */}
+                                <div className="cosmic-card p-8 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-8 opacity-10">
+                                        {result.icon}
+                                    </div>
+                                    <div className="space-y-4 relative z-10">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-3 bg-white/10 rounded-2xl shadow-xl backdrop-blur-xl border border-white/10 text-violet-400">
+                                                {result.icon}
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--cosm-font-display)" }}>{result.title}</h3>
+                                                <div className="text-[10px] uppercase tracking-[0.2em] font-black text-violet-400">
+                                                    Fricción {frictionLevel}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p className="text-white/80 leading-relaxed text-sm">
+                                            {result.description}
+                                        </p>
+                                        <div className="p-4 bg-violet-500/10 border border-violet-500/20 rounded-2xl">
+                                            <p className="text-sm font-bold text-violet-300 italic">
+                                                "{result.truth}"
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+
+                                {/* Protocol */}
+                                <div className="space-y-6">
+                                    <h4 className="text-sm uppercase tracking-widest font-black flex items-center gap-2 text-white/60">
+                                        <Rocket className="h-4 w-4 text-violet-400" /> Protocolo de Desbloqueo
+                                    </h4>
+                                    <div className="space-y-3">
+                                        {result.protocol.map((p, i) => (
+                                            <div key={i} className="flex gap-4 p-5 cosmic-card bg-white/5 border-white/10 group hover:border-violet-500/30 transition-all">
+                                                <div className="h-8 w-8 rounded-full bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 font-black text-xs shrink-0">
+                                                    {i + 1}
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-sm text-white/90 font-bold">{p}</p>
+                                                    <span className="text-[9px] text-white/30 uppercase tracking-widest font-black">
+                                                        Acción enfocada
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Final CTA */}
+                                <div className="p-8 cosmic-card bg-black/40 text-center space-y-6 shadow-2xl">
+                                    <div className="space-y-2">
+                                        <div className="text-[9px] text-violet-400 font-black uppercase tracking-widest">Frase Ancla</div>
+                                        <p className="text-xl font-bold text-white italic" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                                            "{result.anchor}"
+                                        </p>
+                                    </div>
+                                    <div className="space-y-4 pt-4 border-t border-white/10">
+                                        <Button 
+                                            onClick={() => navigate("/dashboard")} 
+                                            className="w-full h-14 rounded-2xl text-lg font-bold gap-2"
+                                            style={{ background: "linear-gradient(135deg, hsl(270 80% 65%), hsl(310 80% 60%))", color: "white", fontFamily: "var(--cosm-font-display)" }}
+                                        >
+                                            Volver al Dashboard <ArrowRight className="h-5 w-5" />
+                                        </Button>
+                                        <div className="flex items-center justify-center gap-6 pt-2">
+                                            <button
+                                                onClick={() => handleSave(false)}
+                                                className="text-[10px] text-white/30 hover:text-white transition-colors uppercase font-black tracking-widest"
+                                            >
+                                                Hacer Registro Kármico 📓
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    toast.info("Función de compartir victoria se activará en la Fase B6 (Tribunal del Poder).");
+                                                }}
+                                                className="text-[10px] text-white/30 hover:text-white transition-colors uppercase font-black tracking-widest"
+                                            >
+                                                Compartir ✨
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
-        </div>
+        </CosmicShell>
+    );
     );
 }

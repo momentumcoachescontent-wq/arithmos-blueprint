@@ -45,74 +45,92 @@ const Missions = () => {
     const allDone = missions.length > 0 && completed === missions.length;
 
     return (
-        <div className="min-h-screen bg-background">
-            <header className="border-b border-border px-6 py-4">
-                <div className="max-w-2xl mx-auto flex items-center justify-between">
-                    <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-sans">
-                        <ArrowLeft className="h-4 w-4" /> Dashboard
-                    </button>
-                    {stats && <XPBar {...stats} compact />}
-                </div>
-            </header>
+        <CosmicShell particles particlePalette="violet">
+            <div className="min-h-screen pb-24 px-6 py-8 overflow-y-auto no-scrollbar">
+                <header className="mb-8">
+                    <div className="max-w-2xl mx-auto flex items-center justify-between">
+                        <button 
+                            onClick={() => navigate("/dashboard")} 
+                            className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm font-sans"
+                        >
+                            <ArrowLeft className="h-4 w-4" /> Dashboard
+                        </button>
+                        {stats && <XPBar {...stats} compact />}
+                    </div>
+                </header>
 
-            <div className="max-w-2xl mx-auto px-6 py-10">
-                <div className="flex items-center gap-3 mb-2">
-                    <Target className="h-5 w-5 text-primary" />
-                    <h1 className="text-2xl font-serif font-semibold text-foreground">Misiones del Día</h1>
-                </div>
-                <p className="text-sm text-muted-foreground font-sans mb-8">
-                    Basadas en tu número personal de hoy · {completed}/{missions.length} completadas
-                </p>
+                <div className="max-w-2xl mx-auto">
+                    <div className="flex items-center gap-3 mb-2">
+                        <Target className="h-5 w-5 text-violet-400" />
+                        <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                            Misiones del Día
+                        </h1>
+                    </div>
+                    <p className="text-xs font-sans mb-8" style={{ color: "hsl(260 10% 60%)" }}>
+                        Basadas en tu número personal de hoy · {completed}/{missions.length} completadas
+                    </p>
 
-                {stats && <div className="mb-8"><XPBar {...stats} /></div>}
+                    {stats && <div className="mb-8"><XPBar {...stats} /></div>}
 
-                {allDone && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-primary/10 border border-primary/30 rounded-xl p-6 text-center mb-8"
-                    >
-                        <CheckCircle2 className="h-8 w-8 text-primary mx-auto mb-2" />
-                        <p className="font-serif text-foreground font-semibold">¡Todas las misiones completadas!</p>
-                        <p className="text-sm text-muted-foreground font-sans mt-1">Regresa mañana para nuevas misiones de poder.</p>
-                    </motion.div>
-                )}
+                    {allDone && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="p-6 text-center mb-8 rounded-[32px]"
+                            style={{ 
+                                background: "hsla(145 60% 10% / 0.3)", 
+                                border: "1px solid hsla(145 60% 40% / 0.3)" 
+                            }}
+                        >
+                            <CheckCircle2 className="h-8 w-8 text-green-400 mx-auto mb-2" />
+                            <p className="font-bold text-white" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                                ¡Todas las misiones completadas!
+                            </p>
+                            <p className="text-xs font-sans mt-1 text-white/60">
+                                Regresa mañana para nuevas misiones de poder.
+                            </p>
+                        </motion.div>
+                    )}
 
-                <div className="space-y-4 relative">
-                    <AnimatePresence>
-                        {xpGained && (
-                            <motion.div
-                                key={xpGained.id}
-                                initial={{ opacity: 0, y: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, y: -20, scale: 1 }}
-                                exit={{ opacity: 0, y: -40 }}
-                                className="fixed top-24 right-6 bg-primary text-primary-foreground px-4 py-2 rounded-full font-sans font-bold text-sm shadow-lg z-50"
-                            >
-                                +{xpGained.amount} XP
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                    <div className="space-y-4 relative">
+                        <AnimatePresence>
+                            {xpGained && (
+                                <motion.div
+                                    key={xpGained.id}
+                                    initial={{ opacity: 0, y: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, y: -20, scale: 1 }}
+                                    exit={{ opacity: 0, y: -40 }}
+                                    className="fixed top-24 right-6 bg-violet-600 text-white px-4 py-2 rounded-full font-sans font-bold text-sm shadow-[0_0_20px_hsla(270,80%,50%,0.5)] z-50"
+                                >
+                                    +{xpGained.amount} XP
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                    {missions.map((mission) => (
-                        <MissionCard
-                            key={mission.id}
-                            mission={mission}
-                            onComplete={handleComplete}
-                            isCompleting={completing === mission.id}
-                        />
-                    ))}
-                    {missions.length < 3 && <MissionLocked />}
-                </div>
+                        {missions.map((mission) => (
+                            <MissionCard
+                                key={mission.id}
+                                mission={mission}
+                                onComplete={handleComplete}
+                                isCompleting={completing === mission.id}
+                            />
+                        ))}
+                        {missions.length < 3 && <MissionLocked />}
+                    </div>
 
-
-                <div className="mt-8 text-center">
-                    <Button variant="ghost" className="text-muted-foreground text-sm font-sans" onClick={() => navigate("/journal")}>
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        Abrir Diario de Sombras
-                    </Button>
+                    <div className="mt-12 text-center">
+                        <Button 
+                            variant="ghost" 
+                            className="text-white/40 hover:text-white/70 text-xs font-sans" 
+                            onClick={() => navigate("/journal")}
+                        >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Abrir Diario de Sombras
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </CosmicShell>
     );
 };
 

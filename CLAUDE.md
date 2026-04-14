@@ -212,7 +212,9 @@ cd supabase/functions
 - [x] Onboarding V2 + Register
 - [x] System Prompt Maestro (archetypes, numerology, prompts, calculate-blueprint, chat-coach → Claude)
 - [x] Multi-provider AI (Claude primary / OpenAI fallback, admin-configurable)
+- [x] Admin Command Center (Telemetry, AI Auditing, PLG Trial Overrides)
 - [ ] TWA audit (Digital Asset Links, manifest, Lighthouse >90)
 - [ ] n8n calculation engine (5 base numbers, 100% precision)
+- [ ] Automated Retention Flows (n8n hooks for trial expiration)
 - [ ] Branch strategy (main=prod, develop=features)
 - [ ] Update README

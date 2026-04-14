@@ -69,157 +69,165 @@ const Synchronicity = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background px-6 py-12 pb-32">
-            <div className="max-w-4xl mx-auto">
-                {/* Header */}
-                <button
-                    onClick={() => navigate("/dashboard")}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-12 text-sm font-sans"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    Volver al Dashboard
-                </button>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-12"
-                >
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                            <Sparkles className="h-6 w-6 text-primary" />
-                        </div>
-                        <p className="text-sm uppercase tracking-[0.3em] text-bronze font-sans">
-                            Consultas de Sincronicidad
-                        </p>
-                    </div>
-                    <h1 className="text-4xl md:text-5xl font-serif font-semibold text-gradient-silver mb-6">
-                        El lenguaje del Caos Ordenado
-                    </h1>
-                    <p className="text-muted-foreground font-sans text-lg max-w-2xl leading-relaxed">
-                        Describe ese número repetido, coincidencia extraña o evento inusual. Arithmos lo analizará bajo tu frecuencia personal.
-                    </p>
-                </motion.div>
-
-                {/* Input Section */}
-                {!result && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="glass rounded-2xl p-8 border-border mb-8 relative overflow-hidden"
+        <CosmicShell particles particlePalette="mixed">
+            <div className="min-h-screen pb-32 px-6 py-12 overflow-y-auto no-scrollbar">
+                <div className="max-w-4xl mx-auto">
+                    {/* Header */}
+                    <button
+                        onClick={() => navigate("/dashboard")}
+                        className="flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-12 text-sm font-sans"
                     >
-                        <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <Wind className="h-24 w-24 text-primary" />
+                        <ArrowLeft className="h-4 w-4" />
+                        Volver al Dashboard
+                    </button>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-12"
+                    >
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="p-3 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                                <Sparkles className="h-6 w-6 text-violet-400" />
+                            </div>
+                            <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-violet-400/80 font-sans">
+                                Consultas de Sincronicidad
+                            </p>
                         </div>
-
-                        <div className="relative z-10 space-y-6">
-                            {limitReached && (
-                                <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-500 font-sans text-sm">
-                                    <ShieldAlert className="h-5 w-5 shrink-0" />
-                                    Has alcanzado el límite de 3 consultas diarias. Vuelve en 24 horas.
-                                </div>
-                            )}
-
-                            <Textarea
-                                placeholder="Describe el evento sin preocuparte por los números..."
-                                className="min-h-[150px] bg-secondary/50 border-border font-sans text-lg focus:ring-primary/20"
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                disabled={limitReached}
-                            />
-
-                            <Button
-                                onClick={handleAnalyze}
-                                disabled={!description.trim() || isAnalyzing || limitReached}
-                                className={`w-full h-14 text-lg font-medium gap-2 ${limitReached ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'glow-indigo'}`}
-                            >
-                                {isAnalyzing ? (
-                                    <motion.div className="flex items-center gap-2">
-                                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        Sintonizando Frecuencia...
-                                    </motion.div>
-                                ) : (
-                                    <>
-                                        Analizar Sincronicidad
-                                        <Send className="h-5 w-5" />
-                                    </>
-                                )}
-                            </Button>
-                        </div>
+                        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                            El lenguaje del Caos Ordenado
+                        </h1>
+                        <p className="text-white/60 font-sans text-lg max-w-2xl leading-relaxed">
+                            Describe ese número repetido, coincidencia extraña o evento inusual. Arithmos lo analizará bajo tu frecuencia personal.
+                        </p>
                     </motion.div>
-                )}
 
-                {/* Results Section */}
-                <AnimatePresence>
-                    {result && (
+                    {/* Input Section */}
+                    {!result && (
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="space-y-8"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="cosmic-card p-8 mb-8 relative overflow-hidden"
                         >
-                            <div className="glass rounded-3xl p-10 border-primary/20 relative shadow-2xl">
-                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
-                                <h3 className="text-xl font-serif font-semibold mb-8 flex items-center gap-3 text-amber-400">
-                                    <Zap className="h-6 w-6" />
-                                    Revelación del Coach
-                                </h3>
-                                <p className="text-foreground/90 font-serif leading-relaxed text-xl italic border-l-4 border-amber-400/30 pl-8 mb-12">
-                                    "{result.analysis}"
-                                </p>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-8 border-t border-border/20">
-                                    <Gauge
-                                        value={result.significance}
-                                        label="Grado de Relevancia"
-                                        color="#818cf8"
-                                    />
-                                    <Gauge
-                                        value={result.influence}
-                                        label="Grado de Influencia"
-                                        color="#fbbf24"
-                                    />
-                                </div>
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <Wind className="h-24 w-24 text-violet-500" />
                             </div>
 
-                            <div className="grid md:grid-cols-1 gap-6">
-                                <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.5 }}
-                                    className="glass rounded-2xl p-8 border-emerald-500/20 bg-emerald-500/5 flex items-start gap-6"
-                                >
-                                    <div className="p-3 rounded-full bg-emerald-500/20">
-                                        <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                            <div className="relative z-10 space-y-6">
+                                {limitReached && (
+                                    <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-400 font-sans text-sm">
+                                        <ShieldAlert className="h-5 w-5 shrink-0" />
+                                        Has alcanzado el límite de 3 consultas diarias. Vuelve en 24 horas.
                                     </div>
-                                    <div>
-                                        <h4 className="text-sm font-sans font-bold uppercase tracking-widest text-emerald-400 mb-2">
-                                            Paso Táctico Sugerido
-                                        </h4>
-                                        <p className="text-foreground/80 font-sans text-lg leading-relaxed">
-                                            {result.actionStep}
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            </div>
+                                )}
 
-                            <div className="flex justify-center pt-8">
+                                <Textarea
+                                    placeholder="Describe el evento sin preocuparte por los números..."
+                                    className="min-h-[150px] bg-white/5 border-white/10 font-sans text-lg focus:ring-violet-500/20 text-white rounded-2xl"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    disabled={limitReached}
+                                />
+
                                 <Button
-                                    variant="ghost"
-                                    onClick={() => {
-                                        reset();
-                                        setDescription("");
+                                    onClick={handleAnalyze}
+                                    disabled={!description.trim() || isAnalyzing || limitReached}
+                                    className="w-full h-14 text-lg font-bold rounded-2xl"
+                                    style={{
+                                        background: limitReached ? "hsl(260 10% 20%)" : "linear-gradient(135deg, hsl(270 80% 65%), hsl(310 80% 60%))",
+                                        color: "white",
+                                        fontFamily: "var(--cosm-font-display)"
                                     }}
-                                    className="text-muted-foreground hover:text-foreground gap-2"
                                 >
-                                    Realizar otra consulta
+                                    {isAnalyzing ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Sintonizando...
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            Analizar Sincronicidad
+                                            <Send className="h-5 w-5" />
+                                        </div>
+                                    )}
                                 </Button>
                             </div>
                         </motion.div>
                     )}
-                </AnimatePresence>
+
+                    {/* Results Section */}
+                    <AnimatePresence>
+                        {result && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="space-y-8"
+                            >
+                                <div className="cosmic-card p-10 relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
+                                    <h3 className="text-xl font-bold mb-8 flex items-center gap-3 text-amber-400" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                                        <Zap className="h-6 w-6" />
+                                        Revelación del Coach
+                                    </h3>
+                                    <p className="text-white/90 font-serif leading-relaxed text-xl italic border-l-4 border-amber-400/30 pl-8 mb-12">
+                                        "{result.analysis}"
+                                    </p>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-8 border-t border-white/10">
+                                        <Gauge
+                                            value={result.significance}
+                                            label="Grado de Relevancia"
+                                            color="hsl(270 80% 70%)"
+                                        />
+                                        <Gauge
+                                            value={result.influence}
+                                            label="Grado de Influencia"
+                                            color="hsl(45 90% 65%)"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid md:grid-cols-1 gap-6">
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.5 }}
+                                        className="cosmic-card p-8 border-green-500/20 bg-green-500/5 flex items-start gap-6"
+                                    >
+                                        <div className="p-3 rounded-full bg-green-500/20">
+                                            <CheckCircle2 className="h-6 w-6 text-green-400" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-[10px] font-sans font-bold uppercase tracking-widest text-green-400 mb-2">
+                                                Paso Táctico Sugerido
+                                            </h4>
+                                            <p className="text-white/80 font-sans text-lg leading-relaxed">
+                                                {result.actionStep}
+                                            </p>
+                                        </div>
+                                    </motion.div>
+                                </div>
+
+                                <div className="flex justify-center pt-8">
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => {
+                                            reset();
+                                            setDescription("");
+                                        }}
+                                        className="text-white/30 hover:text-white/60 gap-2 text-xs font-bold tracking-widest uppercase"
+                                    >
+                                        Realizar otra consulta
+                                    </Button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
-        </div>
+        </CosmicShell>
+    );
     );
 };
 

@@ -42,7 +42,7 @@ export default function CosmicCompatibility() {
     }
   };
 
-  const calculateCompatibility = () => {
+  const handleCompatibilityCalc = () => {
     if (!partnerName.trim() || partnerDate.length !== 10) return;
     setAnalyzing(true);
 
@@ -173,7 +173,7 @@ export default function CosmicCompatibility() {
 
                 <motion.button
                   whileTap={{ scale: 0.97 }}
-                  onClick={calculateCompatibility}
+                  onClick={handleCompatibilityCalc}
                   disabled={analyzing || !partnerName.trim() || partnerDate.length !== 10}
                   className="w-full py-4 rounded-xl font-bold flex items-center justify-center"
                   style={{
