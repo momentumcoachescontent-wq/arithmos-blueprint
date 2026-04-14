@@ -12,7 +12,8 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const CosmicDashboard = lazy(() => import("./pages/CosmicDashboard"));
 const CosmicOnboarding = lazy(() => import("./pages/CosmicOnboarding"));
 const Missions = lazy(() => import("./pages/Missions"));
-const Journal = lazy(() => import("./pages/Journal"));
+const CosmicJournal = lazy(() => import("./pages/CosmicJournal"));
+const CosmicCompatibility = lazy(() => import("./pages/CosmicCompatibility"));
 const Ranking = lazy(() => import("./pages/Ranking"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Synchronicity = lazy(() => import("./pages/Synchronicity"));
@@ -45,7 +46,8 @@ const App = () => (
             <Route path="/cosmic" element={<CosmicDashboard />} />
             <Route path="/dashboard" element={<CosmicDashboard />} />
             <Route path="/missions" element={<Missions />} />
-            <Route path="/journal" element={<Journal />} />
+            <Route path="/journal" element={<CosmicJournal />} />
+            <Route path="/compatibility" element={<CosmicCompatibility />} />
             <Route path="/ranking" element={<Ranking />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/synchronicity" element={<Synchronicity />} />

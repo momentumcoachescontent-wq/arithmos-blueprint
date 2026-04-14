@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useStats } from "@/hooks/useStats";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useStreak } from "@/hooks/useStreak";
+import { useCosmicStreak } from "@/hooks/useCosmicStreak";
 import { CosmicShell, CosmicBottomNav, type CosmicNavItem } from "@/ui/CosmicShell";
 import { CosmicFeed } from "@/features/cosmic-feed/CosmicFeedView";
 import { TarotSpreadsView } from "@/features/tarot/TarotSpreadsView";
@@ -198,7 +198,8 @@ function CosmicYoTab({
       {/* Quick links */}
       <div className="space-y-2">
         {[
-          { label: "Diario", icon: "📓", route: "/journal" },
+          { label: "Diario Cósmico", icon: "📓", route: "/journal" },
+          { label: "Compatibilidad", icon: "💞", route: "/compatibility" },
           { label: "Configuración", icon: "⚙️", route: "/settings" },
           { label: "Coach IA", icon: "🧠", route: "/coach" },
         ].map((link) => (
@@ -252,7 +253,7 @@ const CosmicDashboard = () => {
   const { profile, fetchProfile } = useProfile();
   const { stats, fetchStats, awardXp } = useStats(user?.id);
   const { isPremium, isTrialExpired } = useSubscription(user?.id);
-  const { streak } = useStreak(user?.id);
+  const { streak, checkin } = useCosmicStreak(user?.id);
 
   const initialized = useRef(false);
 
@@ -278,6 +279,7 @@ const CosmicDashboard = () => {
         const p = await fetchProfile(user.id);
         if (!p) navigate("/register");
         await fetchStats(user.id);
+        await checkin();
       };
       init();
       initialized.current = true;
@@ -336,7 +338,7 @@ const CosmicDashboard = () => {
               <CosmicYoTab
                 profile={profile}
                 stats={stats}
-                streak={streak}
+                streak={streak.currentStreak}
                 logout={logout}
               />
             )}
