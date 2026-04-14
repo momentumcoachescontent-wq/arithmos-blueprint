@@ -14,6 +14,7 @@ const CosmicOnboarding = lazy(() => import("./pages/CosmicOnboarding"));
 const Missions = lazy(() => import("./pages/Missions"));
 const CosmicJournal = lazy(() => import("./pages/CosmicJournal"));
 const CosmicCompatibility = lazy(() => import("./pages/CosmicCompatibility"));
+const CosmicRadar = lazy(() => import("./pages/CosmicRadar"));
 const Ranking = lazy(() => import("./pages/Ranking"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Synchronicity = lazy(() => import("./pages/Synchronicity"));
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/missions" element={<Missions />} />
             <Route path="/journal" element={<CosmicJournal />} />
             <Route path="/compatibility" element={<CosmicCompatibility />} />
+            <Route path="/radar" element={<CosmicRadar />} />
             <Route path="/ranking" element={<Ranking />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/synchronicity" element={<Synchronicity />} />

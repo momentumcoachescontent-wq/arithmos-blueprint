@@ -27,6 +27,9 @@ export interface Profile {
   sunSign?: string;
   moonSign?: string;
   risingSign?: string;
+  // Social V4 fields
+  isPublic?: boolean;
+  bio?: string;
 }
 
 export const ARCHETYPES: Record<number, { name: string; description: string }> = {
@@ -167,6 +170,9 @@ export function useProfile() {
         sunSign: data.sun_sign ?? undefined,
         moonSign: data.moon_sign ?? undefined,
         risingSign: data.rising_sign ?? undefined,
+        // Social V4
+        isPublic: data.is_public ?? false,
+        bio: data.bio ?? undefined,
       };
 
       // Auto-repair missing computed numbers

@@ -199,7 +199,8 @@ function CosmicYoTab({
       <div className="space-y-2">
         {[
           { label: "Diario Cósmico", icon: "📓", route: "/journal" },
-          { label: "Compatibilidad", icon: "💞", route: "/compatibility" },
+          { label: "Compatibilidad (1 a 1)", icon: "💞", route: "/compatibility" },
+          { label: "Radar Cósmico (Social)", icon: "📡", route: "/radar" },
           { label: "Configuración", icon: "⚙️", route: "/settings" },
           { label: "Coach IA", icon: "🧠", route: "/coach" },
         ].map((link) => (
