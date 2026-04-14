@@ -69,8 +69,8 @@ CREATE POLICY "Users can insert compatibility readings"
   ON public.compatibility_readings FOR INSERT
   WITH CHECK ((SELECT auth.uid()) = user_a);
 
--- 4. Extender journal_entries con cosmic tracking
-ALTER TABLE public.journal_entries
+-- 4. Extender diary_entries con cosmic tracking
+ALTER TABLE public.diary_entries
   ADD COLUMN IF NOT EXISTS mood TEXT,
   ADD COLUMN IF NOT EXISTS cosmic_mood TEXT,
   ADD COLUMN IF NOT EXISTS tags TEXT[],
