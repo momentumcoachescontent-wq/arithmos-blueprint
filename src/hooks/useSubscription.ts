@@ -25,24 +25,52 @@ export function useSubscription(userId?: string) {
   const { config } = useAppConfig();
 
   const fetchSubscription = useCallback(async (uid: string) => {
-    const { data, error } = await supabase
+    setIsLoading(true);
+    // 1. Try to fetch explicit subscription record first
+    const { data: subData, error: subError } = await supabase
       .from('subscriptions')
       .select('*')
       .eq('user_id', uid)
       .single();
 
-    if (data && !error) {
+    if (subData && !subError) {
       const sub: Subscription = {
-        plan: data.plan as Plan,
-        trialStartedAt: data.trial_started_at,
-        trialEndsAt: data.trial_ends_at,
-        subscriptionStartedAt: data.subscription_started_at ?? undefined,
-        subscriptionEndsAt: data.subscription_ends_at ?? undefined,
-        provider: data.provider as "stripe" | "mercadopago" | undefined,
+        plan: subData.plan as Plan,
+        trialStartedAt: subData.trial_started_at,
+        trialEndsAt: subData.trial_ends_at,
+        subscriptionStartedAt: subData.subscription_started_at ?? undefined,
+        subscriptionEndsAt: subData.subscription_ends_at ?? undefined,
+        provider: subData.provider as "stripe" | "mercadopago" | undefined,
       };
       setSubscription(sub);
+      setIsLoading(false);
       return sub;
     }
+
+    // 2. PLG HOOK: If no subscription exists, calculate 45 day implicit trial from profile created_at
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('created_at')
+      .eq('user_id', uid)
+      .single();
+    
+    if (profile?.created_at) {
+       const createdDate = new Date(profile.created_at);
+       const endsAtDate = new Date(createdDate.getTime() + 45 * 24 * 60 * 60 * 1000); // +45 Days
+       
+       const implicitPlan: Plan = new Date() > endsAtDate ? "freemium" : "trial";
+       
+       const implicitSub: Subscription = {
+          plan: implicitPlan,
+          trialStartedAt: createdDate.toISOString(),
+          trialEndsAt: endsAtDate.toISOString(),
+       };
+       setSubscription(implicitSub);
+       setIsLoading(false);
+       return implicitSub;
+    }
+
+    setIsLoading(false);
     return null;
   }, []);
 
@@ -57,7 +85,7 @@ export function useSubscription(userId?: string) {
 
   // true when trial has expired and user hasn't paid
   const isTrialExpired = subscription
-    ? subscription.plan === "trial" && new Date(subscription.trialEndsAt) < new Date()
+    ? subscription.plan === "freemium" || (subscription.plan === "trial" && new Date(subscription.trialEndsAt) < new Date())
     : false;
 
   // days remaining in trial (0 if expired or not on trial)
@@ -88,8 +116,8 @@ export function useSubscription(userId?: string) {
             userId,
             successUrl: `${window.location.origin}/dashboard?payment=success`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
-            amount: config.premium_price,
-            currency: config.premium_currency,
+            amount: config.premium_price || 7, // Default fallback
+            currency: config.premium_currency || "usd",
           },
         }
       );

@@ -27,10 +27,13 @@ const CoachChat = lazy(() => import("./pages/CoachChat"));
 const FrictionRadar = lazy(() => import("./pages/FrictionRadar"));
 const CalendarioNumerico = lazy(() => import("./pages/CalendarioNumerico"));
 const HorasDelDia = lazy(() => import("./pages/HorasDelDia"));
-const TarotReels = lazy(() => import("./features/tarot-reels/TarotReelsView"));
+const TarotReels = lazy(() => import("./features/tarot-reels/TarotReelsView").then(module => ({ default: module.TarotReelsView })));
+const Paywall = lazy(() => import("./pages/Paywall"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const DataDeletion = lazy(() => import("./pages/DataDeletion"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+
+import { SubscriptionBoundary } from "@/ui/SubscriptionBoundary";
 
 const queryClient = new QueryClient();
 
@@ -50,7 +53,11 @@ const App = () => (
             <Route path="/missions" element={<Missions />} />
             <Route path="/journal" element={<CosmicJournal />} />
             <Route path="/compatibility" element={<CosmicCompatibility />} />
-            <Route path="/radar" element={<CosmicRadar />} />
+            <Route path="/radar" element={
+              <SubscriptionBoundary>
+                <CosmicRadar />
+              </SubscriptionBoundary>
+            } />
             <Route path="/ranking" element={<Ranking />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/synchronicity" element={<Synchronicity />} />
@@ -59,7 +66,12 @@ const App = () => (
             <Route path="/deep-dive" element={<DeepDive />} />
             <Route path="/tribunal-poder" element={<TribunalPoder />} />
             <Route path="/evolucion" element={<Evolucion />} />
-            <Route path="/reels" element={<TarotReels />} />
+            <Route path="/reels" element={
+              <SubscriptionBoundary blurChildren={false}>
+                <TarotReels />
+              </SubscriptionBoundary>
+            } />
+            <Route path="/paywall" element={<Paywall />} />
             <Route path="/coach" element={<CoachChat />} />
             <Route path="/radar-friccion" element={<FrictionRadar />} />
             <Route path="/calendario" element={<CalendarioNumerico />} />
