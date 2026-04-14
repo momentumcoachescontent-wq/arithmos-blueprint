@@ -20,61 +20,27 @@ import { calculateNatalProfile } from "@/engines/astrology/natal-chart";
    TAB: MAPA — Profile + Natal Chart
    ============================================ */
 
-function CosmicMapaTab({ profile }: { profile: ReturnType<typeof useProfile>["profile"] }) {
-  if (!profile) return null;
-
-  const natal = useMemo(() => {
-    return calculateNatalProfile({ date: profile.birthDate });
-  }, [profile.birthDate]);
+function CosmicMapaTab({ profile }: { profile: NonNullable<ReturnType<typeof useProfile>["profile"]> }) {
+  const natal = useMemo(() => calculateNatalProfile(profile.birthDate), [profile.birthDate]);
 
   return (
-    <div className="px-4 py-6 space-y-4">
-      <div className="text-center mb-4">
+    <div className="px-4 py-8 space-y-10">
+      {/* Header Profile */}
+      <div className="text-center">
         <h1
-          className="text-xl font-bold"
-          style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(0 0% 95%)" }}
-        >
-          Tu Mapa Cósmico
-        </h1>
-        <p
-          className="text-xs mt-1"
-          style={{ fontFamily: "var(--cosm-font-body)", color: "hsl(260 8% 50%)" }}
+          className="text-4xl font-bold mb-2 lowercase italic"
+          style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(0 0% 98%)" }}
         >
           {profile.name}
-        </p>
+        </h1>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest font-bold text-violet-400">
+          ✨ {profile.archetype}
+        </div>
       </div>
 
-      {/* Big Three */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Sol", sign: natal.sunSign, color: "hsl(45 90% 60%)" },
-          { label: "Luna", sign: natal.moonSign, color: "hsl(270 80% 70%)" },
-          { label: "Ascendente", sign: natal.risingSign, color: "hsl(175 70% 55%)" },
-        ].map((item) => (
-          <div
-            key={item.label}
-            className="cosmic-card flex flex-col items-center p-4 text-center"
-          >
-            <span className="text-3xl mb-2">{item.sign.symbol}</span>
-            <span
-              className="text-xs font-semibold"
-              style={{ fontFamily: "var(--cosm-font-display)", color: item.color }}
-            >
-              {item.sign.nameEs}
-            </span>
-            <span
-              className="text-[10px] mt-0.5 uppercase tracking-wider"
-              style={{ color: "hsl(260 8% 45%)" }}
-            >
-              {item.label}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Cosmic Summary */}
+      {/* Astro Summary Card */}
       <div
-        className="cosmic-card p-4 text-sm leading-relaxed"
+        className="text-center italic text-sm leading-relaxed px-4"
         style={{
           fontFamily: "var(--cosm-font-body)",
           color: "hsl(260 10% 65%)",
@@ -129,7 +95,7 @@ function CosmicMapaTab({ profile }: { profile: ReturnType<typeof useProfile>["pr
 }
 
 /* ============================================
-   TAB: YO — Settings Hub
+   TAB: YO — Settings & Stats
    ============================================ */
 
 function CosmicYoTab({
@@ -328,7 +294,7 @@ const CosmicDashboard = () => {
   return (
     <CosmicShell particles particlePalette="mixed">
       {/* Scrollable content */}
-      <div className="pb-24 overflow-y-auto min-h-screen">
+      <div className="pb-24 overflow-y-auto min-h-screen no-scrollbar">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -337,16 +303,46 @@ const CosmicDashboard = () => {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
           >
-            {activeTab === "cosmos" && cosmicReading && (
-              <CosmicFeed reading={cosmicReading} />
+            {activeTab === "cosmos" && (
+              <div className="px-4 py-6 space-y-6">
+                {/* HERO CARD: TAROT REELS */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate("/reels")}
+                  className="w-full h-40 rounded-[32px] p-6 relative overflow-hidden text-left"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(270 80% 25%), hsl(310 80% 20%))",
+                    border: "1px solid hsla(270 80% 50% / 0.4)",
+                    boxShadow: "0 20px 40px -10px hsla(270 80% 50% / 0.3)",
+                  }}
+                >
+                  <div className="absolute top-0 right-0 p-4 text-4xl opacity-20">🎞️</div>
+                  <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl bg-pink-500/20"></div>
+
+                  <div className="relative z-10 flex flex-col h-full">
+                    <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-pink-300 mb-1">Nuevo · Viral</span>
+                    <h3 className="text-xl font-bold mb-2 leading-tight" style={{ fontFamily: "var(--cosm-font-display)", color: "white" }}>
+                      Tu Destino en 15"
+                    </h3>
+                    <p className="text-xs text-white/60 mb-auto">Tarot interactivo en formato Reel.</p>
+                    <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-white tracking-widest">
+                      Ver ahora <span>✨</span>
+                    </div>
+                  </div>
+                </motion.button>
+
+                {cosmicReading && <CosmicFeed reading={cosmicReading} />}
+              </div>
             )}
+            
             {activeTab === "tarot" && <TarotSpreadsView />}
             {activeTab === "mapa" && <CosmicMapaTab profile={profile} />}
             {activeTab === "yo" && (
               <CosmicYoTab
                 profile={profile}
                 stats={stats}
-                streak={streak.currentStreak}
+                streak={streak}
                 logout={logout}
               />
             )}

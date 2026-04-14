@@ -27,6 +27,7 @@ const CoachChat = lazy(() => import("./pages/CoachChat"));
 const FrictionRadar = lazy(() => import("./pages/FrictionRadar"));
 const CalendarioNumerico = lazy(() => import("./pages/CalendarioNumerico"));
 const HorasDelDia = lazy(() => import("./pages/HorasDelDia"));
+const TarotReels = lazy(() => import("./features/tarot-reels/TarotReelsView"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const DataDeletion = lazy(() => import("./pages/DataDeletion"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/deep-dive" element={<DeepDive />} />
             <Route path="/tribunal-poder" element={<TribunalPoder />} />
             <Route path="/evolucion" element={<Evolucion />} />
+            <Route path="/reels" element={<TarotReels />} />
             <Route path="/coach" element={<CoachChat />} />
             <Route path="/radar-friccion" element={<FrictionRadar />} />
             <Route path="/calendario" element={<CalendarioNumerico />} />
