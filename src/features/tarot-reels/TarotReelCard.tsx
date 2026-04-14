@@ -5,6 +5,7 @@
  * Features: Cinematic animations, kinetic typography, and immersive visuals.
  */
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { type TarotReel } from "@/engines/tarot/reels-generator";
 
@@ -26,7 +27,56 @@ export function TarotReelCard({ reel, isActive }: Props) {
     }
   };
 
+  const getBaseFrequency = () => {
+    switch (reel.vibe) {
+      case "power": return 136.1; // OM frequency
+      case "warning": return 528; // Repair frequency
+      case "love": return 639; // Heart frequency
+      case "manifest": return 852; // Third eye frequency
+      default: return 432;
+    }
+  };
+
   const themeColor = getThemeColor();
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  useEffect(() => {
+    let osc: OscillatorNode | null = null;
+    let gain: GainNode | null = null;
+
+    if (isActive) {
+      const startAudio = async () => {
+        if (!audioCtxRef.current) {
+           audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
+        await audioCtxRef.current.resume();
+
+        osc = audioCtxRef.current.createOscillator();
+        gain = audioCtxRef.current.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(getBaseFrequency(), audioCtxRef.current.currentTime);
+        
+        gain.gain.setValueAtTime(0, audioCtxRef.current.currentTime);
+        gain.gain.setTargetAtTime(0.05, audioCtxRef.current.currentTime, 1); // Subtle volume
+
+        osc.connect(gain);
+        gain.connect(audioCtxRef.current.destination);
+        osc.start();
+      };
+      
+      // We only start if the user interacts (browsers block auto-play until interaction)
+      // This will play when the user scrolls and touches the screen.
+      startAudio().catch(() => {});
+    }
+
+    return () => {
+      if (gain && audioCtxRef.current) {
+         gain.gain.setTargetAtTime(0, audioCtxRef.current.currentTime, 0.5);
+         setTimeout(() => { if (osc) { osc.stop(); osc.disconnect(); } }, 500);
+      }
+    };
+  }, [isActive, reel.vibe]);
 
   return (
     <div className="relative h-full w-full overflow-hidden flex flex-col items-center justify-center p-6 bg-black">

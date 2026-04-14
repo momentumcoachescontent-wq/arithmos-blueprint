@@ -11,7 +11,9 @@ import { CosmicShell, CosmicBottomNav, type CosmicNavItem } from "@/ui/CosmicShe
 import { CosmicFeed } from "@/features/cosmic-feed/CosmicFeedView";
 import { TarotSpreadsView } from "@/features/tarot/TarotSpreadsView";
 import { generateCosmicDay } from "@/engines/cosmic-feed";
+import { getDailyTransits } from "@/engines/astrology/transits";
 import { CosmicNotifications } from "@/features/match/CosmicNotifications";
+import { ZenAudioPlayer } from "@/features/zen-player/ZenAudioPlayer";
 import { ARCHETYPES } from "@/hooks/useProfile";
 
 import { calculateNatalProfile } from "@/engines/astrology/natal-chart";
@@ -270,6 +272,8 @@ const CosmicDashboard = () => {
     );
   }, [user, profile]);
 
+  const dailyTransits = useMemo(() => getDailyTransits(), []);
+
   // Loading state
   if (!user || !profile || !stats) {
     return (
@@ -331,6 +335,27 @@ const CosmicDashboard = () => {
                     </div>
                   </div>
                 </motion.button>
+
+                {/* ZEN AUDIO PLAYER */}
+                <ZenAudioPlayer />
+
+                {/* TRANSITOS DEL DÍA */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold tracking-widest uppercase text-white/50 px-2">Clima Astral de Hoy</h3>
+                  <div className="grid gap-3">
+                    {dailyTransits.map((transit, idx) => (
+                      <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-4 items-start">
+                        <div className="text-2xl mt-1">{transit.emoji}</div>
+                        <div>
+                          <h4 className="text-sm font-bold text-white mb-1" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                            {transit.planet} en {transit.sign}
+                          </h4>
+                          <p className="text-xs text-white/70 leading-relaxed font-sans">{transit.message}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
                 {cosmicReading && <CosmicFeed reading={cosmicReading} />}
               </div>
