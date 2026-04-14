@@ -6,8 +6,8 @@
  * holistic daily reading with actionable cosmic guidance.
  */
 
-import { calculateSunSign, calculateMoonSign, type ZodiacSign } from "../astrology/natal-chart";
-import { getDailyCard, type DrawnCard } from "../tarot/deck";
+import { calculateSunSign, calculateMoonSign, type ZodiacSign } from "@/engines/astrology/natal-chart";
+import { getDailyCard, type DrawnCard } from "@/engines/tarot/deck";
 import {
   reduceToSingleDigitOrMaster,
   ARCHETYPES,

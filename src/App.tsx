@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-// Arithmos AI Strategist - Production Build v1.2.7
+// Arithmos V3 Cosmic — Production Build
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Register from "./pages/Register";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const CosmicDashboard = lazy(() => import("./pages/CosmicDashboard"));
 const Missions = lazy(() => import("./pages/Missions"));
 const Journal = lazy(() => import("./pages/Journal"));
 const Ranking = lazy(() => import("./pages/Ranking"));
@@ -39,8 +40,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/onboarding" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/onboarding" element={<Navigate to="/cosmic" replace />} />
+            <Route path="/cosmic" element={<CosmicDashboard />} />
+            <Route path="/dashboard" element={<CosmicDashboard />} />
             <Route path="/missions" element={<Missions />} />
             <Route path="/journal" element={<Journal />} />
             <Route path="/ranking" element={<Ranking />} />
