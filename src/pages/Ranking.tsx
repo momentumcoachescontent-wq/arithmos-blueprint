@@ -104,7 +104,7 @@ const Ranking = () => {
             <header className="px-6 py-4">
                 <div className="max-w-2xl mx-auto flex items-center justify-between opacity-80">
                     <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 text-white hover:text-white/70 text-sm font-sans transition-colors">
-                        <ArrowLeft className="h-4 w-4" /> Volver
+                        <ArrowLeft className="h-4 w-4" /> Retroceder
                     </button>
                     <span className="text-[10px] tracking-widest uppercase text-white/50 font-bold">Gamificación Local</span>
                 </div>

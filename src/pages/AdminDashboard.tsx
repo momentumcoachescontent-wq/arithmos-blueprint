@@ -103,11 +103,11 @@ const AdminDashboard = () => {
                 notes: dbError ? dbError.message : 'Conexión estable con PostgreSQL'
             };
 
-            // 2. Check Stripe Config (Con fallback seguro)
-            const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY || "pk_live_51LDzMqGdhRtIc6ULYspd91Q7x6Ys26s4si31edRIPLHe9UwDtcifvx9XaD0Pkp5xuIJxJZZjKUFcq5xWL04PVFcH0004oH7hHf";
+            // 2. Check Stripe Config
+            const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
             results.stripe = {
                 status: !!stripeKey ? 'ok' : 'error',
-                notes: stripeKey ? 'Llaves cargadas (vía env o fallback estratégico)' : 'Falta VITE_STRIPE_PUBLIC_KEY en variables de entorno'
+                notes: stripeKey ? 'Llaves cargadas vía env' : 'Falta VITE_STRIPE_PUBLIC_KEY en variables de entorno'
             };
 
             // 3. Check Edge Functions (attempt a ping to chat-coach or similar)

@@ -264,7 +264,7 @@ export default function FrictionRadar() {
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
-                if (!silent) toast.error("Debes iniciar sesión para guardar en tu historial.");
+                if (!silent) toast.error("Conexión perdida. Debes iniciar sesión para anclar esto en tus registros.");
                 return;
             }
 
@@ -288,7 +288,7 @@ export default function FrictionRadar() {
             if (!silent) toast.success("Resultado guardado en tu historial evolutivo.");
         } catch (err) {
             console.error("Error saving diagnostic:", err);
-            if (!silent) toast.error("Error al guardar el diagnóstico.");
+            if (!silent) toast.error("Interferencia al anclar la visión.");
         }
     };
 
@@ -517,7 +517,7 @@ export default function FrictionRadar() {
                                             onClick={() => handleSave(false)}
                                             className="text-xs text-muted-foreground hover:text-white transition-colors"
                                         >
-                                            Guardar en mi historial
+                                            Hacer Registro Kármico
                                         </button>
                                         <div className="w-1 h-1 bg-muted-foreground/30 rounded-full" />
                                         <button

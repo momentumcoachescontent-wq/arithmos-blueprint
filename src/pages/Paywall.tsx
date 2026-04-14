@@ -23,7 +23,7 @@ export default function Paywall() {
 
       <header className="w-full max-w-lg mx-auto px-6 py-6 relative z-10 flex items-center justify-between">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-white/50 hover:text-white text-sm font-sans font-bold uppercase tracking-widest transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Volver
+            <ArrowLeft className="h-4 w-4" /> Retroceder
         </button>
       </header>
 

@@ -275,17 +275,17 @@ export function useProfile() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-      const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook/arithmos-calculate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ full_name: profile.name, birth_date: profile.birthDate }),
-        signal: controller.signal
+      const { data: responseData, error: functionError } = await supabase.functions.invoke('n8n-bridge', {
+        body: {
+            route: 'arithmos-calculate',
+            payload: { full_name: profile.name, birth_date: profile.birthDate }
+        }
       });
 
       clearTimeout(timeoutId);
 
-      if (response.ok) {
-        let data = await response.json();
+      if (!functionError) {
+        let data = responseData;
         if (Array.isArray(data)) data = data[0];
 
         if (data && data.success && data.interpretation) {

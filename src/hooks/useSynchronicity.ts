@@ -53,15 +53,14 @@ export function useSynchronicity(userId?: string) {
         setResult(null);
 
         try {
-            const response = await fetch("https://n8n-n8n.z3tydl.easypanel.host/webhook/arithmos-synchronicity", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: userId, description })
+            const { data, error: functionError } = await supabase.functions.invoke('n8n-bridge', {
+                body: { 
+                    route: 'arithmos-synchronicity',
+                    payload: { user_id: userId, description }
+                }
             });
 
-            if (!response.ok) throw new Error("Error en el servidor de IA");
-
-            const data = await response.json();
+            if (functionError) throw new Error("Error en el servidor de IA");
 
             const newResult: SynchronicityResult = {
                 analysis: data.analysis || "El universo susurra a través de este evento, sugiriendo un alineamiento con tu propósito actual.",

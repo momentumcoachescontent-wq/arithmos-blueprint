@@ -119,7 +119,7 @@ const DeepDive = () => {
                 sessionStorage.setItem('deepDiveUrl', data.url);
                 sessionStorage.setItem('deepDiveRequested', 'true');
                 toast.success("¡Reporte generado!", {
-                    description: "Tu Deep Dive Anual se ha abierto en una nueva pestaña. Usa Ctrl+P → Guardar como PDF.",
+                    description: "Tu Blueprint Anual se ha materializado en una nueva ventana. Presiona Ctrl+P → Guardar como PDF.",
                     duration: 8000,
                 });
                 // Caso 2: HTML directo (fallback sin Storage)
@@ -135,7 +135,7 @@ const DeepDive = () => {
                 // Limpiar el blob URL después de 5 minutos
                 setTimeout(() => URL.revokeObjectURL(blobUrl), 300000);
                 toast.success("¡Reporte generado!", {
-                    description: "Tu Deep Dive Anual se ha abierto en una nueva pestaña. Usa Ctrl+P → Guardar como PDF.",
+                    description: "Tu Blueprint Anual se ha materializado en una nueva ventana. Presiona Ctrl+P → Guardar como PDF.",
                     duration: 8000,
                 });
             } else {
@@ -162,7 +162,7 @@ const DeepDive = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-10">
                     <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-sans">
-                        <ArrowLeft className="h-4 w-4" /> Volver
+                        <ArrowLeft className="h-4 w-4" /> Retroceder
                     </button>
                     <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-sans font-bold uppercase tracking-widest border border-emerald-500/20">
                         <FileText className="h-3 w-3" /> Deep Dive Pro
@@ -247,7 +247,7 @@ const DeepDive = () => {
                                     <h3 className="text-xl font-serif font-semibold text-foreground">¡Reporte Generado!</h3>
                                     <p className="text-muted-foreground font-sans text-sm max-w-sm mx-auto">
                                         Tu Deep Dive Anual se ha abierto en una nueva pestaña.
-                                        Usa <strong className="text-foreground">Ctrl+P → Guardar como PDF</strong> para conservarlo.
+                                        Presiona <strong className="text-foreground">Ctrl+P → Guardar como PDF</strong> para materializarlo.
                                     </p>
                                     <div className="flex gap-3 justify-center flex-wrap">
                                         {downloadUrl && (

@@ -362,7 +362,7 @@ const CosmicJournal = () => {
                       border: "none",
                     }}
                   >
-                    {isSaving ? "Guardando..." : "Guardar ✨"}
+                    {isSaving ? "Codificando..." : "Sellar en el Cosmos ✨"}
                   </motion.button>
                   <button
                     onClick={() => { setIsWriting(false); setTitle(""); setContent(""); setSelectedMood(null); setSelectedTags([]); }}
@@ -374,7 +374,7 @@ const CosmicJournal = () => {
                       border: "1px solid hsla(270 60% 40% / 0.2)",
                     }}
                   >
-                    Cancelar
+                    Descartar Visión
                   </button>
                 </div>
               </motion.div>
@@ -384,7 +384,7 @@ const CosmicJournal = () => {
           {/* Entry list */}
           {isLoading ? (
             <p className="text-center text-sm" style={{ color: "hsl(260 10% 45%)", fontFamily: "var(--cosm-font-body)" }}>
-              Cargando tus páginas...
+              Sintonizando Frecuencias...
             </p>
           ) : entries.length === 0 ? (
             <div className="text-center py-16 space-y-3">

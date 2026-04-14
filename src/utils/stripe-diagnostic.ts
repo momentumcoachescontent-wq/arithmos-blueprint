@@ -8,8 +8,8 @@ async function runDiagnostic() {
     console.log("🚀 Iniciando diagnóstico...");
 
     // 1. Validar variables de entorno front
-    const publicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY || "pk_live_... (hardcoded)";
-    const priceId = import.meta.env.VITE_STRIPE_PRICE_ID || "price_... (hardcoded)";
+    const publicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+    const priceId = import.meta.env.VITE_STRIPE_PRICE_ID;
 
     console.log("------- [1. Frontend Env] -------");
     console.log("VITE_STRIPE_PUBLIC_KEY:", publicKey ? "✅ Presente" : "❌ Faltante");
