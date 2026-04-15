@@ -549,4 +549,3 @@ export default function FrictionRadar() {
         </CosmicShell>
     );
 };
-}
