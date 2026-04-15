@@ -263,6 +263,5 @@ export function TarotReelCard({ reel, isActive }: Props) {
         </p>
       </div>
     </div>
-    </div>
   );
 }
