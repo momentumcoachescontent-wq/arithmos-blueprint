@@ -1,10 +1,5 @@
-/**
- * Arithmos V3 — Tarot Engine
- * 
- * Complete 78-card Rider-Waite-Smith deck with Major and Minor Arcana.
- * Each card includes upright and reversed meanings, element, planet/sign
- * association, and keywords for AI prompt enrichment.
- */
+import { hashString } from "@/lib/utils";
+import { generateSynthesis } from "./synthesizer";
 
 export interface TarotCard {
   id: number;
@@ -37,6 +32,7 @@ export interface TarotReading {
   spread: SpreadType;
   cards: DrawnCard[];
   timestamp: string;
+  synthesis?: string;
 }
 
 export interface DrawnCard {
@@ -400,7 +396,7 @@ export function performReading(spreadType: SpreadType): TarotReading {
   const spread = SPREADS[spreadType];
   const drawn = drawCards(spread.positions.length);
 
-  return {
+  const reading: TarotReading = {
     spread: spreadType,
     cards: drawn.map((d, i) => ({
       ...d,
@@ -408,6 +404,9 @@ export function performReading(spreadType: SpreadType): TarotReading {
     })),
     timestamp: new Date().toISOString(),
   };
+
+  reading.synthesis = generateSynthesis(reading);
+  return reading;
 }
 
 /**

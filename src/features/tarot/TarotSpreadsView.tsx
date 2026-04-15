@@ -112,12 +112,44 @@ function TarotCardVisual({
 function ReadingInterpretation({ reading }: { reading: TarotReading }) {
   return (
     <motion.div
-      className="space-y-3 mt-4"
+      className="space-y-4 mt-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.5 }}
     >
-      {reading.cards.map((drawn, i) => (
+      {/* Síntesis Global V3.3 */}
+      {reading.synthesis && (
+        <CosmicCard 
+          padding="md" 
+          glow="violet" 
+          className="border-violet-500/30 bg-gradient-to-br from-violet-500/10 to-transparent"
+        >
+          <div className="flex items-start gap-3">
+             <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center text-xl flex-shrink-0">
+               ✨
+             </div>
+             <div>
+                <h3 
+                  className="text-sm font-bold mb-1.5 uppercase tracking-widest text-violet-200"
+                  style={{ fontFamily: "var(--cosm-font-display)" }}
+                >
+                  Síntesis Cósmica
+                </h3>
+                <p 
+                  className="text-sm leading-relaxed text-white/90 italic" 
+                  style={{ fontFamily: "var(--cosm-font-display)" }}
+                >
+                  {reading.synthesis}
+                </p>
+             </div>
+          </div>
+        </CosmicCard>
+      )}
+
+      <div className="h-px w-full bg-white/5 my-2" />
+      
+      <div className="space-y-3">
+        {reading.cards.map((drawn, i) => (
         <CosmicCard key={i} padding="sm" glow="none">
           <div className="flex items-start gap-2">
             <span className="text-lg mt-0.5">{drawn.card.emoji}</span>
@@ -145,7 +177,8 @@ function ReadingInterpretation({ reading }: { reading: TarotReading }) {
             </div>
           </div>
         </CosmicCard>
-      ))}
+        ))}
+      </div>
     </motion.div>
   );
 }
