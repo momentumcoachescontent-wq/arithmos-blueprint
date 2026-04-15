@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getChineseZodiac } from "@/lib/chinese-zodiac";
