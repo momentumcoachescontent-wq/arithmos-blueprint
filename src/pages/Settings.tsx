@@ -214,11 +214,11 @@ const Settings = () => {
             <header className="border-b border-border px-6 py-4 sticky top-0 z-10 bg-background/80 backdrop-blur">
                 <div className="max-w-2xl mx-auto flex items-center justify-between">
                     <button
-                        onClick={() => navigate("/dashboard")}
+                        onClick={() => navigate("/inicio")}
                         className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm font-sans"
                     >
                         <ArrowLeft className="h-4 w-4" />
-                        Dashboard
+                        Inicio
                     </button>
                     <span className="font-serif text-foreground">Configuración</span>
                     <div className="w-24" />
@@ -313,7 +313,7 @@ const Settings = () => {
                                         Sin email — cuenta anónima.{" "}
                                         <button
                                             className="text-primary underline-offset-2 hover:underline"
-                                            onClick={() => navigate("/onboarding?register=true")}
+                                            onClick={() => navigate("/registro")}
                                         >
                                             Registrarse
                                         </button>
@@ -337,7 +337,7 @@ const Settings = () => {
                         <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-sm font-sans text-amber-300 space-y-2">
                             <p className="font-semibold">⚠️ Cuenta Anónima</p>
                             <p>Tus datos están solo en este dispositivo. Regístrate para protegerlos y acceder desde cualquier lugar.</p>
-                            <Button size="sm" variant="outline" className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10" onClick={() => navigate("/onboarding?register=true")}>
+                            <Button size="sm" variant="outline" className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10" onClick={() => navigate("/registro")}>
                                 Crear Cuenta Real →
                             </Button>
                         </div>

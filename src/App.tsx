@@ -54,7 +54,9 @@ const App = () => (
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/register" element={<Navigate to="/registro" replace />} />
             <Route path="/registro" element={<Register />} />
+            <Route path="/dashboard" element={<Navigate to="/inicio" replace />} />
             <Route path="/bienvenida" element={<CosmicOnboarding />} />
             <Route path="/inicio" element={<CosmicDashboard />} />
             <Route path="/misiones" element={<Missions />} />

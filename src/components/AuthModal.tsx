@@ -32,7 +32,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       await loginWithEmail(email, password);
       onClose();
-      navigate("/dashboard");
+      navigate("/inicio");
     } catch (err: any) {
       if (err.message?.includes("Invalid login")) {
         setError("Email o contraseña incorrectos.");
@@ -165,7 +165,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     className="text-primary hover:underline"
                     onClick={() => {
                       onClose();
-                      navigate("/register");
+                      navigate("/registro");
                     }}
                   >
                     Crear una gratis →

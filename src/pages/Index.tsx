@@ -69,7 +69,7 @@ export default function Index() {
           className="flex flex-col items-center gap-6"
         >
           <Link
-            to="/register"
+            to="/registro"
             className="group relative flex items-center gap-3 px-10 py-5 bg-white text-black font-bold rounded-2xl hover:bg-violet-400 hover:text-white transition-all duration-300 shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)]"
           >
             Descubrir mi Esencia

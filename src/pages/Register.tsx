@@ -102,7 +102,7 @@ export default function Register() {
   };
 
   if (pageState === "aha" && ahaData) {
-    return <AhaMoment {...ahaData} onContinue={() => navigate("/dashboard")} />;
+    return <AhaMoment {...ahaData} onContinue={() => navigate("/inicio")} />;
   }
 
   return (
