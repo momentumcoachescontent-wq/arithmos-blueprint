@@ -12,6 +12,7 @@
 - **Cosmic Engine (Fase 3)**:
     - `TarotReelsView`: Scroll vertical snap-scroll para micro-lecturas.
     - `find-matches`: Algoritmo de afinidad basado en Camino de Vida y Signos.
+    - `CosmicCoordinates`: Captura de Hora y Lugar de nacimiento (Coordenadas exactas para natal chart).
 
 ## 3. Capa Social y Datos (V5)
 - **Schema `cosmic_interactions`**: 
@@ -24,6 +25,7 @@
 - **Palette**: `#0D0C14` (Night), Gold, Violet, Teal.
 - **Typography**: Georgia (Display) + Sans (UI).
 - **Interface**: Glassmorphism extremo, micro-animaciones (Framer Motion), feedback háptico simulado (vibes de audio en Reels).
+- **Onboarding V3.2**: Flujo multi-paso (Identidad -> Coordenadas) diseñado para alta conversión y captura de datos de valor.
 
 ## 5. Modelo de Negocio (PLG)
 - **Reverse Trial**: Acceso total por 14-30 días -> Freemium degradado.

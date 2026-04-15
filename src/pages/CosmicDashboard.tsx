@@ -167,6 +167,51 @@ function CosmicFrecuenciasTab({
         </div>
       </div>
 
+      {/* Horóscopo Chino V3.1 */}
+      {profile.chineseSign && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-3"
+        >
+          <h2
+            className="text-sm font-semibold px-1"
+            style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(0 0% 90%)" }}
+          >
+            Esencia Oriental
+          </h2>
+          <div className="cosmic-card p-4 flex items-center gap-4 border-violet-500/20 bg-gradient-to-br from-violet-500/10 to-transparent">
+            <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-violet-500/10 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+              {profile.chineseSign === "Dragón" ? "🐉" : 
+               profile.chineseSign === "Tigre" ? "🐅" : 
+               profile.chineseSign === "Rata" ? "🐀" : 
+               profile.chineseSign === "Buey" ? "🐂" : 
+               profile.chineseSign === "Conejo" ? "🐇" : 
+               profile.chineseSign === "Serpiente" ? "🐍" : 
+               profile.chineseSign === "Caballo" ? "🐎" : 
+               profile.chineseSign === "Cabra" ? "🐐" : 
+               profile.chineseSign === "Mono" ? "🐒" : 
+               profile.chineseSign === "Gallo" ? "🐓" : 
+               profile.chineseSign === "Perro" ? "🐕" : "🐖"}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-sm font-bold text-white font-serif">
+                  {profile.chineseSign} de {profile.chineseElement}
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-bold uppercase tracking-tighter">
+                  {profile.chineseVibe}
+                </span>
+              </div>
+              <p className="text-[11px] text-white/50 font-sans leading-tight">
+                Vibras de {profile.chineseElement.toLowerCase()} con el espíritu del {profile.chineseSign.toLowerCase()}.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Divisor */}
       <div
         className="h-px w-full"

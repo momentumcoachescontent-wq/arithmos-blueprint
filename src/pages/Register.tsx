@@ -15,6 +15,8 @@ interface AhaData {
   lifePathNumber: number;
   archetype: string;
   archetypeDescription: string;
+  chineseSign?: string;
+  chineseElement?: string;
 }
 
 export default function Register() {
@@ -92,6 +94,8 @@ export default function Register() {
         lifePathNumber: profile.lifePathNumber,
         archetype: profile.archetype,
         archetypeDescription: profile.description,
+        chineseSign: profile.chineseSign,
+        chineseElement: profile.chineseElement,
       });
       setPageState("aha");
     } catch (err: any) {

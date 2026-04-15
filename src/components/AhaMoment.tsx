@@ -2,10 +2,12 @@ interface AhaMomentProps {
   lifePathNumber: number;
   archetype: string;
   archetypeDescription: string;
+  chineseSign?: string;
+  chineseElement?: string;
   onContinue: () => void;
 }
 
-export function AhaMoment({ lifePathNumber, archetype, archetypeDescription, onContinue }: AhaMomentProps) {
+export function AhaMoment({ lifePathNumber, archetype, archetypeDescription, chineseSign, chineseElement, onContinue }: AhaMomentProps) {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative"
@@ -66,6 +68,28 @@ export function AhaMoment({ lifePathNumber, archetype, archetypeDescription, onC
         >
           {archetypeDescription}
         </p>
+
+        {chineseSign && (
+          <div className="mt-4 flex flex-col items-center gap-1 opacity-80 scale-90">
+            <span className="text-[9px] uppercase tracking-widest text-[#B8860B]">Y tu Guardia Oriental</span>
+            <div className="flex items-center gap-2">
+               <span className="text-xl">
+                 {chineseSign === "Dragón" ? "🐉" : 
+                  chineseSign === "Tigre" ? "🐅" : 
+                  chineseSign === "Rata" ? "🐀" : 
+                  chineseSign === "Buey" ? "🐂" : 
+                  chineseSign === "Conejo" ? "🐇" : 
+                  chineseSign === "Serpiente" ? "🐍" : 
+                  chineseSign === "Caballo" ? "🐎" : 
+                  chineseSign === "Cabra" ? "🐐" : 
+                  chineseSign === "Mono" ? "🐒" : 
+                  chineseSign === "Gallo" ? "🐓" : 
+                  chineseSign === "Perro" ? "🐕" : "🐖"}
+               </span>
+               <span className="text-sm font-serif italic text-white/70">{chineseSign} de {chineseElement}</span>
+            </div>
+          </div>
+        )}
 
         <button
           onClick={onContinue}
