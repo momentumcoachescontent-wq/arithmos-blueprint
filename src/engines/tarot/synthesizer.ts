@@ -45,10 +45,10 @@ function buildTimelineSynthesis(cards: DrawnCard[], isKarmic: boolean, element?:
     : "Tu línea emocional muestra un flujo claro de causa y efecto. ";
 
   let elementInsight = "";
-  if (element === "fire") elementInsight = "El fuego domina tu camino, indicando que el cambio vendrá a través de la pasión y la acción directa. ";
-  if (element === "water") elementInsight = "El predominio del agua sugiere que este ciclo es sanador y profundamente intuitivo. ";
-  if (element === "air") elementInsight = "El aire indica que la claridad mental y la verdad serán tus mejores herramientas. ";
-  if (element === "earth") elementInsight = "La tierra estabiliza tu lectura, sugiriendo que los resultados serán tangibles y sólidos. ";
+  if (element === "fuego") elementInsight = "El fuego domina tu camino, indicando que el cambio vendrá a través de la pasión y la acción directa. ";
+  if (element === "agua") elementInsight = "El predominio del agua sugiere que este ciclo es sanador y profundamente intuitivo. ";
+  if (element === "aire") elementInsight = "El aire indica que la claridad mental y la verdad serán tus mejores herramientas. ";
+  if (element === "tierra") elementInsight = "La tierra estabiliza tu lectura, sugiriendo que los resultados serán tangibles y sólidos. ";
 
   return `${intro}${elementInsight}Lo que dejaste atrás con ${past.card.nameEs} ha forjado la vibración de ${present.card.nameEs} que experimentas hoy. La clave está en transmutar esta energía para recibir el regalo de ${future.card.nameEs} que el universo abre ante ti.`;
 }
