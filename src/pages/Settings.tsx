@@ -20,6 +20,8 @@ import {
     Zap,
     Loader2,
     Trash2,
+    Clock,
+    MapPin,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
