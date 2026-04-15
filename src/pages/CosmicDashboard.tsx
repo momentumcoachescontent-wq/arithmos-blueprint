@@ -44,6 +44,24 @@ function CosmosTab({
           Clima Astral de Hoy
         </h3>
         <div className="grid gap-3">
+          {/* Acción Cósmica Integrada (Solicitado por el usuario) */}
+          {cosmicReading && (
+            <div className="bg-violet-500/10 border border-violet-500/20 rounded-2xl p-4 flex gap-4 items-start shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+              <div className="text-2xl mt-1">{cosmicReading.cosmicAction.emoji}</div>
+              <div>
+                <h4 className="text-sm font-bold text-violet-200 mb-1" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                  Acción Cósmica: {cosmicReading.cosmicAction.title}
+                </h4>
+                <p className="text-xs text-white/80 leading-relaxed font-sans italic">
+                  "{cosmicReading.cosmicAction.description}"
+                </p>
+                <div className="flex items-center gap-1 mt-2 text-[10px] text-violet-400 font-bold uppercase tracking-widest">
+                  <span>⏱️ {cosmicReading.cosmicAction.duration}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {dailyTransits.map((transit, idx) => (
             <div
               key={idx}
@@ -82,19 +100,19 @@ function CosmosTab({
         <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl bg-pink-500/20" />
         <div className="relative z-10 flex flex-col h-full">
           <p className="text-xs font-sans font-semibold text-primary uppercase tracking-wider mb-1">
-            Comparte tu Destino
+            Contenido Viral
           </p>
           <h3
             className="text-xl font-bold mb-1 leading-tight"
             style={{ fontFamily: "var(--cosm-font-display)", color: "white" }}
           >
-            Poderes de Tu Esencia
+            Tarot que Conecta
           </h3>
           <p className="text-xs text-white/80 mb-auto leading-snug">
-            Reels especiales creados para compartir lo que el Tarot te depara.
+            Genera Reels especiales para compartir tu destino en redes y vibrar con tu comunidad.
           </p>
           <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-white tracking-widest">
-            Entrar ahora <span>✨</span>
+            Crear Reel para Compartir ✨
           </div>
         </div>
       </motion.button>
@@ -148,12 +166,12 @@ function CosmicFrecuenciasTab({
         </h2>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { label: "Camino de Vida", value: profile.lifePathNumber, emoji: "🛤️", desc: "Tu propósito fundamental" },
-            { label: "Expresión", value: profile.expressionNumber, emoji: "🗣️", desc: "Tus talentos naturales" },
-            { label: "Impulso del Alma", value: profile.soulUrgeNumber, emoji: "💫", desc: "Tus deseos más profundos" },
-            { label: "Personalidad", value: profile.personalityNumber, emoji: "🎭", desc: "Tu imagen ante el mundo" },
+            { label: "Camino de Vida", value: profile.lifePathNumber, emoji: "🛤️", desc: "Define tu propósito central y la misión que viniste a cumplir en esta encarnación." },
+            { label: "Expresión", value: profile.expressionNumber, emoji: "🗣️", desc: "Tus talentos naturales y la forma en que el mundo percibe tus capacidades." },
+            { label: "Impulso del Alma", value: profile.soulUrgeNumber, emoji: "💫", desc: "Lo que realmente motiva a tu corazón silenciosamente; tus deseos más profundos." },
+            { label: "Personalidad", value: profile.personalityNumber, emoji: "🎭", desc: "Tu máscara externa y la primera impresión que proyectas hacia los demás." },
           ].map((num) => (
-            <div key={num.label} className="cosmic-card flex flex-col p-3">
+            <div key={num.label} className="cosmic-card flex flex-col p-3 border-white/5 bg-white/[0.02]">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">{num.emoji}</span>
                 <span
@@ -163,7 +181,7 @@ function CosmicFrecuenciasTab({
                   {num.value || "—"}
                 </span>
               </div>
-              <p className="text-[10px] font-bold text-white/80" style={{ fontFamily: "var(--cosm-font-display)" }}>
+              <p className="text-[10px] font-bold text-violet-200/80 mb-1" style={{ fontFamily: "var(--cosm-font-display)" }}>
                 {num.label}
               </p>
               <p className="text-[9px] leading-tight text-white/40 italic">
@@ -222,15 +240,7 @@ function CosmicFrecuenciasTab({
             { label: "Tu Evolución", icon: "📈", route: "/evolucion", desc: "Historial y progreso" },
             { label: "Radar de Equipo", icon: "👥", route: "/radar-equipo", desc: "Sinergia colectiva" },
           ].map((link) => (
-             link.special === "action" ? (
-               <div key="action" className="rounded-2xl p-4 border border-violet-500/30 bg-violet-500/5 mb-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">✨</span>
-                    <span className="text-xs font-bold uppercase tracking-widest text-violet-200">Acción Cósmica Hoy</span>
-                  </div>
-                  <p className="text-xs text-white/80 leading-snug italic">"{profile.archetype}": Usa tu energía para manifestar.</p>
-               </div>
-             ) : link.special === "zen" ? (
+             link.special === "action" ? null : link.special === "zen" ? (
                <button
                  key="zen"
                  onClick={() => window.dispatchEvent(new CustomEvent('toggle-zen-player'))}

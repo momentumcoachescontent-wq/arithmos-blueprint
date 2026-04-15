@@ -421,7 +421,7 @@ const Settings = () => {
                 <Section title="Comunidad" icon={User}>
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-sans text-foreground">Aparecer en el Tribunal de Poder</p>
+                            <p className="text-sm font-sans text-foreground">Aparecer en el Ranking de Poder</p>
                             <p className="text-xs text-muted-foreground font-sans">
                                 Tu nombre y XP serán visibles en el ranking comunitario
                             </p>

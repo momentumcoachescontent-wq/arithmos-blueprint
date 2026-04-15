@@ -51,24 +51,27 @@ export function generateDailyReels(count: number = 5): TarotReel[] {
       // Primera carta: El ancla
       hook = "Esto inicia tu viaje de hoy.";
       interpretation = `${meaning} Esta energía es tu punto de partida.`;
+  } else {
+    // Cartas subsiguientes: La relación
+    const prevName = prevDrawn.card.nameEs;
+    
+    // Lógica de transición
+    if (drawn.card.element === prevDrawn.card.element) {
+      hook = `La fuerza de ${prevName} se intensifica.`;
+      interpretation = `Esa energía de ${drawn.card.element} que sentiste antes se vuelve pura acción ahora. ${meaning}`;
+    } else if (drawn.reversed && !prevDrawn.reversed) {
+      hook = "Cuidado, aquí hay un giro.";
+      interpretation = `Veníamos con fluidez, pero ahora ${drawn.card.nameEs} nos pide frenar. ${meaning}`;
     } else {
-      // Cartas subsiguientes: La relación
-      const prevName = prevDrawn.card.nameEs;
-      
-      // Lógica de transición
-      if (drawn.card.element === prevDrawn.card.element) {
-        hook = `La fuerza de ${prevName} se intensifica.`;
-        interpretation = `Esa energía de ${drawn.card.element} que sentiste antes se vuelve pura acción ahora. ${meaning}`;
-      } else if (drawn.reversed && !prevDrawn.reversed) {
-        hook = "Cuidado, aquí hay un giro.";
-        interpretation = `Veníamos con fluidez, pero ahora ${drawn.card.nameEs} nos pide frenar. ${meaning}`;
-      } else {
-        hook = `¿Ves cómo se conecta con ${prevName}?`;
-        interpretation = `No puedes avanzar sin integrar lo anterior. ${meaning} El equilibrio está ahí.`;
-      }
+      hook = `¿Ves cómo se conecta con ${prevName}?`;
+      interpretation = `No puedes avanzar sin integrar lo anterior. ${meaning} El equilibrio está ahí.`;
     }
+  }
 
-    reels.push({
+  // Leyenda del portal para viralidad
+  interpretation += " [https://arithmos-blueprint.lovable.app]";
+
+  reels.push({
       id: `reel-${i}-${Date.now()}`,
       card: drawn,
       title,
