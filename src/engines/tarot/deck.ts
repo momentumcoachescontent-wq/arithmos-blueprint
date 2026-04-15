@@ -82,7 +82,9 @@ export const SPREADS: Record<SpreadType, TarotSpread> = {
    MAJOR ARCANA (22 cards)
    ============================================ */
 
-export const MAJOR_ARCANA: Ta    id: 0, name: "The Fool", nameEs: "El Loco",
+export const MAJOR_ARCANA: TarotCard[] = [
+  {
+    id: 0, name: "The Fool", nameEs: "El Loco",
     arcana: "major", association: "Urano", element: "aire",
     keywords: ["new beginnings", "freedom", "innocence"],
     keywordsEs: ["nuevos comienzos", "libertad", "inocencia"],
@@ -278,11 +280,15 @@ export const MAJOR_ARCANA: Ta    id: 0, name: "The Fool", nameEs: "El Loco",
     meaningUpright: "Ciclo completo. Has llegado. Celebra antes de empezar el siguiente nivel.",
     meaningReversed: "Casi llegas pero algo falta. Revisa qué hilo suelto no has cerrado.",
     emoji: "🌍",
-  },mpleto. Has llegado. Celebra antes de empezar el siguiente nivel.",
-    meaningReversed: "Casi llegas pero algo falta. Revisa qué hilo suelto no has cerrado.",
-    emoji: "🌍",
   },
 ];
+
+const COURT_NAMES = {
+  11: { en: "Page", es: "Sota" },
+  12: { en: "Knight", es: "Caballero" },
+  13: { en: "Queen", es: "Reina" },
+  14: { en: "King", es: "Rey" },
+};
 
 /* ============================================
    MINOR ARCANA GENERATOR
