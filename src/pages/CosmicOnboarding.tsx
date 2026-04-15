@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { calculateLifePath, calculateNameValue, reduceToSingleDigitOrMaster, ARCHETYPES } from "@/hooks/useProfile";
 import { calculateNatalProfile } from "@/engines/astrology/natal-chart";
 import { CosmicShell } from "@/ui/CosmicShell";
+import { CitySearch } from "@/components/CitySearch";
 
 /* ============================================================
    STEP CONFIG
@@ -443,21 +444,26 @@ export default function CosmicOnboarding() {
                       </>
                     )}
                     {currentStep.id === "birth-place" && (
-                      <>
-                        <CosmicInput
-                          label="Ciudad de nacimiento (opcional)"
+                      <div className="space-y-4">
+                        <label
+                          className="block text-xs font-medium mb-1 uppercase tracking-widest text-center"
+                          style={{ color: "hsl(270 60% 65%)", fontFamily: "var(--cosm-font-display)" }}
+                        >
+                          Ciudad de nacimiento (opcional)
+                        </label>
+                        <CitySearch
                           value={birthPlace}
-                          onChange={setBirthPlace}
+                          onChange={(val) => setBirthPlace(val)}
                           placeholder="Ej: Ciudad de México"
-                          autoFocus
+                          className="max-w-md mx-auto"
                         />
-                        <p
+                         <p
                           className="text-xs text-center"
                           style={{ color: "hsl(260 8% 42%)", fontFamily: "var(--cosm-font-body)" }}
                         >
                           Esto permite afinar tu ascendente ✨
                         </p>
-                      </>
+                      </div>
                     )}
                   </div>
 

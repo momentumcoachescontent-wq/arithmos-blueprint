@@ -348,6 +348,91 @@ export function useProfile() {
     return null;
   }, [profile]);
 
-  return { profile, createProfile, fetchProfile, syncBlueprintIA };
+  const updateProfile = useCallback(async (updates: Partial<Profile>) => {
+    if (!profile?.userId) {
+      console.warn("No hay perfil cargado para actualizar.");
+      return null;
+    }
+
+    setSaving(true);
+    try {
+      // 1. Mapeo de campos de frontend a base de datos (snake_case)
+      const dbUpdates: any = {
+        updated_at: new Date().toISOString()
+      };
+
+      if (updates.name !== undefined) dbUpdates.name = updates.name;
+      if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+      if (updates.birthDate !== undefined) dbUpdates.birth_date = updates.birthDate;
+      if (updates.birthTime !== undefined) dbUpdates.birth_time = updates.birthTime;
+      if (updates.birthPlace !== undefined) dbUpdates.birth_place = updates.birthPlace;
+      if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
+      if (updates.isPublic !== undefined) dbUpdates.is_public = updates.isPublic;
+
+      // 2. Si cambian datos base (nombre/nacimiento), recalculamos blueprint
+      let finalProfileData = { ...profile, ...updates };
+
+      if (updates.name || updates.birthDate) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const authToken = session?.access_token || SUPABASE_PUBLISHABLE_KEY;
+
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/calculate-blueprint`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authToken}`
+          },
+          body: JSON.stringify({
+            name: updates.name || profile.name,
+            birthDate: updates.birthDate || profile.birthDate
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          dbUpdates.life_path_number = result.lifePathNumber;
+          dbUpdates.expression_number = result.expressionNumber;
+          dbUpdates.soul_urge_number = result.soulUrgeNumber;
+          dbUpdates.personality_number = result.personalityNumber;
+          dbUpdates.archetype = result.archetype;
+          dbUpdates.archetype_description = result.archetypeDescription;
+
+          finalProfileData = {
+            ...finalProfileData,
+            lifePathNumber: result.lifePathNumber,
+            expressionNumber: result.expressionNumber,
+            soulUrgeNumber: result.soulUrgeNumber,
+            personalityNumber: result.personalityNumber,
+            archetype: result.archetype,
+            description: result.archetypeDescription
+          };
+        }
+      }
+
+      // 3. Persistir en Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update(dbUpdates)
+        .eq('user_id', profile.userId);
+
+      if (error) throw error;
+
+      // 4. Actualizar estado local y caché
+      setProfile(finalProfileData);
+      sessionStorage.setItem("arithmos_profile", JSON.stringify(finalProfileData));
+      
+      return finalProfileData;
+    } catch (error: any) {
+      console.error("Error en updateProfile:", error.message);
+      toast.error("No se pudo actualizar el perfil.");
+      throw error;
+    } finally {
+      setSaving(false);
+    }
+  }, [profile]);
+
+  const [saving, setSaving] = useState(false);
+
+  return { profile, createProfile, fetchProfile, syncBlueprintIA, updateProfile, saving };
 }
 

@@ -35,6 +35,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { CitySearch } from "@/components/CitySearch";
 import { useStats } from "@/hooks/useStats";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -76,7 +77,7 @@ const Feedback = ({ message, type }: { message: string; type: "ok" | "err" }) =>
 const Settings = () => {
     const navigate = useNavigate();
     const { user, isAuthenticated, logout } = useAuth();
-    const { profile, createProfile } = useProfile();
+    const { profile, updateProfile, saving: savingProfile } = useProfile();
     const { stats, fetchStats, toggleRanking } = useStats(user?.id);
     const { redirectToCheckout, redirectToPortal, isLoading: stripeLoading, isPremium: subIsPremium, isTrialExpired } = useSubscription(user?.id);
     const isPremium = profile?.role === 'admin' || (subIsPremium && !isTrialExpired);
@@ -88,7 +89,6 @@ const Settings = () => {
     const [birthTime, setBirthTime] = useState("");
     const [birthPlace, setBirthPlace] = useState("");
     const [profileStatus, setProfileStatus] = useState<{ message: string; type: "ok" | "err" } | null>(null);
-    const [savingProfile, setSavingProfile] = useState(false);
 
     useEffect(() => {
         if (profile) {
@@ -145,16 +145,19 @@ const Settings = () => {
         if (!name.trim()) { setProfileStatus({ message: "El nombre es obligatorio.", type: "err" }); return; }
         if (!birthDate) { setProfileStatus({ message: "La fecha de nacimiento es obligatoria.", type: "err" }); return; }
 
-        setSavingProfile(true);
         try {
             const dateStr = format(birthDate, "yyyy-MM-dd");
-            await createProfile(name.trim(), dateStr, user?.id, phone.trim(), birthTime, birthPlace);
+            await updateProfile({
+                name: name.trim(),
+                phone: phone.trim(),
+                birthDate: dateStr,
+                birthTime,
+                birthPlace
+            });
             setProfileStatus({ message: "Perfil actualizado correctamente.", type: "ok" });
             setTimeout(() => setProfileStatus(null), 3000);
         } catch (err: any) {
             setProfileStatus({ message: err.message || "Error al actualizar perfil.", type: "err" });
-        } finally {
-            setSavingProfile(false);
         }
     };
 
@@ -298,11 +301,9 @@ const Settings = () => {
                                 <Label className="font-sans text-sm text-muted-foreground flex items-center gap-2">
                                     <MapPin className="h-3 w-3" /> Ciudad
                                 </Label>
-                                <Input
-                                    placeholder="Ej. CDMX"
+                                <CitySearch 
                                     value={birthPlace}
-                                    onChange={(e) => setBirthPlace(e.target.value)}
-                                    className="bg-secondary/50 border-border"
+                                    onChange={(val) => setBirthPlace(val)}
                                 />
                             </div>
                         </div>
