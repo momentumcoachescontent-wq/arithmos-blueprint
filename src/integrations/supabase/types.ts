@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       admin_health_checks: {
@@ -256,13 +231,143 @@ export type Database = {
         }
         Relationships: []
       }
+      compatibility_readings: {
+        Row: {
+          analysis: Json | null
+          astrology_score: number | null
+          created_at: string | null
+          id: string
+          numerology_score: number | null
+          overall_score: number | null
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          analysis?: Json | null
+          astrology_score?: number | null
+          created_at?: string | null
+          id?: string
+          numerology_score?: number | null
+          overall_score?: number | null
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          analysis?: Json | null
+          astrology_score?: number | null
+          created_at?: string | null
+          id?: string
+          numerology_score?: number | null
+          overall_score?: number | null
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compatibility_readings_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "compatibility_readings_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      cosmic_interactions: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_mutual: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_mutual?: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_mutual?: boolean | null
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cosmic_interactions_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "cosmic_interactions_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      cosmic_streaks: {
+        Row: {
+          current_streak: number | null
+          id: string
+          last_checkin_at: string | null
+          longest_streak: number | null
+          total_checkins: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number | null
+          id?: string
+          last_checkin_at?: string | null
+          longest_streak?: number | null
+          total_checkins?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          current_streak?: number | null
+          id?: string
+          last_checkin_at?: string | null
+          longest_streak?: number | null
+          total_checkins?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cosmic_streaks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       diary_entries: {
         Row: {
           ai_reflection: string | null
+          alignment_score: number | null
           content: string
+          cosmic_mood: string | null
           created_at: string | null
           id: string
+          mood: string | null
+          personal_day: number | null
           shadow_pattern: string | null
+          tags: string[] | null
           title: string
           type: string | null
           updated_at: string | null
@@ -271,10 +376,15 @@ export type Database = {
         }
         Insert: {
           ai_reflection?: string | null
+          alignment_score?: number | null
           content: string
+          cosmic_mood?: string | null
           created_at?: string | null
           id?: string
+          mood?: string | null
+          personal_day?: number | null
           shadow_pattern?: string | null
+          tags?: string[] | null
           title: string
           type?: string | null
           updated_at?: string | null
@@ -283,10 +393,15 @@ export type Database = {
         }
         Update: {
           ai_reflection?: string | null
+          alignment_score?: number | null
           content?: string
+          cosmic_mood?: string | null
           created_at?: string | null
           id?: string
+          mood?: string | null
+          personal_day?: number | null
           shadow_pattern?: string | null
+          tags?: string[] | null
           title?: string
           type?: string | null
           updated_at?: string | null
@@ -474,11 +589,18 @@ export type Database = {
           archetype: string
           archetype_description: string | null
           audio_url: string | null
+          bio: string | null
           birth_date: string
+          birth_place: string | null
+          birth_place_lat: number | null
+          birth_place_lng: number | null
+          birth_time: string | null
           created_at: string
           email: string | null
           expression_number: number | null
+          is_public: boolean | null
           life_path_number: number
+          moon_sign: string | null
           name: string
           narrative: string | null
           onboarding_completed_at: string | null
@@ -486,9 +608,11 @@ export type Database = {
           personality_number: number | null
           phone: string | null
           power_strategy: string | null
+          rising_sign: string | null
           role: string
           shadow_work: string | null
           soul_urge_number: number | null
+          sun_sign: string | null
           updated_at: string
           user_id: string
         }
@@ -496,11 +620,18 @@ export type Database = {
           archetype: string
           archetype_description?: string | null
           audio_url?: string | null
+          bio?: string | null
           birth_date: string
+          birth_place?: string | null
+          birth_place_lat?: number | null
+          birth_place_lng?: number | null
+          birth_time?: string | null
           created_at?: string
           email?: string | null
           expression_number?: number | null
+          is_public?: boolean | null
           life_path_number: number
+          moon_sign?: string | null
           name: string
           narrative?: string | null
           onboarding_completed_at?: string | null
@@ -508,9 +639,11 @@ export type Database = {
           personality_number?: number | null
           phone?: string | null
           power_strategy?: string | null
+          rising_sign?: string | null
           role?: string
           shadow_work?: string | null
           soul_urge_number?: number | null
+          sun_sign?: string | null
           updated_at?: string
           user_id: string
         }
@@ -518,11 +651,18 @@ export type Database = {
           archetype?: string
           archetype_description?: string | null
           audio_url?: string | null
+          bio?: string | null
           birth_date?: string
+          birth_place?: string | null
+          birth_place_lat?: number | null
+          birth_place_lng?: number | null
+          birth_time?: string | null
           created_at?: string
           email?: string | null
           expression_number?: number | null
+          is_public?: boolean | null
           life_path_number?: number
+          moon_sign?: string | null
           name?: string
           narrative?: string | null
           onboarding_completed_at?: string | null
@@ -530,9 +670,11 @@ export type Database = {
           personality_number?: number | null
           phone?: string | null
           power_strategy?: string | null
+          rising_sign?: string | null
           role?: string
           shadow_work?: string | null
           soul_urge_number?: number | null
+          sun_sign?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -738,6 +880,47 @@ export type Database = {
         }
         Relationships: []
       }
+      tarot_readings: {
+        Row: {
+          alignment_score: number | null
+          cards: Json
+          cosmic_mood: string | null
+          created_at: string | null
+          id: string
+          interpretation: string | null
+          spread_type: string
+          user_id: string
+        }
+        Insert: {
+          alignment_score?: number | null
+          cards: Json
+          cosmic_mood?: string | null
+          created_at?: string | null
+          id?: string
+          interpretation?: string | null
+          spread_type: string
+          user_id: string
+        }
+        Update: {
+          alignment_score?: number | null
+          cards?: Json
+          cosmic_mood?: string | null
+          created_at?: string | null
+          id?: string
+          interpretation?: string | null
+          spread_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarot_readings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           added_at: string
@@ -882,6 +1065,39 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      user_telemetry: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          event_name: string
+          id: string
+          metadata: Json | null
+          session_id: string | null
+          target_feature: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          event_name: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          target_feature?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          event_name?: string
+          id?: string
+          metadata?: Json | null
+          session_id?: string | null
+          target_feature?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -1029,9 +1245,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
