@@ -402,7 +402,6 @@ const Evolucion = () => {
             </div>
         </CosmicShell>
     );
-    );
 };
 
 export default Evolucion;
