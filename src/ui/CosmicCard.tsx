@@ -5,7 +5,7 @@ import { motion, type MotionProps } from "framer-motion";
    COSMIC CARD — Glass-morphic content container
    ============================================ */
 
-type GlowColor = "violet" | "gold" | "teal" | "magenta" | "none";
+type GlowColor = "violet" | "gold" | "teal" | "magenta" | "indigo" | "none";
 
 interface CosmicCardProps extends MotionProps {
   children: ReactNode;
@@ -37,6 +37,10 @@ const GLOW_MAP: Record<GlowColor, { border: string; shadow: string }> = {
   magenta: {
     border: "hsl(310 80% 60% / 0.4)",
     shadow: "0 0 30px -8px hsl(310 80% 60% / 0.25)",
+  },
+  indigo: {
+    border: "hsl(230 80% 65% / 0.4)",
+    shadow: "0 0 30px -8px hsl(230 80% 65% / 0.25)",
   },
   none: {
     border: "hsl(260 20% 100% / 0.1)",
@@ -114,7 +118,7 @@ CosmicCard.displayName = "CosmicCard";
 
 interface CosmicBadgeProps {
   children: ReactNode;
-  variant?: "violet" | "gold" | "teal" | "magenta" | "ghost";
+  variant?: "violet" | "gold" | "teal" | "magenta" | "indigo" | "ghost";
   size?: "sm" | "md";
   className?: string;
 }
@@ -139,6 +143,11 @@ const BADGE_VARIANTS = {
     bg: "hsl(310 80% 60% / 0.12)",
     text: "hsl(310 80% 70%)",
     border: "hsl(310 80% 60% / 0.2)",
+  },
+  indigo: {
+    bg: "hsl(230 80% 65% / 0.12)",
+    text: "hsl(230 80% 75%)",
+    border: "hsl(230 80% 65% / 0.2)",
   },
   ghost: {
     bg: "hsl(260 20% 100% / 0.05)",
@@ -252,6 +261,10 @@ const ICON_COLOR_MAP: Record<GlowColor, { bg: string; text: string }> = {
   magenta: {
     bg: "hsl(310 80% 60% / 0.15)",
     text: "hsl(310 80% 70%)",
+  },
+  indigo: {
+    bg: "hsl(230 80% 65% / 0.15)",
+    text: "hsl(230 80% 75%)",
   },
   none: {
     bg: "hsl(260 20% 100% / 0.06)",
