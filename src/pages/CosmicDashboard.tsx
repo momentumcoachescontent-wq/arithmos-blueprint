@@ -24,10 +24,12 @@ import { calculateNatalProfile } from "@/engines/astrology/natal-chart";
 function CosmosTab({
   cosmicReading,
   dailyTransits,
+  profile,
   navigate,
 }: {
   cosmicReading: ReturnType<typeof generateCosmicDay>;
   dailyTransits: ReturnType<typeof getDailyTransits>;
+  profile: any;
   navigate: ReturnType<typeof useNavigate>;
 }) {
   return (
@@ -36,12 +38,79 @@ function CosmosTab({
       {/* 1. DÍA CÓSMICO — primero porque es el insight personal */}
       {cosmicReading && <CosmicFeed reading={cosmicReading} />}
 
+      {/* 1.1 ESENCIA ORIENTAL (Movida de Frecuencias) */}
+      {profile.chineseSign && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="space-y-3"
+        >
+          <h2
+            className="text-sm font-bold tracking-widest uppercase text-white/50 px-2"
+          >
+            Esencia Oriental
+          </h2>
+          <div className="cosmic-card p-4 flex items-center gap-4 border-violet-500/20 bg-gradient-to-br from-violet-500/10 to-transparent">
+            <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-violet-500/10 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(139,92,246,0.1)]">
+              {profile.chineseSign === "Dragón" ? "🐉" : 
+               profile.chineseSign === "Tigre" ? "🐅" : 
+               profile.chineseSign === "Rata" ? "🐀" : 
+               profile.chineseSign === "Buey" ? "🐂" : 
+               profile.chineseSign === "Conejo" ? "🐇" : 
+               profile.chineseSign === "Serpiente" ? "🐍" : 
+               profile.chineseSign === "Caballo" ? "🐎" : 
+               profile.chineseSign === "Cabra" ? "🐐" : 
+               profile.chineseSign === "Mono" ? "🐒" : 
+               profile.chineseSign === "Gallo" ? "🐓" : 
+               profile.chineseSign === "Perro" ? "🐕" : "🐖"}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-bold text-white font-serif tracking-tight">
+                  {profile.chineseSign} de {profile.chineseElement}
+                </span>
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-violet-500/30 text-violet-200 font-bold uppercase tracking-tighter border border-violet-500/20">
+                  {profile.chineseVibe}
+                </span>
+              </div>
+              <p className="text-[12px] text-white/90 font-medium font-sans leading-tight mb-1">
+                {profile.chineseDailyGuide || "Tu esencia brilla con fuerza hoy."}
+              </p>
+              <p className="text-[10px] text-white/30 font-sans italic">
+                Energía de {profile.chineseElement.toLowerCase()} con el espíritu del {profile.chineseSign.toLowerCase()}.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* 2. CLIMA ASTRAL DEL DÍA */}
       <div className="space-y-3">
         <h3 className="text-sm font-bold tracking-widest uppercase text-white/50 px-2">
           Clima Astral de Hoy
         </h3>
         <div className="grid gap-3">
+          {/* Acción Cósmica Inyectada en el Clima Astral */}
+          {cosmicReading.cosmicAction && (
+            <div
+              className="rounded-2xl p-4 border border-violet-500/40 bg-gradient-to-br from-violet-500/20 to-transparent shadow-[0_0_20px_rgba(139,92,246,0.15)]"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl">{cosmicReading.cosmicAction.emoji}</span>
+                <h4 className="text-sm font-bold text-white uppercase tracking-wider" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                  Acción Cósmica: {cosmicReading.cosmicAction.title}
+                </h4>
+                <div className="ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full bg-violet-500/30 text-violet-100 uppercase">
+                  {cosmicReading.cosmicAction.duration}
+                </div>
+              </div>
+              <p className="text-sm text-white/90 leading-tight font-sans">
+                {cosmicReading.cosmicAction.description}
+              </p>
+            </div>
+          )}
+
           {dailyTransits.map((transit, idx) => (
             <div
               key={idx}
@@ -80,15 +149,17 @@ function CosmosTab({
         <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl bg-pink-500/20" />
         <div className="relative z-10 flex flex-col h-full">
           <p className="text-xs font-sans font-semibold text-primary uppercase tracking-wider mb-1">
-            Poderes de Tu Esencia
+            Comparte tu Destino
           </p>
           <h3
             className="text-xl font-bold mb-1 leading-tight"
             style={{ fontFamily: "var(--cosm-font-display)", color: "white" }}
           >
-            Tu Mensaje en Segundos
+            Poderes de Tu Esencia
           </h3>
-          <p className="text-xs text-white/60 mb-auto">Tarot que vibra contigo.</p>
+          <p className="text-xs text-white/80 mb-auto leading-snug">
+            Reels especiales creados para compartir lo que el Tarot te depara.
+          </p>
           <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-white tracking-widest">
             Entrar ahora <span>✨</span>
           </div>
@@ -167,50 +238,7 @@ function CosmicFrecuenciasTab({
         </div>
       </div>
 
-      {/* Horóscopo Chino V3.1 */}
-      {profile.chineseSign && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="space-y-3"
-        >
-          <h2
-            className="text-sm font-semibold px-1"
-            style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(0 0% 90%)" }}
-          >
-            Esencia Oriental
-          </h2>
-          <div className="cosmic-card p-4 flex items-center gap-4 border-violet-500/20 bg-gradient-to-br from-violet-500/10 to-transparent">
-            <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-violet-500/10 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(139,92,246,0.1)]">
-              {profile.chineseSign === "Dragón" ? "🐉" : 
-               profile.chineseSign === "Tigre" ? "🐅" : 
-               profile.chineseSign === "Rata" ? "🐀" : 
-               profile.chineseSign === "Buey" ? "🐂" : 
-               profile.chineseSign === "Conejo" ? "🐇" : 
-               profile.chineseSign === "Serpiente" ? "🐍" : 
-               profile.chineseSign === "Caballo" ? "🐎" : 
-               profile.chineseSign === "Cabra" ? "🐐" : 
-               profile.chineseSign === "Mono" ? "🐒" : 
-               profile.chineseSign === "Gallo" ? "🐓" : 
-               profile.chineseSign === "Perro" ? "🐕" : "🐖"}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-0.5">
-                <span className="text-sm font-bold text-white font-serif">
-                  {profile.chineseSign} de {profile.chineseElement}
-                </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-bold uppercase tracking-tighter">
-                  {profile.chineseVibe}
-                </span>
-              </div>
-              <p className="text-[11px] text-white/50 font-sans leading-tight">
-                Vibras de {profile.chineseElement.toLowerCase()} con el espíritu del {profile.chineseSign.toLowerCase()}.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      )}
+
 
       {/* Divisor */}
       <div
@@ -500,6 +528,7 @@ const CosmicDashboard = () => {
               <CosmosTab
                 cosmicReading={cosmicReading}
                 dailyTransits={dailyTransits}
+                profile={profile}
                 navigate={navigate}
               />
             )}

@@ -255,6 +255,14 @@ export function TarotReelCard({ reel, isActive }: Props) {
           <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Compartir</span>
         </button>
       </div>
+
+      {/* Portal Attribution Legend */}
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20 pointer-events-none opacity-30">
+        <p className="text-[9px] uppercase tracking-[0.4em] font-medium text-white/60">
+          arithmos-blueprint.lovable.app
+        </p>
+      </div>
+    </div>
     </div>
   );
 }

@@ -31,10 +31,11 @@ export interface Profile {
   // Social V4 fields
   isPublic?: boolean;
   bio?: string;
-  // Chinese Zodiac V3.1
+  // Chinese Zodiac V3.1+
   chineseSign?: string;
   chineseElement?: string;
   chineseVibe?: string;
+  chineseDailyGuide?: string;
 }
 
 export const ARCHETYPES: Record<number, { name: string; description: string }> = {
@@ -186,6 +187,7 @@ export function useProfile() {
         fetchedProfile.chineseSign = chinese.animal;
         fetchedProfile.chineseElement = chinese.element;
         fetchedProfile.chineseVibe = chinese.vibe;
+        fetchedProfile.chineseDailyGuide = chinese.dailyGuide;
       }
 
       // Auto-repair missing computed numbers
@@ -258,6 +260,7 @@ export function useProfile() {
     newProfile.chineseSign = chinese.animal;
     newProfile.chineseElement = chinese.element;
     newProfile.chineseVibe = chinese.vibe;
+    newProfile.chineseDailyGuide = chinese.dailyGuide;
 
     sessionStorage.setItem("arithmos_profile", JSON.stringify(newProfile));
     setProfile({ ...newProfile });

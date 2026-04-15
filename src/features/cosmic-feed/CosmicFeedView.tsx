@@ -214,59 +214,7 @@ function TarotSection({ data }: { data: CosmicDayReading["tarot"] }) {
   );
 }
 
-/* ============================================
-   COSMIC ACTION SECTION
-   ============================================ */
 
-function CosmicActionSection({ action }: { action: CosmicDayReading["cosmicAction"] }) {
-  return (
-    <motion.div
-      className="animate-fade-in-up stagger-4"
-      whileTap={{ scale: 0.97 }}
-    >
-      <div
-        className="rounded-2xl p-4 relative overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, hsl(270 80% 65% / 0.12), hsl(310 80% 60% / 0.08))",
-          border: "1px solid hsl(270 80% 65% / 0.2)",
-        }}
-      >
-        {/* Subtle glow */}
-        <div
-          className="absolute -top-10 -right-10 h-24 w-24 rounded-full"
-          style={{
-            background: "radial-gradient(circle, hsl(270 80% 65% / 0.15), transparent 70%)",
-          }}
-          aria-hidden="true"
-        />
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">{action.emoji}</span>
-            <h3
-              className="text-sm font-semibold"
-              style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(0 0% 95%)" }}
-            >
-              Acción Cósmica
-            </h3>
-            <CosmicBadge variant="ghost">{action.duration}</CosmicBadge>
-          </div>
-          <p
-            className="text-base font-medium mb-1"
-            style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(270 80% 80%)" }}
-          >
-            {action.title}
-          </p>
-          <p
-            className="text-sm"
-            style={{ fontFamily: "var(--cosm-font-body)", color: "hsl(260 10% 60%)" }}
-          >
-            {action.description}
-          </p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
 /* ============================================
    MAIN COSMIC FEED COMPONENT
@@ -309,9 +257,6 @@ export function CosmicFeed({ reading }: CosmicFeedProps) {
       <NumerologySection data={reading.numerology} />
       <AstrologySection data={reading.astrology} />
       <TarotSection data={reading.tarot} />
-
-      {/* Cosmic Action */}
-      <CosmicActionSection action={reading.cosmicAction} />
     </div>
   );
 }
