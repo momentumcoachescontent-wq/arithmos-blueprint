@@ -237,7 +237,9 @@ export function TarotSpreadsView() {
                     background: "hsl(270 80% 65% / 0.12)",
                   }}
                 >
-                  {spread.type === "past-present-future" ? "⏳" : spread.type === "love" ? "💞" : "🔮"}
+                  {spread.type === "past-present-future" ? "⏳" : 
+                   spread.type === "love" ? "💞" : 
+                   spread.type === "decision" ? "⚖️" : "🏥"}
                 </div>
                 <div className="flex-1">
                   <h3
@@ -289,8 +291,8 @@ export function TarotSpreadsView() {
         {allRevealed ? "Lectura completa ✨" : "Toca cada carta para revelarla"}
       </p>
 
-      {/* Cards layout */}
-      <div className="flex justify-center gap-4">
+      {/* Cards layout - Adapts to single row or grid for therapeutic spread */}
+      <div className={`grid ${reading.cards.length > 3 ? "grid-cols-3 gap-y-6" : "flex justify-center"} gap-x-2`}>
         {reading.cards.map((drawn, i) => (
           <TarotCardVisual
             key={i}

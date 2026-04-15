@@ -19,7 +19,7 @@ export interface TarotCard {
   emoji: string;
 }
 
-export type SpreadType = "daily" | "past-present-future" | "love" | "decision";
+export type SpreadType = "daily" | "past-present-future" | "love" | "decision" | "therapeutic";
 
 export interface TarotSpread {
   type: SpreadType;
@@ -69,6 +69,12 @@ export const SPREADS: Record<SpreadType, TarotSpread> = {
     nameEs: "Decisión Importante",
     positions: ["La situación actual", "Si eliges el camino A", "Si eliges el camino B"],
     description: "Ilumina las consecuencias energéticas de tus opciones.",
+  },
+  therapeutic: {
+    type: "therapeutic",
+    nameEs: "Tarot Terapéutico",
+    positions: ["Presente", "Bloqueo", "Raíz", "Consejo", "Entorno", "Potencial"],
+    description: "Análisis profundo de 6 cartas para sanar y evolucionar.",
   },
 };
 

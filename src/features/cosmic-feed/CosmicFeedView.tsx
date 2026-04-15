@@ -4,6 +4,7 @@ import { type CosmicDayReading } from "@/engines/cosmic-feed";
 
 interface CosmicFeedProps {
   reading: CosmicDayReading;
+  profile: any; // Using any for brevity, should ideally use Profile type
 }
 
 /* ============================================
@@ -214,13 +215,60 @@ function TarotSection({ data }: { data: CosmicDayReading["tarot"] }) {
   );
 }
 
+/* ============================================
+   CHINESE ZODIAC SECTION
+   ============================================ */
+
+function ChineseZodiacSection({ profile }: { profile: any }) {
+  if (!profile.chineseSign) return null;
+  
+  const getSymbol = (sign: string) => {
+    const map: Record<string, string> = {
+      "Dragón": "🐉", "Tigre": "🐅", "Rata": "🐀", "Buey": "🐂", 
+      "Conejo": "🐇", "Serpiente": "🐍", "Caballo": "🐎", "Cabra": "🐐", 
+      "Mono": "🐒", "Gallo": "🐓", "Perro": "🐕", "Cerdo": "🐖"
+    };
+    return map[sign] || "🧧";
+  };
+
+  return (
+    <CosmicCard glow="indigo" padding="md" className="animate-fade-in-up stagger-4">
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(79,70,229,0.1)] grayscale hover:grayscale-0 transition-all">
+          {getSymbol(profile.chineseSign)}
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3
+              className="text-sm font-semibold"
+              style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(0 0% 95%)" }}
+            >
+              Horóscopo Chino
+            </h3>
+            <CosmicBadge variant="indigo">
+              {profile.chineseSign} de {profile.chineseElement}
+            </CosmicBadge>
+          </div>
+          <p className="text-[12px] text-white/90 leading-tight mb-2">
+            {profile.chineseDailyGuide || "Tu esencia brilla con fuerza hoy."}
+          </p>
+          <div className="flex items-center justify-between text-[10px] text-white/40">
+            <span>Energía de {profile.chineseElement}</span>
+            <span className="uppercase tracking-widest font-bold">Año del Caballo de Fuego (2026)</span>
+          </div>
+        </div>
+      </div>
+    </CosmicCard>
+  );
+}
+
 
 
 /* ============================================
    MAIN COSMIC FEED COMPONENT
    ============================================ */
 
-export function CosmicFeed({ reading }: CosmicFeedProps) {
+export function CosmicFeed({ reading, profile }: CosmicFeedProps) {
   return (
     <div className="px-4 py-6 space-y-4">
       {/* Header */}
@@ -253,10 +301,11 @@ export function CosmicFeed({ reading }: CosmicFeedProps) {
         <AlignmentRing score={reading.alignmentScore} mood={reading.cosmicMood} />
       </div>
 
-      {/* Three systems */}
+      {/* Four systems */}
       <NumerologySection data={reading.numerology} />
       <AstrologySection data={reading.astrology} />
       <TarotSection data={reading.tarot} />
+      <ChineseZodiacSection profile={profile} />
     </div>
   );
 }

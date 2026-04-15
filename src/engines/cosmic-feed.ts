@@ -183,7 +183,10 @@ export function generateCosmicDay(
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
   const day = today.getDate();
+  const isPM = today.getHours() >= 12;
+  const periodId = isPM ? "pm" : "am";
   const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const seedStr = `${userId}-${dateStr}-${periodId}`;
 
   // --- NUMEROLOGY ---
   const personalYear = calculatePersonalYear(birthDate, year);
@@ -199,7 +202,8 @@ export function generateCosmicDay(
   const moonInsight = MOON_INSIGHTS[moonSign.element] || MOON_INSIGHTS.water;
 
   // --- TAROT ---
-  const dailyCard = getDailyCard(userId, today);
+  // Pasamos el today con la hora preservada o el seed modificado para 2 lecturas diarias
+  const dailyCard = getDailyCard(seedStr);
   const tarotInsight = dailyCard.reversed
     ? dailyCard.card.meaningReversed
     : dailyCard.card.meaningUpright;

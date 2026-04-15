@@ -1,5 +1,5 @@
 import { useMemo, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Zap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,10 +15,9 @@ function reduce(n: number): number {
   return cur;
 }
 
-function personalDayToday(birthDate: string): number {
-  const today = new Date();
+function personalDayAtDate(birthDate: string, date: Date): number {
   const [, bm, bd] = birthDate.split("-").map(Number);
-  return reduce(today.getDate() + (today.getMonth() + 1) + bd + bm);
+  return reduce(date.getDate() + (date.getMonth() + 1) + bd + bm);
 }
 
 // ── Number triads for affinity ──────────────────────────────────────────────
@@ -71,12 +70,18 @@ export default function HorasDelDia() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
-  const currentHour = new Date().getHours();
+  const [searchParams] = useSearchParams();
+  const targetDate = useMemo(() => {
+    const d = searchParams.get("date");
+    return d ? new Date(d + "T12:00:00") : new Date();
+  }, [searchParams]);
+
+  const currentHour = targetDate.getHours();
   const currentRef = useRef<HTMLDivElement>(null);
 
   const personalDay = useMemo(
-    () => (profile?.birthDate ? personalDayToday(profile.birthDate) : 1),
-    [profile?.birthDate]
+    () => (profile?.birthDate ? personalDayAtDate(profile.birthDate, targetDate) : 1),
+    [profile?.birthDate, targetDate]
   );
 
   // Show hours 5am–11pm (useful range)
@@ -93,7 +98,7 @@ export default function HorasDelDia() {
 
   if (!profile) return null;
 
-  const today = new Date().toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" });
+  const todayDisplay = targetDate.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" });
   const numName = NUM_NAMES[personalDay] ?? "";
 
   return (
@@ -113,7 +118,7 @@ export default function HorasDelDia() {
         animate={{ opacity: 1, y: 0 }}
         className="px-6 pt-4 pb-8 text-center"
       >
-        <p className="text-xs font-sans text-muted-foreground uppercase tracking-[0.25em] mb-3 capitalize">{today}</p>
+        <p className="text-xs font-sans text-muted-foreground uppercase tracking-[0.25em] mb-3 capitalize">{todayDisplay}</p>
         <div className="relative inline-block">
           <span
             className="font-serif font-bold text-foreground tabular-nums leading-none"

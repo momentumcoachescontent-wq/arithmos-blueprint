@@ -35,55 +35,8 @@ function CosmosTab({
   return (
     <div className="px-4 py-6 space-y-6">
 
-      {/* 1. DÍA CÓSMICO — primero porque es el insight personal */}
-      {cosmicReading && <CosmicFeed reading={cosmicReading} />}
-
-      {/* 1.1 ESENCIA ORIENTAL (Movida de Frecuencias) */}
-      {profile.chineseSign && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="space-y-3"
-        >
-          <h2
-            className="text-sm font-bold tracking-widest uppercase text-white/50 px-2"
-          >
-            Esencia Oriental
-          </h2>
-          <div className="cosmic-card p-4 flex items-center gap-4 border-violet-500/20 bg-gradient-to-br from-violet-500/10 to-transparent">
-            <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-violet-500/10 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(139,92,246,0.1)]">
-              {profile.chineseSign === "Dragón" ? "🐉" : 
-               profile.chineseSign === "Tigre" ? "🐅" : 
-               profile.chineseSign === "Rata" ? "🐀" : 
-               profile.chineseSign === "Buey" ? "🐂" : 
-               profile.chineseSign === "Conejo" ? "🐇" : 
-               profile.chineseSign === "Serpiente" ? "🐍" : 
-               profile.chineseSign === "Caballo" ? "🐎" : 
-               profile.chineseSign === "Cabra" ? "🐐" : 
-               profile.chineseSign === "Mono" ? "🐒" : 
-               profile.chineseSign === "Gallo" ? "🐓" : 
-               profile.chineseSign === "Perro" ? "🐕" : "🐖"}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-bold text-white font-serif tracking-tight">
-                  {profile.chineseSign} de {profile.chineseElement}
-                </span>
-                <span className="text-[9px] px-2 py-0.5 rounded-full bg-violet-500/30 text-violet-200 font-bold uppercase tracking-tighter border border-violet-500/20">
-                  {profile.chineseVibe}
-                </span>
-              </div>
-              <p className="text-[12px] text-white/90 font-medium font-sans leading-tight mb-1">
-                {profile.chineseDailyGuide || "Tu esencia brilla con fuerza hoy."}
-              </p>
-              <p className="text-[10px] text-white/30 font-sans italic">
-                Energía de {profile.chineseElement.toLowerCase()} con el espíritu del {profile.chineseSign.toLowerCase()}.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      )}
+      {/* 1. DÍA CÓSMICO — Incluye Numerología, Astro, Tarot y ahora Horóscopo Chino */}
+      {cosmicReading && <CosmicFeed reading={cosmicReading} profile={profile} />}
 
       {/* 2. CLIMA ASTRAL DEL DÍA */}
       <div className="space-y-3">
@@ -91,26 +44,6 @@ function CosmosTab({
           Clima Astral de Hoy
         </h3>
         <div className="grid gap-3">
-          {/* Acción Cósmica Inyectada en el Clima Astral */}
-          {cosmicReading.cosmicAction && (
-            <div
-              className="rounded-2xl p-4 border border-violet-500/40 bg-gradient-to-br from-violet-500/20 to-transparent shadow-[0_0_20px_rgba(139,92,246,0.15)]"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-xl">{cosmicReading.cosmicAction.emoji}</span>
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider" style={{ fontFamily: "var(--cosm-font-display)" }}>
-                  Acción Cósmica: {cosmicReading.cosmicAction.title}
-                </h4>
-                <div className="ml-auto text-[9px] font-bold px-2 py-0.5 rounded-full bg-violet-500/30 text-violet-100 uppercase">
-                  {cosmicReading.cosmicAction.duration}
-                </div>
-              </div>
-              <p className="text-sm text-white/90 leading-tight font-sans">
-                {cosmicReading.cosmicAction.description}
-              </p>
-            </div>
-          )}
-
           {dailyTransits.map((transit, idx) => (
             <div
               key={idx}
@@ -215,24 +148,27 @@ function CosmicFrecuenciasTab({
         </h2>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { label: "Camino de Vida", value: profile.lifePathNumber, emoji: "🛤️" },
-            { label: "Expresión", value: profile.expressionNumber, emoji: "🗣️" },
-            { label: "Impulso del Alma", value: profile.soulUrgeNumber, emoji: "💫" },
-            { label: "Personalidad", value: profile.personalityNumber, emoji: "🎭" },
+            { label: "Camino de Vida", value: profile.lifePathNumber, emoji: "🛤️", desc: "Tu propósito fundamental" },
+            { label: "Expresión", value: profile.expressionNumber, emoji: "🗣️", desc: "Tus talentos naturales" },
+            { label: "Impulso del Alma", value: profile.soulUrgeNumber, emoji: "💫", desc: "Tus deseos más profundos" },
+            { label: "Personalidad", value: profile.personalityNumber, emoji: "🎭", desc: "Tu imagen ante el mundo" },
           ].map((num) => (
-            <div key={num.label} className="cosmic-card flex items-center gap-3 p-3">
-              <span className="text-lg">{num.emoji}</span>
-              <div>
+            <div key={num.label} className="cosmic-card flex flex-col p-3">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">{num.emoji}</span>
                 <span
                   className="text-lg font-bold"
                   style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(45 90% 65%)" }}
                 >
                   {num.value || "—"}
                 </span>
-                <p className="text-[10px]" style={{ color: "hsl(260 8% 50%)" }}>
-                  {num.label}
-                </p>
               </div>
+              <p className="text-[10px] font-bold text-white/80" style={{ fontFamily: "var(--cosm-font-display)" }}>
+                {num.label}
+              </p>
+              <p className="text-[9px] leading-tight text-white/40 italic">
+                {num.desc}
+              </p>
             </div>
           ))}
         </div>
@@ -276,19 +212,48 @@ function CosmicFrecuenciasTab({
         </h2>
         <div className="space-y-2">
           {[
-            { label: "Calendario Numérico", icon: "📅", route: "/calendario", desc: "Tu energía día a día" },
-            { label: "Horas del Día", icon: "⏰", route: "/horas", desc: "Momentos de poder y sombra" },
+            { label: "Acción Cósmica", icon: "✨", route: "#", desc: "Tu tarea ritual de hoy", special: "action" },
+            { label: "Frecuencias de Sanación", icon: "🎵", route: "#", desc: "Terapia de audio binaural", special: "zen" },
+            { label: "Calendario y Horas", icon: "📅", route: "/calendario", desc: "Sincronía temporal diaria" },
             { label: "Radar de Fricción", icon: "⚡", route: "/radar-friccion", desc: "Diagnóstico de bloqueos" },
-            { label: "Tribunal de Poder", icon: "🏛️", route: "/tribunal-poder", desc: "Análisis estratégico 1:1" },
-            { label: "Radar de Equipo", icon: "👥", route: "/radar-equipo", desc: "Sinergia colectiva" },
+            { label: "Sincronicidad", icon: "🌀", route: "/sincronicidad", desc: "Señales del universo" },
+            { label: "Coach IA", icon: "🧠", route: "/coach", desc: "Tu mentor místico personal" },
+            { label: "Afinidad Cósmica", icon: "💞", route: "/compatibility", desc: "Sinergia en tus vínculos" },
             { label: "Tu Evolución", icon: "📈", route: "/evolucion", desc: "Historial y progreso" },
+            { label: "Radar de Equipo", icon: "👥", route: "/radar-equipo", desc: "Sinergia colectiva" },
           ].map((link) => (
+             link.special === "action" ? (
+               <div key="action" className="rounded-2xl p-4 border border-violet-500/30 bg-violet-500/5 mb-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">✨</span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-violet-200">Acción Cósmica Hoy</span>
+                  </div>
+                  <p className="text-xs text-white/80 leading-snug italic">"{profile.archetype}": Usa tu energía para manifestar.</p>
+               </div>
+             ) : link.special === "zen" ? (
+               <button
+                 key="zen"
+                 onClick={() => window.dispatchEvent(new CustomEvent('toggle-zen-player'))}
+                 className="cosmic-card cosmic-glass-hover w-full flex items-center gap-3 p-3 text-left border-violet-500/10 mb-2"
+               >
+                 <div className="w-10 h-10 rounded-xl bg-violet-500/5 flex items-center justify-center text-lg">
+                   🎵
+                 </div>
+                 <div className="flex-1 min-w-0">
+                   <span className="text-sm font-medium block text-white/90">Frecuencias de Sanación</span>
+                   <span className="text-[11px] text-white/40">Terapia de audio binaural</span>
+                 </div>
+                 <span className="text-white/20 text-sm">›</span>
+               </button>
+             ) : (
             <button
               key={link.route}
               onClick={() => navigate(link.route)}
-              className="cosmic-card cosmic-glass-hover w-full flex items-center gap-3 p-3 text-left"
+              className="cosmic-card cosmic-glass-hover w-full flex items-center gap-3 p-3 text-left border-violet-500/10"
             >
-              <span className="text-lg">{link.icon}</span>
+              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg">
+                {link.icon}
+              </div>
               <div className="flex-1 min-w-0">
                 <span
                   className="text-sm font-medium block"
@@ -305,6 +270,7 @@ function CosmicFrecuenciasTab({
               </div>
               <span className="text-white/20 text-sm">›</span>
             </button>
+             )
           ))}
         </div>
       </div>
@@ -364,7 +330,7 @@ function CosmicYoTab({
         {[
           { label: "XP", value: stats.xp, emoji: "⚡" },
           { label: "Nivel", value: stats.level, emoji: "🏆" },
-          { label: "Racha", value: `${streak}d`, emoji: "🔥" },
+          { label: "Racha", value: `${streak.currentStreak}d`, emoji: "🔥" },
         ].map((stat) => (
           <div key={stat.label} className="cosmic-card p-3 text-center">
             <span className="text-sm">{stat.emoji}</span>
@@ -383,28 +349,31 @@ function CosmicYoTab({
 
       {/* Quick links */}
       <div className="space-y-2">
-        {[
-          { label: "Diario Cósmico", icon: "📓", route: "/journal" },
-          { label: "Afinidad Cósmica (1 a 1)", icon: "💞", route: "/compatibility" },
-          { label: "Comunidad (Social)", icon: "📡", route: "/radar" },
-          { label: "Sincronicidad", icon: "🌀", route: "/synchronicity" },
-          { label: "Coach IA", icon: "🧠", route: "/coach" },
-          { label: "Configuración", icon: "⚙️", route: "/settings" },
-        ].map((link) => (
-          <button
-            key={link.route}
-            onClick={() => navigate(link.route)}
-            className="cosmic-card cosmic-glass-hover w-full flex items-center gap-3 p-3 text-left"
+      <div className="space-y-2">
+        <button
+          onClick={() => navigate("/ajustes")}
+          className="cosmic-card cosmic-glass-hover w-full flex items-center gap-3 p-3 text-left"
+        >
+          <span className="text-lg">⚙️</span>
+          <span
+            className="text-sm font-medium"
+            style={{ fontFamily: "var(--cosm-font-body)", color: "hsl(0 0% 88%)" }}
           >
-            <span className="text-lg">{link.icon}</span>
-            <span
-              className="text-sm font-medium"
-              style={{ fontFamily: "var(--cosm-font-body)", color: "hsl(0 0% 88%)" }}
-            >
-              {link.label}
-            </span>
-          </button>
-        ))}
+            Configuración
+          </span>
+        </button>
+      </div>
+
+      {/* Admin Panel Link */}
+      {profile.role === "admin" && (
+        <button
+          onClick={() => navigate("/admin")}
+          className="cosmic-card cosmic-glass-hover w-full flex items-center gap-3 p-4 text-left border-violet-500/40 bg-violet-500/10 mt-4"
+        >
+          <span className="text-lg">🛠️</span>
+          <span className="text-sm font-bold text-violet-200">Panel de Administrador</span>
+        </button>
+      )}
       </div>
 
       {/* Activity Feed */}

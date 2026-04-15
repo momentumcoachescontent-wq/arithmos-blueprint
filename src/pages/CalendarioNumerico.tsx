@@ -237,12 +237,20 @@ export default function CalendarioNumerico() {
                 </div>
               </div>
               <p className="font-sans text-foreground/80 text-sm leading-relaxed">{selectedMsg.body}</p>
-              <button
-                onClick={() => setSelected(null)}
-                className="mt-5 w-full py-2 rounded-xl border border-border text-muted-foreground text-sm font-sans hover:bg-secondary transition-colors"
-              >
-                Cerrar
-              </button>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => navigate(`/horas?date=${selected.date.toISOString().split("T")[0]}`)}
+                  className="flex-1 py-3 rounded-xl bg-violet-500/20 border border-violet-500/40 text-violet-200 text-sm font-bold font-sans hover:bg-violet-500/30 transition-all flex items-center justify-center gap-2"
+                >
+                  <span>⏰</span> Ver horario cósmico
+                </button>
+                <button
+                  onClick={() => setSelected(null)}
+                  className="px-6 py-3 rounded-xl border border-border text-muted-foreground text-sm font-sans hover:bg-secondary transition-colors"
+                >
+                  Cerrar
+                </button>
+              </div>
             </motion.div>
           </>
         )}
