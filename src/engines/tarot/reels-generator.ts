@@ -26,9 +26,11 @@ const HOOKS = [
 
 export function generateDailyReels(count: number = 5): TarotReel[] {
   const cards = drawCards(count, { reversalChance: 0.4 });
-  
-  return cards.map((drawn, i) => {
-    const isMajor = drawn.card.arcana === "major";
+  const reels: TarotReel[] = [];
+
+  for (let i = 0; i < cards.length; i++) {
+    const drawn = cards[i];
+    const prevDrawn = i > 0 ? cards[i - 1] : null;
     
     // Determinamos el vibe basado en el arcano o el palo
     let vibe: TarotReel["vibe"] = "manifest";
@@ -38,23 +40,43 @@ export function generateDailyReels(count: number = 5): TarotReel[] {
 
     // Generamos un título dinámico
     const title = `${drawn.card.nameEs}${drawn.reversed ? " (Invertida)" : ""}`;
-    const hook = HOOKS[i % HOOKS.length];
     
-    // Interpretación punchy
+    // Narrativa Relacional (V3.1)
+    let hook = HOOKS[i % HOOKS.length];
     let interpretation = "";
-    if (drawn.reversed) {
-      interpretation = `Algo está bloqueado. ${drawn.card.meaningReversed} Deja de forzar y empieza a soltar.`;
+
+    const meaning = drawn.reversed ? drawn.card.meaningReversed : drawn.card.meaningUpright;
+
+    if (!prevDrawn) {
+      // Primera carta: El ancla
+      hook = "Esto inicia tu viaje de hoy.";
+      interpretation = `${meaning} Esta energía es tu punto de partida.`;
     } else {
-      interpretation = `${drawn.card.meaningUpright} Es el momento. Hazlo con miedo, pero hazlo.`;
+      // Cartas subsiguientes: La relación
+      const prevName = prevDrawn.card.nameEs;
+      
+      // Lógica de transición
+      if (drawn.card.element === prevDrawn.card.element) {
+        hook = `La fuerza de ${prevName} se intensifica.`;
+        interpretation = `Esa energía de ${drawn.card.element} que sentiste antes se vuelve pura acción ahora. ${meaning}`;
+      } else if (drawn.reversed && !prevDrawn.reversed) {
+        hook = "Cuidado, aquí hay un giro.";
+        interpretation = `Veníamos con fluidez, pero ahora ${drawn.card.nameEs} nos pide frenar. ${meaning}`;
+      } else {
+        hook = `¿Ves cómo se conecta con ${prevName}?`;
+        interpretation = `No puedes avanzar sin integrar lo anterior. ${meaning} El equilibrio está ahí.`;
+      }
     }
 
-    return {
+    reels.push({
       id: `reel-${i}-${Date.now()}`,
       card: drawn,
       title,
       hook,
       interpretation,
       vibe
-    };
-  });
+    });
+  }
+  
+  return reels;
 }

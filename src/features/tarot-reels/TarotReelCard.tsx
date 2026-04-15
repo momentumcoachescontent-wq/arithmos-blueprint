@@ -5,8 +5,11 @@
  * Features: Cinematic animations, kinetic typography, and immersive visuals.
  */
 
-import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, Share2, ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { type TarotReel } from "@/engines/tarot/reels-generator";
 
 interface Props {
@@ -15,6 +18,9 @@ interface Props {
 }
 
 export function TarotReelCard({ reel, isActive }: Props) {
+  const { user } = useAuth();
+  const [hasLiked, setHasLiked] = useState(false);
+  const [showHeartPop, setShowHeartPop] = useState(false);
   const card = reel.card;
   
   const getThemeColor = () => {
@@ -39,6 +45,38 @@ export function TarotReelCard({ reel, isActive }: Props) {
 
   const themeColor = getThemeColor();
   const audioCtxRef = useRef<AudioContext | null>(null);
+
+  useEffect(() => {
+    // Reset like state when reel changes or is initialized
+    setHasLiked(false);
+  }, [reel.id]);
+
+  const handleLike = async () => {
+    if (!user || hasLiked) return;
+    
+    setHasLiked(true);
+    setShowHeartPop(true);
+    setTimeout(() => setShowHeartPop(false), 1000);
+
+    try {
+      // Registrar interacción en Supabase (V5 Schema)
+      // Nota: receiver_id debería ser el autor del contenido, pero por ahora 
+      // lo registramos como una interacción global o con un bot si no hay autor.
+      const { error } = await supabase
+        .from('cosmic_interactions')
+        .insert({
+          sender_id: user.id,
+          receiver_id: '00000000-0000-0000-0000-000000000000', // System account for global reels
+          is_mutual: false
+        });
+      
+      if (error && error.code !== '23505') { // Ignorar duplicados
+        console.error("Error al registrar vibración:", error);
+      }
+    } catch (err) {
+      console.error("Error interactuando con el cosmos:", err);
+    }
+  };
 
   useEffect(() => {
     let osc: OscillatorNode | null = null;
@@ -100,13 +138,13 @@ export function TarotReelCard({ reel, isActive }: Props) {
           className="text-xs uppercase tracking-[0.3em] font-black mb-2 opacity-60"
           style={{ color: themeColor }}
         >
-          Destino Instantáneo
+          Tu Mensaje de Hoy
         </motion.p>
         <motion.h3
           initial={{ y: 40, opacity: 0 }}
           animate={isActive ? { y: 0, opacity: 1 } : {}}
           transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-2xl font-bold italic tracking-tighter text-white"
+          className="text-2xl font-bold italic tracking-tighter text-white px-4"
           style={{ fontFamily: "var(--cosm-font-display)" }}
         >
           {reel.hook}
@@ -143,9 +181,23 @@ export function TarotReelCard({ reel, isActive }: Props) {
               {reel.title}
             </h2>
             <div className="h-px w-12 mx-auto my-4 bg-white/20"></div>
-            <p className="text-[10px] uppercase tracking-widest font-bold opacity-40">Arquetipo Universal</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold opacity-40">Tu Esencia</p>
           </div>
         </div>
+
+        {/* Heart Pop Animation Overlay */}
+        <AnimatePresence>
+          {showHeartPop && (
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: [1, 1.5, 1.2], opacity: [0, 1, 0] }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
+            >
+              <Heart size={120} fill="white" className="text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]" />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Interpretation (Lower Third) */}
@@ -167,24 +219,40 @@ export function TarotReelCard({ reel, isActive }: Props) {
           transition={{ delay: 2, duration: 1 }}
           className="mt-12 flex justify-center gap-4"
         >
-          <div className="px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] uppercase font-bold tracking-widest text-white/60">
-            Swipe Up 🪐
+          <div className="px-6 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] uppercase font-bold tracking-[0.2em] text-white/80">
+            Desliza para más 🪐
           </div>
         </motion.div>
       </div>
 
-      {/* Vertical UI Sidebars (Simulating Tiktok UI) */}
-      <div className="absolute right-4 bottom-32 flex flex-col gap-6 z-20">
-        <button className="flex flex-col items-center gap-1">
-          <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-xl">✨</div>
-          <span className="text-[10px] font-bold text-white/60">Like</span>
+      {/* Vertical UI Sidebars (Action Buttons) */}
+      <div className="absolute right-4 bottom-32 flex flex-col gap-8 z-20">
+        <button 
+          onClick={handleLike}
+          className="flex flex-col items-center gap-1.5 group"
+        >
+          <motion.div 
+            whileTap={{ scale: 0.8 }}
+            className={`w-14 h-14 rounded-full backdrop-blur-xl flex items-center justify-center text-xl transition-all duration-300 ${hasLiked ? 'bg-white text-black' : 'bg-white/10 text-white border border-white/10 group-hover:bg-white/20'}`}
+          >
+            <Heart size={24} fill={hasLiked ? "black" : "none"} strokeWidth={2.5} />
+          </motion.div>
+          <span className={`text-[10px] font-black uppercase tracking-widest ${hasLiked ? 'text-white' : 'text-white/40'}`}>
+            {hasLiked ? 'Vibrado' : 'Vibra'}
+          </span>
         </button>
+        
         <button 
            onClick={() => navigator.share?.({ title: 'Mensaje Cósmico', text: reel.interpretation, url: window.location.href })}
-           className="flex flex-col items-center gap-1"
+           className="flex flex-col items-center gap-1.5 group"
         >
-          <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-xl">📤</div>
-          <span className="text-[10px] font-bold text-white/60">Share</span>
+          <motion.div 
+            whileTap={{ scale: 0.8 }}
+            className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center text-xl transition-all group-hover:bg-white/20"
+          >
+            <Share2 size={24} className="text-white" strokeWidth={2.5} />
+          </motion.div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Compartir</span>
         </button>
       </div>
     </div>

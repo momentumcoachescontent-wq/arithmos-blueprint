@@ -54,24 +54,23 @@ const App = () => (
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/onboarding" element={<CosmicOnboarding />} />
-            <Route path="/cosmic" element={<CosmicDashboard />} />
-            <Route path="/dashboard" element={<CosmicDashboard />} />
-            <Route path="/missions" element={<Missions />} />
-            <Route path="/journal" element={<CosmicJournal />} />
-            <Route path="/compatibility" element={<CosmicCompatibility />} />
+            <Route path="/registro" element={<Register />} />
+            <Route path="/bienvenida" element={<CosmicOnboarding />} />
+            <Route path="/inicio" element={<CosmicDashboard />} />
+            <Route path="/misiones" element={<Missions />} />
+            <Route path="/diario" element={<CosmicJournal />} />
+            <Route path="/compatibilidad" element={<CosmicCompatibility />} />
             <Route path="/radar" element={
               <SubscriptionBoundary>
                 <CosmicRadar />
               </SubscriptionBoundary>
             } />
             <Route path="/ranking" element={<Ranking />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/synchronicity" element={<Synchronicity />} />
+            <Route path="/ajustes" element={<Settings />} />
+            <Route path="/sincronicidad" element={<Synchronicity />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/radar-equipo" element={<RadarEquipo />} />
-            <Route path="/deep-dive" element={<DeepDive />} />
+            <Route path="/analisis-profundo" element={<DeepDive />} />
             <Route path="/tribunal-poder" element={<TribunalPoder />} />
             <Route path="/evolucion" element={<Evolucion />} />
             <Route path="/reels" element={

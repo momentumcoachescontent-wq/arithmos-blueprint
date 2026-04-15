@@ -33,17 +33,17 @@ export function TrialBanner({ subscription, daysLeft, onUpgrade }: TrialBannerPr
         <Zap className={`h-4 w-4 shrink-0 ${isUrgent ? "text-amber-400" : "text-primary"}`} />
         <p className="text-sm font-sans text-foreground/80 truncate">
           <span className="font-semibold text-foreground">
-            Día {daysElapsed} de tu prueba gratuita
+            Día {daysElapsed} de tu regalo
           </span>
           {" · "}
           {daysLeft > 0 ? (
             <>
               <span className={isUrgent ? "text-amber-400 font-semibold" : ""}>
-                {daysLeft} {daysLeft === 1 ? "día restante" : "días restantes"}
+                Te quedan {daysLeft} {daysLeft === 1 ? "día" : "días"}
               </span>
             </>
           ) : (
-            <span className="text-rose-400 font-semibold">Tu prueba ha terminado</span>
+            <span className="text-rose-400 font-semibold">Tu regalo ha terminado</span>
           )}
         </p>
       </div>

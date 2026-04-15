@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
 import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getChineseZodiac } from "@/lib/chinese-zodiac";
 
 export interface Profile {
   userId: string;
@@ -30,55 +30,59 @@ export interface Profile {
   // Social V4 fields
   isPublic?: boolean;
   bio?: string;
+  // Chinese Zodiac V3.1
+  chineseSign?: string;
+  chineseElement?: string;
+  chineseVibe?: string;
 }
 
 export const ARCHETYPES: Record<number, { name: string; description: string }> = {
   1: {
-    name: "La Pionera",
+    name: "Tu Esencia: La Pionera",
     description: "Eres de las que crea sus propios caminos, bb. Ninguna regla te fue dada — las escribes tú. Tu energía es tan fuerte que la gente lo siente antes de que abras la boca.",
   },
   2: {
-    name: "La Intérprete",
+    name: "Tu Esencia: La Intérprete",
     description: "Captas lo que nadie más nota. Eres el tipo de persona que hace sentir a alguien profundamente entendida con solo escuchar. Eso es rareza, no debilidad.",
   },
   3: {
-    name: "La Manifestadora",
+    name: "Tu Esencia: La Manifestadora",
     description: "Todo lo que dices tiene un peso especial. Tu creatividad no es hobby — es tu superpoder real. El universo te escucha cuando hablas desde el corazón.",
   },
   4: {
-    name: "La Arquitecta",
+    name: "Tu Esencia: La Arquitecta",
     description: "Construyes cosas que duran. Mientras otros improvisan, tú ya planificaste 3 pasos adelante. Eres la base sobre la que otros se apoyan sin saberlo.",
   },
   5: {
-    name: "La Nómada Cósmica",
+    name: "Tu Esencia: La Nómada Cósmica",
     description: "La libertad no es tu deseo — es tu necesidad. Cambias de forma como el agua y eso te hace imposible de atrapar. Prosperas donde otros se asustan.",
   },
   6: {
-    name: "La Armónica",
+    name: "Tu Esencia: La Armónica",
     description: "Tienes el don de hacer que todo encaje. Cuidas sin agotarte cuando estás en tu centro, y tu amor es del tipo que transforma sin pedirlo.",
   },
   7: {
-    name: "La Mística",
+    name: "Tu Esencia: La Mística",
     description: "Tu mente va a profundidades que la mayoría ni sabe que existen. La soledad no te asusta — la necesitas para reconectarte con lo que sabes sin haberlo aprendido.",
   },
   8: {
-    name: "La Poderosa",
+    name: "Tu Esencia: La Poderosa",
     description: "Núcleo puro de manifestación. Cuando decides algo, el universo mueve piezas para que pase. Tu reto no es conseguir poder — es no tenerle miedo a tenerlo.",
   },
   9: {
-    name: "La Humanitaria",
+    name: "Tu Esencia: La Humanitaria",
     description: "Viniste a dejar el mundo diferente a como lo encontraste. Tu corazón siente cosas que van más allá de lo personal. Eso a veces duele, pero es tu don más grande.",
   },
   11: {
-    name: "La Portadora de Luz",
+    name: "Tu Esencia: La Portadora de Luz",
     description: "Número maestro. Antena entre dimensiones. Sientes cosas que no puedes explicar y eso puede ser agotador, pero es porque vibras en una frecuencia que pocos comprenden.",
   },
   22: {
-    name: "La Constructora Maestra",
+    name: "Tu Esencia: La Constructora Maestra",
     description: "Número maestro. Tienes la capacidad de hacer real lo que otros solo sueñan. No pienses pequeño — literalmente no puedes. Tu escala natural es el impacto colectivo.",
   },
   33: {
-    name: "La Sanadora Maestra",
+    name: "Tu Esencia: La Sanadora Maestra",
     description: "Número maestro. Tu sola presencia cambia la energía de un lugar. No necesitas explicarte — se siente. Naciste para elevar, y eso empieza por no minimizarte a ti misma.",
   },
 };
@@ -175,6 +179,14 @@ export function useProfile() {
         bio: data.bio ?? undefined,
       };
 
+      // Cálculo bajo demanda de Horóscopo Chino si hay fecha de nacimiento
+      if (fetchedProfile.birthDate) {
+        const chinese = getChineseZodiac(fetchedProfile.birthDate);
+        fetchedProfile.chineseSign = chinese.animal;
+        fetchedProfile.chineseElement = chinese.element;
+        fetchedProfile.chineseVibe = chinese.vibe;
+      }
+
       // Auto-repair missing computed numbers
       if (!fetchedProfile.expressionNumber || !fetchedProfile.soulUrgeNumber || !fetchedProfile.personalityNumber) {
         fetchedProfile.expressionNumber = reduceToSingleDigitOrMaster(calculateNameValue(fetchedProfile.name, 'all'));
@@ -237,6 +249,12 @@ export function useProfile() {
       createdAt: new Date().toISOString(),
       phone: phone,
     };
+
+    // Agregar Horóscopo Chino
+    const chinese = getChineseZodiac(birthDate);
+    newProfile.chineseSign = chinese.animal;
+    newProfile.chineseElement = chinese.element;
+    newProfile.chineseVibe = chinese.vibe;
 
     sessionStorage.setItem("arithmos_profile", JSON.stringify(newProfile));
     setProfile({ ...newProfile });

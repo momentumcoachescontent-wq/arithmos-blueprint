@@ -79,18 +79,18 @@ function CosmosTab({
         <div className="absolute top-0 right-0 p-4 text-4xl opacity-20">🎞️</div>
         <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl bg-pink-500/20" />
         <div className="relative z-10 flex flex-col h-full">
-          <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-pink-300 mb-1">
-            Nuevo · Viral
-          </span>
+          <p className="text-xs font-sans font-semibold text-primary uppercase tracking-wider mb-1">
+            Poderes de Tu Esencia
+          </p>
           <h3
             className="text-xl font-bold mb-1 leading-tight"
             style={{ fontFamily: "var(--cosm-font-display)", color: "white" }}
           >
-            Tu Destino en 15"
+            Tu Mensaje en Segundos
           </h3>
-          <p className="text-xs text-white/60 mb-auto">Tarot interactivo en formato Reel.</p>
+          <p className="text-xs text-white/60 mb-auto">Tarot que vibra contigo.</p>
           <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-white tracking-widest">
-            Ver ahora <span>✨</span>
+            Entrar ahora <span>✨</span>
           </div>
         </div>
       </motion.button>
@@ -140,7 +140,7 @@ function CosmicFrecuenciasTab({
           className="text-sm font-semibold mb-3"
           style={{ fontFamily: "var(--cosm-font-display)", color: "hsl(0 0% 90%)" }}
         >
-          Tus Números
+          Tu Esencia
         </h2>
         <div className="grid grid-cols-2 gap-2">
           {[
@@ -312,8 +312,8 @@ function CosmicYoTab({
       <div className="space-y-2">
         {[
           { label: "Diario Cósmico", icon: "📓", route: "/journal" },
-          { label: "Compatibilidad (1 a 1)", icon: "💞", route: "/compatibility" },
-          { label: "Radar Cósmico (Social)", icon: "📡", route: "/radar" },
+          { label: "Afinidad Cósmica (1 a 1)", icon: "💞", route: "/compatibility" },
+          { label: "Comunidad (Social)", icon: "📡", route: "/radar" },
           { label: "Sincronicidad", icon: "🌀", route: "/synchronicity" },
           { label: "Coach IA", icon: "🧠", route: "/coach" },
           { label: "Configuración", icon: "⚙️", route: "/settings" },

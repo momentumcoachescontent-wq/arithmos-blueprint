@@ -24,7 +24,7 @@ export function ArchetypeCard({ lifePathNumber, archetypeName }: ArchetypeCardPr
       <div className="flex items-start justify-between mb-4">
         <div>
           <p className="text-xs font-sans font-semibold text-primary uppercase tracking-wider mb-1">
-            Poderes del Arquetipo
+            Poderes de Tu Esencia
           </p>
           <h3 className="font-serif text-lg text-foreground font-semibold">{archetypeName}</h3>
         </div>

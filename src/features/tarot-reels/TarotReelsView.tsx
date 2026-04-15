@@ -64,11 +64,22 @@ export default function TarotReelsView() {
           scrollBehavior: 'smooth'
         }}
       >
-        {reels.map((reel, idx) => (
-          <div key={reel.id} className="h-full w-full snap-start snap-always">
-            <TarotReelCard reel={reel} isActive={activeIndex === idx} />
-          </div>
-        ))}
+        {reels.map((reel, idx) => {
+          const distance = Math.abs(activeIndex - idx);
+          return (
+            <motion.div 
+              key={reel.id} 
+              animate={{ 
+                scale: distance === 0 ? 1 : 0.85,
+                opacity: distance === 0 ? 1 : 0.3,
+                filter: distance === 0 ? "blur(0px)" : "blur(4px)"
+              }}
+              className="h-full w-full snap-start snap-always"
+            >
+              <TarotReelCard reel={reel} isActive={activeIndex === idx} />
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Progress Indicator (Liquid style) */}

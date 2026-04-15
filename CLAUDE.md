@@ -102,6 +102,8 @@ arithmos-blueprint/
 │       └── stripe-webhook/
 │
 ├── docs/
+│   ├── MEMORY.md               # Arithmos V3 (Cosmic) Memory
+│   ├── MASTER_PLAN.md           # Strategic Roadmap V3
 │   ├── plans/                  # Implementation plans (step-by-step)
 │   └── specs/                  # Design specs and architecture decisions
 │
