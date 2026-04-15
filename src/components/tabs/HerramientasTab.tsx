@@ -17,7 +17,6 @@ const FREE_TOOLS = [
   { label: "Radar de Fricción",icon: Scale,          color: "text-indigo-400", path: "/radar-friccion" },
   { label: "Sincronicidad",    icon: Sparkles,       color: "text-primary",    path: "/synchronicity" },
   { label: "Misiones",         icon: Target,         color: "text-primary",    path: "/missions" },
-  { label: "Tribunal de Poder",icon: Trophy,         color: "text-amber-400",  path: "/tribunal-poder" },
 ];
 
 export function HerramientasTab({ userId, hasAccess }: HerramientasTabProps) {
