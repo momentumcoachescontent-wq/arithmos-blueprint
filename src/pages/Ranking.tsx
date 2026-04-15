@@ -29,6 +29,7 @@ const POSITION_ICONS = [
 ];
 
 const Ranking = () => {
+    // V3.1 — Fix syntax closure
     const navigate = useNavigate();
     const { user, isAuthenticated } = useAuth();
     
