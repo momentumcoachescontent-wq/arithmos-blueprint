@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { CosmicShell } from "@/ui/CosmicShell";
 
 // ─── Tipos ────────────────────────────────────────────
 type EntryType = "all" | "journal_entry" | "team_reading" | "reading" | "mission";

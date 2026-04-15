@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Trophy, Crown, Shield, MapPin, Globe, Calendar, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import CosmicShell from "@/ui/CosmicShell";
+import { CosmicShell } from "@/ui/CosmicShell";
 import { useAuth } from "@/hooks/useAuth";
 
 interface RankingEntry {

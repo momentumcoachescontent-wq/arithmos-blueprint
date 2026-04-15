@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { useSynchronicity } from "@/hooks/useSynchronicity";
+import { CosmicShell } from "@/ui/CosmicShell";
 
 const Gauge = ({ value, label, color }: { value: number; label: string; color: string }) => {
     const radius = 40;

@@ -9,6 +9,7 @@ import { useMissions } from "@/hooks/useMissions";
 import { useStats } from "@/hooks/useStats";
 import { MissionCard, MissionLocked } from "@/components/MissionCard";
 import { XPBar } from "@/components/XPBar";
+import { CosmicShell } from "@/ui/CosmicShell";
 
 const Missions = () => {
     const navigate = useNavigate();

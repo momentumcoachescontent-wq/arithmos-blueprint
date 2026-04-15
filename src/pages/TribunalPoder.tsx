@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, calculateLifePath, ARCHETYPES, calculateNameValue, reduceToSingleDigitOrMaster } from "@/hooks/useProfile";
 import { toast } from "sonner";
+import { CosmicShell } from "@/ui/CosmicShell";
 
 // Funciones de cálculo rápido numerológico
 const getSoulUrge = (name: string) => reduceToSingleDigitOrMaster(calculateNameValue(name, 'vowels'));
