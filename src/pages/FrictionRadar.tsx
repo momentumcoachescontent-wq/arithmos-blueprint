@@ -548,5 +548,5 @@ export default function FrictionRadar() {
             </div>
         </CosmicShell>
     );
-    );
+};
 }

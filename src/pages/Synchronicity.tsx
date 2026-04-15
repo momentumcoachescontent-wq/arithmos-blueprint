@@ -228,7 +228,6 @@ const Synchronicity = () => {
             </div>
         </CosmicShell>
     );
-    );
 };
 
 export default Synchronicity;

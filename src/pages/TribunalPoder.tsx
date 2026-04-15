@@ -374,7 +374,6 @@ const TribunalPoder = () => {
             </div>
         </CosmicShell>
     );
-    );
 };
 
 export default TribunalPoder;
