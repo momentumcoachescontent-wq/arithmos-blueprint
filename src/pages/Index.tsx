@@ -1,101 +1,97 @@
-// src/pages/Index.tsx
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import { AuthModal } from "@/components/AuthModal";
+import { CosmicShell } from "@/ui/CosmicShell";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 export default function Index() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ background: "#0D0C14" }}
-    >
+    <CosmicShell particles particlePalette="violet">
       {/* Nav */}
-      <nav
-        className="flex justify-between items-center px-6 py-4"
-        style={{ borderBottom: "1px solid #1e1c2e" }}
-      >
-        <span
-          className="font-serif"
-          style={{ color: "#e8e8e8", fontSize: "14px", letterSpacing: "0.05em" }}
+      <nav className="relative z-20 flex justify-between items-center px-8 py-6 backdrop-blur-sm border-b border-white/5 bg-black/10">
+        <motion.span 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="font-serif text-white text-lg tracking-widest flex items-center gap-2"
         >
-          ✦ Arithmos
-        </span>
+          <span className="text-violet-400">✦</span> ARITHMOS
+        </motion.span>
+        
         <button
           onClick={() => setIsAuthModalOpen(true)}
-          className="font-sans underline underline-offset-2"
-          style={{
-            fontSize: "11px",
-            color: "#888",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-          }}
+          className="text-[11px] uppercase tracking-widest font-bold text-white/40 hover:text-violet-300 transition-colors"
         >
-          Iniciar Sesión
+          Log In
         </button>
       </nav>
 
-      {/* Hero */}
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-        <p
-          className="uppercase font-sans mb-5"
-          style={{ fontSize: "9px", letterSpacing: "0.4em", color: "#B8860B" }}
+      {/* Hero Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-[85vh] text-center px-6 max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8"
         >
-          30 días Premium · Sin tarjeta de crédito
-        </p>
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-[10px] uppercase tracking-[0.3em] font-bold text-violet-400">
+            <Sparkles className="h-3 w-3" /> Acceso Exclusivo V3.2
+          </span>
+        </motion.div>
 
-        <h1
-          className="font-serif font-semibold mb-4"
-          style={{
-            fontSize: "28px",
-            color: "#e8e8e8",
-            lineHeight: "1.3",
-            maxWidth: "360px",
-          }}
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="text-4xl md:text-6xl font-bold mb-6 italic lowercase leading-[1.1] tracking-tight text-white"
+          style={{ fontFamily: "var(--cosm-font-display)" }}
         >
-          ¿Operas a favor de tu ciclo natural, o en su contra?
-        </h1>
+          ¿Operas a favor de tu ciclo <span className="text-violet-400">natural</span>, o en su contra?
+        </motion.h1>
 
-        <p
-          className="font-sans mb-8"
-          style={{
-            fontSize: "13px",
-            color: "#777",
-            maxWidth: "280px",
-            lineHeight: "1.7",
-          }}
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="text-sm md:text-lg text-white/50 max-w-xl mb-12 leading-relaxed font-sans"
         >
-          Numerología determinista aplicada a decisiones de alto impacto. Tu
-          Blueprint personal en 60 segundos.
-        </p>
+          Numerología determinista y Astrología aplicadas a decisiones de alto impacto. 
+          Sincroniza tu energía con el pulso del cosmos y domina tu oscuridad.
+        </motion.p>
 
-        <Link
-          to="/register"
-          className="font-sans font-bold"
-          style={{
-            padding: "13px 40px",
-            background: "#D4AF37",
-            color: "#0D0C14",
-            borderRadius: "4px",
-            fontSize: "14px",
-            textDecoration: "none",
-            display: "inline-block",
-          }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-col items-center gap-6"
         >
-          Descubrir mi Blueprint →
-        </Link>
+          <Link
+            to="/register"
+            className="group relative flex items-center gap-3 px-10 py-5 bg-white text-black font-bold rounded-2xl hover:bg-violet-400 hover:text-white transition-all duration-300 shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)]"
+          >
+            Descubrir mi Esencia
+            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
 
-        <p
-          className="font-sans mt-4"
-          style={{ fontSize: "10px", color: "#555" }}
+          <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold">
+            30 días de regalo · Sin tarjeta · Sin compromiso
+          </p>
+        </motion.div>
+
+        {/* Dynamic visual indicator */}
+        <motion.div 
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-12 text-white/20 text-xs tracking-tighter"
         >
-          ✓ Sin tarjeta · 30 días completos · Sin compromiso
-        </p>
+          Desliza para ver más
+        </motion.div>
       </div>
 
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
-    </div>
+    </CosmicShell>
   );
 }

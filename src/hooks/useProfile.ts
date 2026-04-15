@@ -209,7 +209,7 @@ export function useProfile() {
     return null;
   }, []);
 
-  const createProfile = useCallback(async (name: string, birthDate: string, userId?: string, phone?: string) => {
+  const createProfile = useCallback(async (name: string, birthDate: string, userId?: string, phone?: string, birthTime?: string, birthPlace?: string) => {
     const { data: { session } } = await supabase.auth.getSession();
     const authToken = session?.access_token || SUPABASE_PUBLISHABLE_KEY;
 
@@ -248,6 +248,8 @@ export function useProfile() {
       description: result.archetypeDescription,
       createdAt: new Date().toISOString(),
       phone: phone,
+      birthTime,
+      birthPlace,
     };
 
     // Agregar Horóscopo Chino
@@ -274,6 +276,8 @@ export function useProfile() {
             archetype: result.archetype,
             archetype_description: result.archetypeDescription,
             phone: phone ?? null,
+            birth_time: birthTime ?? null,
+            birth_place: birthPlace ?? null,
           },
           { onConflict: 'user_id' },
         );

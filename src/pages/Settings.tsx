@@ -83,6 +83,8 @@ const Settings = () => {
     const [name, setName] = useState("");
     const [phone, setPhone] = useState("");
     const [birthDate, setBirthDate] = useState<Date>();
+    const [birthTime, setBirthTime] = useState("");
+    const [birthPlace, setBirthPlace] = useState("");
     const [profileStatus, setProfileStatus] = useState<{ message: string; type: "ok" | "err" } | null>(null);
     const [savingProfile, setSavingProfile] = useState(false);
 
@@ -94,6 +96,8 @@ const Settings = () => {
                 try { setBirthDate(parseISO(profile.birthDate)); }
                 catch (e) { console.error("Error parsing date:", e); }
             }
+            setBirthTime(profile.birthTime || "");
+            setBirthPlace(profile.birthPlace || "");
         }
     }, [profile]);
 
@@ -142,7 +146,7 @@ const Settings = () => {
         setSavingProfile(true);
         try {
             const dateStr = format(birthDate, "yyyy-MM-dd");
-            await createProfile(name.trim(), dateStr, user?.id, phone.trim());
+            await createProfile(name.trim(), dateStr, user?.id, phone.trim(), birthTime, birthPlace);
             setProfileStatus({ message: "Perfil actualizado correctamente.", type: "ok" });
             setTimeout(() => setProfileStatus(null), 3000);
         } catch (err: any) {
@@ -274,6 +278,31 @@ const Settings = () => {
                                     />
                                 </PopoverContent>
                             </Popover>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="font-sans text-sm text-muted-foreground flex items-center gap-2">
+                                    <Clock className="h-3 w-3" /> Hora
+                                </Label>
+                                <Input
+                                    type="time"
+                                    value={birthTime}
+                                    onChange={(e) => setBirthTime(e.target.value)}
+                                    className="bg-secondary/50 border-border"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="font-sans text-sm text-muted-foreground flex items-center gap-2">
+                                    <MapPin className="h-3 w-3" /> Ciudad
+                                </Label>
+                                <Input
+                                    placeholder="Ej. CDMX"
+                                    value={birthPlace}
+                                    onChange={(e) => setBirthPlace(e.target.value)}
+                                    className="bg-secondary/50 border-border"
+                                />
+                            </div>
                         </div>
 
                         <div className="space-y-2">
